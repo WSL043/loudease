@@ -36,6 +36,7 @@ const checks = [
   ['preview save responses preserve the latest slider value', /payload\.type === 'WVB_SAVE_SETTINGS'/.test(popupJs) && /mockSettings = \{[\s\S]*?normalizeSettings/.test(popupJs)],
   ['settings button opens the extension options page', /id="settingsButton"/.test(popupHtml) && /runtime\?\.openOptionsPage/.test(popupJs)],
   ['popup theme button switches the shared light and dark preference', /id="themeButton"/.test(popupHtml) && /saveUiPreferences\(\{ theme: nextTheme \}\)/.test(popupJs) && /data-effective-theme/.test(popupCss)],
+  ['popup active status and enable switch use theme semantic colors', /--success-text/.test(popupCss) && /\.statusBadge[^\n]*var\(--success-text\)/.test(popupCss) && /\.switchTrack[^\n]*var\(--switch-off\)/.test(popupCss) && /checked[^\n]*\.switchTrack::after[^\n]*var\(--switch-thumb-on\)/.test(popupCss) && /data-theme="dark"[^\n]*--success-text/.test(popupCss)],
   ['external settings cannot overwrite an active local gesture or pending write', /strengthGestureActive \|\| pendingWriteCount > 0/.test(popupJs) && /handleStorageChanged/.test(popupJs)],
   ['strength ranges expose help to assistive technology without leaving a tooltip over the waveform', /aria-describedby="cutHelp"/.test(popupHtml) && /aria-describedby="liftHelp"/.test(popupHtml) && !/\.strengthControl:focus-within/.test(popupCss)],
   ['RTL strength progress follows the native control direction', /\[dir="rtl"\] \.strengthRange/.test(popupCss) && /--range-direction: to left/.test(popupCss)],
