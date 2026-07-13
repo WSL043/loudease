@@ -10,16 +10,20 @@
   <main id="app" class="shell" data-state="loading">
     <header class="header">
       <div class="brand">
-        <picture class="brandIcon" aria-hidden="true">
-          <source media="(prefers-color-scheme: dark)" srcset="../assets/logo-ai-a-dark.png">
-          <img src="../assets/logo-ai-a-light.png" alt="">
-        </picture>
+        <span class="brandIcon" aria-hidden="true">
+          <img class="brandLogo logoLight" src="../assets/logo-ai-a-light.png" alt="">
+          <img class="brandLogo logoDark" src="../assets/logo-ai-a-dark.png" alt="">
+        </span>
         <div>
           <h1 data-i18n="appName">LoudEase</h1>
           <span id="version">v--</span>
         </div>
       </div>
       <div class="headerActions">
+        <button id="themeButton" class="iconButton themeButton" type="button" title="Switch to dark theme" aria-label="Switch to dark theme" aria-pressed="false">
+          <img class="themeIcon themeIconLight" src="../assets/sun.svg" alt="" aria-hidden="true">
+          <img class="themeIcon themeIconDark" src="../assets/moon.svg" alt="" aria-hidden="true">
+        </button>
         <button id="settingsButton" class="iconButton" type="button" data-i18n-title="settingsHeading" data-i18n-aria-label="settingsHeading" aria-label="Settings">
           <img src="../assets/settings.svg" alt="" aria-hidden="true">
         </button>

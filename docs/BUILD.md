@@ -7,7 +7,7 @@ The repository has two deterministic, allowlist-based targets:
 - `npm run package:store` also writes `dist/loudease-store.zip` with sorted paths, stored entries, and a fixed timestamp.
 - `npm run test:release` rebuilds and verifies the store target.
 
-Only `manifest.json`, `background.js`, and runtime files below `assets`, `content`, `monitor`, `offscreen`, `popup`, `shared`, and `_locales` are eligible. Tests, temporary output, tools, documentation, source-only files, logs, archives, keys, secrets, and Git metadata are never copied.
+Only `manifest.json`, `background.js`, the release notices (`LICENSE`, `NOTICE`, `TRADEMARKS.md`), and runtime files below `assets`, `content`, `monitor`, `offscreen`, `popup`, `shared`, and `_locales` are eligible. Tests, temporary output, tools, other documentation, source-only files, logs, archives, keys, secrets, and Git metadata are never copied.
 
 ## Development diagnostics marker contract
 

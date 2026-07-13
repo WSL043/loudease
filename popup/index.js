@@ -15,6 +15,7 @@ const elements = {
   captureButton: document.getElementById('captureButton'),
   reloadButton: document.getElementById('reloadButton'),
   healthLabel: document.getElementById('healthLabel'),
+  themeButton: document.getElementById('themeButton'),
   settingsButton: document.getElementById('settingsButton'),
   respectPlayerVolume: document.getElementById('respectPlayerVolume'),
   cutDial: document.getElementById('cutDial'),
@@ -29,7 +30,7 @@ const elements = {
 };
 
 const { get: t, apply: applyI18n, initialize: initializeI18n } = globalThis.WebVolumeBalancerI18n;
-const { STORAGE_KEY: UI_PREFERENCES_KEY, read: readUiPreferences, applyTheme } = globalThis.WebVolumeBalancerUiPreferences;
+const { STORAGE_KEY: UI_PREFERENCES_KEY, read: readUiPreferences, save: saveUiPreferences, applyTheme } = globalThis.WebVolumeBalancerUiPreferences;
 
 let settings = null;
 let saving = false;
@@ -45,6 +46,8 @@ let strengthGestureActive = false;
 let observerEnsuredAt = 0;
 let autoCaptureAttempted = false;
 let autoCaptureRunning = false;
+let currentUiPreferences = { theme: 'system', locale: 'en' };
+const colorSchemeQuery = globalThis.matchMedia?.('(prefers-color-scheme: dark)');
 
 const query = new URLSearchParams(location.search);
 const e2eTabId = Number(query.get('e2eTabId'));
@@ -68,7 +71,7 @@ let mockSettings = {
   liftStrength: 50,
   siteKey: '',
   siteScoped: false,
-  version: '0.7.0'
+  version: '0.7.1'
 };
 
 function message(payload) {
@@ -131,6 +134,36 @@ function normalizeSettings(input = {}) {
 
 function countText(value) {
   return String(Math.max(0, Math.round(value)));
+}
+
+function effectiveTheme(theme = currentUiPreferences.theme) {
+  if (theme === 'dark' || theme === 'light') {
+    return theme;
+  }
+  return colorSchemeQuery?.matches ? 'dark' : 'light';
+}
+
+function renderThemeButton() {
+  const activeTheme = effectiveTheme();
+  const label = activeTheme === 'dark'
+    ? t('switchToLightTheme', undefined, 'Switch to light theme')
+    : t('switchToDarkTheme', undefined, 'Switch to dark theme');
+  elements.themeButton.dataset.effectiveTheme = activeTheme;
+  elements.themeButton.title = label;
+  elements.themeButton.setAttribute('aria-label', label);
+  elements.themeButton.setAttribute('aria-pressed', activeTheme === 'dark' ? 'true' : 'false');
+}
+
+async function toggleTheme() {
+  const nextTheme = effectiveTheme() === 'dark' ? 'light' : 'dark';
+  elements.themeButton.disabled = true;
+  try {
+    currentUiPreferences = await saveUiPreferences({ theme: nextTheme });
+    applyTheme(currentUiPreferences.theme);
+    renderThemeButton();
+  } finally {
+    elements.themeButton.disabled = false;
+  }
 }
 
 const INPUT_LEVEL_SHAPE = Object.freeze([0.32, 0.72, 1, 0.5, 0.84, 0.4, 0.68]);
@@ -319,10 +352,11 @@ function setStrengthControlsEnabled(enabled) {
 }
 
 async function load() {
-  const uiPreferences = await readUiPreferences();
-  applyTheme(uiPreferences.theme);
-  await initializeI18n(uiPreferences.locale);
+  currentUiPreferences = await readUiPreferences();
+  applyTheme(currentUiPreferences.theme);
+  await initializeI18n(currentUiPreferences.locale);
   applyI18n();
+  renderThemeButton();
   await findActiveTab();
   const payload = await message({ type: 'WVB_GET_SETTINGS', tabUrl: activeTabUrl });
   settings = normalizeSettings(payload || {});
@@ -421,10 +455,11 @@ async function syncExternalSettings() {
 }
 
 async function syncUiPreferences() {
-  const uiPreferences = await readUiPreferences();
-  applyTheme(uiPreferences.theme);
-  await initializeI18n(uiPreferences.locale);
+  currentUiPreferences = await readUiPreferences();
+  applyTheme(currentUiPreferences.theme);
+  await initializeI18n(currentUiPreferences.locale);
   applyI18n();
+  renderThemeButton();
   await refreshStatus({ allowAutoCapture: false });
 }
 
@@ -676,6 +711,12 @@ function bind() {
 
   elements.reloadButton.addEventListener('click', reloadCurrentPage);
   elements.captureButton.addEventListener('click', toggleTabCapture);
+  elements.themeButton.addEventListener('click', () => toggleTheme().catch(() => {}));
+  colorSchemeQuery?.addEventListener?.('change', () => {
+    if (currentUiPreferences.theme === 'system') {
+      renderThemeButton();
+    }
+  });
   elements.settingsButton.addEventListener('click', async () => {
     if (globalThis.chrome?.runtime?.openOptionsPage) {
       await chrome.runtime.openOptionsPage();

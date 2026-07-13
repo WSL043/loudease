@@ -11,7 +11,7 @@ body:
     id: version
     attributes:
       label: Extension version and build
-      description: For example, 0.6.0 from dist/github-dev or dist/store.
+      description: For example, 0.7.1-beta.1 from dist/github-dev or dist/store.
     validations:
       required: true
   - type: input

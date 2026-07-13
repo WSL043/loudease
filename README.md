@@ -19,7 +19,7 @@
   <img alt="Private beta" src="https://img.shields.io/badge/status-private%20beta-f59e0b">
   <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">
   <img alt="Local processing" src="https://img.shields.io/badge/audio-local%20only-159669">
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-17202b"></a>
+  <a href="LICENSE"><img alt="MPL 2.0 License" src="https://img.shields.io/badge/license-MPL--2.0-17202b"></a>
 </p>
 
 <p align="center">
@@ -140,4 +140,6 @@ Start with [Contributing](CONTRIBUTING.md). Report vulnerabilities through GitHu
 
 ## License
 
-LoudEase is released under the [MIT License](LICENSE).
+LoudEase source code is released under the [Mozilla Public License 2.0](LICENSE). Modified LoudEase source files remain open when distributed; larger works may use their own license for separate files.
+
+The LoudEase name and logo are not licensed with the source code. Forks are welcome, but redistributed products must use a distinct name and visual identity. See [Trademark Policy](TRADEMARKS.md) and [NOTICE](NOTICE).

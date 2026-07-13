@@ -1,6 +1,6 @@
 # Audio DSP
 
-This document describes the current `leveler-v3` algorithm in version `0.7.0`.
+This document describes the current `leveler-v3` algorithm in version `0.7.1`.
 
 ## Goals
 

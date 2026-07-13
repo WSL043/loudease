@@ -6,7 +6,7 @@ LoudEase is open-source software, but its source license does not make private t
 
 - Audio processing is local. PCM audio is not uploaded.
 - The store build sends no telemetry, analytics, browsing activity, diagnostics, settings, or audio to a developer-operated server.
-- User-created support reports are exported only after an explicit copy or download action.
+- User-created support reports are previewed and exported only after an explicit copy, download, or "copy and open GitHub" action. Opening GitHub does not submit the report.
 - The development build can send diagnostics only to an explicitly enabled localhost receiver. That code is removed from the store package.
 
 These statements are release invariants. A change that introduces remote collection must not ship under the current privacy policy.

@@ -358,6 +358,8 @@
   "themeSystem": { "message": "跟随系统" },
   "themeLight": { "message": "浅色" },
   "themeDark": { "message": "深色" },
+  "switchToDarkTheme": { "message": "切换到深色主题" },
+  "switchToLightTheme": { "message": "切换到浅色主题" },
   "defaultBalanceHeading": { "message": "所有网站的默认平衡" },
   "enabledHelp": { "message": "标签页接管后保持音量平衡。" },
   "playerLimitShort": { "message": "尊重播放器音量" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "适用于所有已接管网站；站点规则可单独覆盖。" },
   "supportReportHelp": { "message": "生成已脱敏的报告，用于问题反馈和支持。" },
   "openIssue": { "message": "提交问题" },
-  "tabLabel": { "message": "标签页" }
+  "tabLabel": { "message": "标签页" },
+  "reportPrivacyLabel": { "message": "报告隐私边界" },
+  "voluntaryReportLabel": { "message": "自愿报告" },
+  "helpImproveHeading": { "message": "帮助改进 LoudEase" },
+  "voluntaryReportHelp": { "message": "不会自动发送任何内容。先查看本地报告，再决定是否提交到 GitHub。" },
+  "noAudioShared": { "message": "不包含音频" },
+  "noUrlsShared": { "message": "不包含网址或站点名称" },
+  "noAccountDataShared": { "message": "不包含账户标识" },
+  "shareReport": { "message": "复制报告并打开 GitHub" },
+  "previewReport": { "message": "预览包含的数据" },
+  "technicalDiagnostics": { "message": "技术诊断" },
+  "technicalDiagnosticsHelp": { "message": "用于排查问题的实时连接详情。" },
+  "reportCopiedOpenIssue": { "message": "报告已复制，请粘贴到 GitHub 表单中。" }
 }

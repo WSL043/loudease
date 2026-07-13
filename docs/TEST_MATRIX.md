@@ -18,7 +18,7 @@ Local capture E2E emits synthetic audio by design. It is disabled on developer m
 
 ## Real-site release baseline
 
-The following rows require current `0.7.0` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate.
+The following rows require current `0.7.1` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate.
 
 | Scenario | Connect | Fresh signal | Cut/lift evidence | Mute/volume | Source switch | 30 min | 2 h mixed run |
 |---|---:|---:|---:|---:|---:|---:|---:|

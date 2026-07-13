@@ -7,6 +7,7 @@ const popupHtml = read('popup/index.html');
 const popupJs = read('popup/index.js');
 const popupCss = read('popup/index.css');
 const monitorHtml = read('monitor/index.html');
+const monitorCss = read('monitor/index.css');
 const helper = read('shared/i18n.js');
 const locales = ['en', 'zh_CN', 'zh_TW', 'ja', 'ko', 'es', 'pt_BR', 'de', 'fr', 'ru', 'ar'];
 const catalogs = Object.fromEntries(locales.map((locale) => [locale, JSON.parse(read(`_locales/${locale}/messages.json`))]));
@@ -29,14 +30,16 @@ const checks = [
   ['popup status requires runtime evidence before claiming active', /captureActive \|\| \(active > 0 && processed > 0 && audible > 0\)/.test(popupJs) && /hasFreshSignal/.test(popupJs)],
   ['recovery actions are hidden by default and shown from failure branches', /id="captureButton"[^>]*hidden/.test(popupHtml) && /id="reloadButton"[^>]*hidden/.test(popupHtml) && /needsReload/.test(popupJs)],
   ['selected AI logo has separate light and dark production assets', /logo-ai-a-light\.png/.test(popupHtml) && /logo-ai-a-dark\.png/.test(popupHtml) && fs.existsSync(path.join(root, 'assets', 'logo-ai-a-light.png')) && fs.existsSync(path.join(root, 'assets', 'logo-ai-a-dark.png'))],
+  ['selected UI theme controls the matching logo asset', [popupHtml, monitorHtml].every((html) => /class="brandLogo logoLight"/.test(html) && /class="brandLogo logoDark"/.test(html)) && [popupCss, monitorCss].every((css) => /data-theme="dark"[^\n]*\.logoLight/.test(css) && /data-theme="dark"[^\n]*\.logoDark/.test(css))],
   ['popup visualizes live input and output levels from runtime evidence', /id="levelVisual"/.test(popupHtml) && /updateLevelVisual\(status\)/.test(popupJs) && /averageOutputDb/.test(popupJs)],
   ['strength ranges keep value, thumb, and colored progress synchronized', /dial\.input\.style\.setProperty\('--strength'/.test(popupJs) && /--strength/.test(popupCss) && /linear-gradient\(var\(--range-direction\)/.test(popupCss)],
   ['preview save responses preserve the latest slider value', /payload\.type === 'WVB_SAVE_SETTINGS'/.test(popupJs) && /mockSettings = \{[\s\S]*?normalizeSettings/.test(popupJs)],
   ['settings button opens the extension options page', /id="settingsButton"/.test(popupHtml) && /runtime\?\.openOptionsPage/.test(popupJs)],
+  ['popup theme button switches the shared light and dark preference', /id="themeButton"/.test(popupHtml) && /saveUiPreferences\(\{ theme: nextTheme \}\)/.test(popupJs) && /data-effective-theme/.test(popupCss)],
   ['external settings cannot overwrite an active local gesture or pending write', /strengthGestureActive \|\| pendingWriteCount > 0/.test(popupJs) && /handleStorageChanged/.test(popupJs)],
   ['strength ranges expose help to assistive technology without leaving a tooltip over the waveform', /aria-describedby="cutHelp"/.test(popupHtml) && /aria-describedby="liftHelp"/.test(popupHtml) && !/\.strengthControl:focus-within/.test(popupCss)],
   ['RTL strength progress follows the native control direction', /\[dir="rtl"\] \.strengthRange/.test(popupCss) && /--range-direction: to left/.test(popupCss)],
-  ['monitor retains advanced settings and diagnostics export', ['localDiagnostics', 'siteForm', 'resetSettings', 'copyJson', 'downloadJson'].every((id) => monitorHtml.includes(`id="${id}"`))]
+  ['monitor retains advanced settings and voluntary diagnostics export', ['localDiagnostics', 'siteForm', 'resetSettings', 'copyJson', 'downloadJson', 'shareReport', 'reportJson'].every((id) => monitorHtml.includes(`id="${id}"`))]
 ];
 
 let failed = false;

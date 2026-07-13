@@ -10,7 +10,9 @@ The private beta uses three channels:
 2. The Chrome Web Store Support Hub for questions, bug reports, and feature requests after support is enabled in the publisher dashboard.
 3. GitHub Issue Forms for reproducible engineering reports from invited testers and, later, public contributors.
 
-The extension can create a redacted support report in **Settings -> Support & diagnostics**. Copying or downloading that report is an explicit local action. The extension does not submit it automatically.
+The extension can create a redacted support report in **Settings -> Support & diagnostics**. The user can preview it, copy or download it, or explicitly copy it and open the GitHub Issue Form. The extension does not submit it automatically.
+
+The generated report excludes URLs, hostnames, inferred platform names, page titles, tab identifiers, account identifiers, event timestamps, and audio. The user remains responsible for reviewing it before a public submission.
 
 Do not put private URLs, account information, tokens, browsing history, personal recordings, or unlicensed media in a store review or public GitHub issue. Security vulnerabilities belong in a private GitHub Security Advisory.
 
@@ -50,5 +52,17 @@ The first telemetry release requires a separate privacy and legal review. This d
 ## Backend boundary
 
 GitHub is a manual feedback tracker, not an anonymous telemetry endpoint. The extension must never contain a GitHub access token.
+
+A personal email inbox is also not a telemetry backend. It is unsuitable for structured aggregation, deletion controls, access auditing, rate limiting, and consistent retention. Email may be offered later for a user-selected private support attachment, but not for automatic measurements.
+
+## No-server collection options
+
+The public beta can operate without a developer-run backend:
+
+1. GitHub Issue Forms remain the public engineering channel. They are suitable for reproducible bugs, audio-quality defects, and community discussion, but require a GitHub account and reports are public.
+2. A hosted form such as Tally can be added as an optional private listening-feedback channel for non-GitHub users. Use fixed-choice fields for content type, consistency, artifacts, and strength values; keep free text optional and forbid URLs, account data, and audio uploads by default.
+3. Google Forms linked to a private Google Sheet is a simpler alternative when visual customization is less important.
+
+Hosted forms are third-party processors, not local telemetry. Before enabling one, update the privacy policy with the provider, purpose, fields, retention period, deletion contact, and data location. Keep submission user-initiated; do not silently post the local support report.
 
 If aggregate quality measurement is introduced later, use a narrowly scoped HTTPS endpoint with server-side schema allowlisting, request limits, restricted access, short raw retention, documented processors, and auditable deletion or irreversible aggregation. The public client schema may be open source while collected records and private evaluation data remain access-controlled.

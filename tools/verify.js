@@ -64,6 +64,8 @@ exists('README.md');
 exists('README_zh.md');
 exists('CONTRIBUTING.md');
 exists('LICENSE');
+exists('NOTICE');
+exists('TRADEMARKS.md');
 exists('docs/RESEARCH.md');
 exists('docs/ARCHITECTURE.md');
 exists('docs/AUDIO_DSP.md');

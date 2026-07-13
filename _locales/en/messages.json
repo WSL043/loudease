@@ -358,6 +358,8 @@
   "themeSystem": { "message": "System" },
   "themeLight": { "message": "Light" },
   "themeDark": { "message": "Dark" },
+  "switchToDarkTheme": { "message": "Switch to dark theme" },
+  "switchToLightTheme": { "message": "Switch to light theme" },
   "defaultBalanceHeading": { "message": "Default balance for all sites" },
   "enabledHelp": { "message": "Keep balancing enabled when a tab is connected." },
   "playerLimitShort": { "message": "Respect player volume" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "Applies to every connected site unless a site rule overrides it." },
   "supportReportHelp": { "message": "Create a privacy-safe report for bug reports and support." },
   "openIssue": { "message": "Report an issue" },
-  "tabLabel": { "message": "Tab" }
+  "tabLabel": { "message": "Tab" },
+  "reportPrivacyLabel": { "message": "Report privacy boundaries" },
+  "voluntaryReportLabel": { "message": "Voluntary report" },
+  "helpImproveHeading": { "message": "Help improve LoudEase" },
+  "voluntaryReportHelp": { "message": "Nothing is sent automatically. Review the local report, then choose whether to submit it on GitHub." },
+  "noAudioShared": { "message": "No audio" },
+  "noUrlsShared": { "message": "No URLs or site names" },
+  "noAccountDataShared": { "message": "No account identifiers" },
+  "shareReport": { "message": "Copy report & open GitHub" },
+  "previewReport": { "message": "Preview included data" },
+  "technicalDiagnostics": { "message": "Technical diagnostics" },
+  "technicalDiagnosticsHelp": { "message": "Live connection details for troubleshooting." },
+  "reportCopiedOpenIssue": { "message": "Report copied. Paste it into the GitHub form." }
 }

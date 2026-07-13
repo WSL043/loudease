@@ -358,6 +358,8 @@
   "themeSystem": { "message": "System" },
   "themeLight": { "message": "Hell" },
   "themeDark": { "message": "Dunkel" },
+  "switchToDarkTheme": { "message": "Zum dunklen Design wechseln" },
+  "switchToLightTheme": { "message": "Zum hellen Design wechseln" },
   "defaultBalanceHeading": { "message": "Standardbalance für alle Websites" },
   "enabledHelp": { "message": "Lautstärkeausgleich nach dem Verbinden eines Tabs aktiviert lassen." },
   "playerLimitShort": { "message": "Player-Lautstärke beachten" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "Gilt für alle verbundenen Websites, sofern keine Website-Regel sie überschreibt." },
   "supportReportHelp": { "message": "Erstellt einen datenschutzfreundlichen Bericht für Fehler und Support." },
   "openIssue": { "message": "Problem melden" },
-  "tabLabel": { "message": "Tab" }
+  "tabLabel": { "message": "Tab" },
+  "reportPrivacyLabel": { "message": "Datenschutzumfang des Berichts" },
+  "voluntaryReportLabel": { "message": "Freiwilliger Bericht" },
+  "helpImproveHeading": { "message": "LoudEase verbessern" },
+  "voluntaryReportHelp": { "message": "Es wird nichts automatisch gesendet. Prüfen Sie den lokalen Bericht und entscheiden Sie dann, ob Sie ihn auf GitHub einreichen." },
+  "noAudioShared": { "message": "Keine Audiodaten" },
+  "noUrlsShared": { "message": "Keine URLs oder Websitenamen" },
+  "noAccountDataShared": { "message": "Keine Kontokennungen" },
+  "shareReport": { "message": "Bericht kopieren und GitHub öffnen" },
+  "previewReport": { "message": "Enthaltene Daten anzeigen" },
+  "technicalDiagnostics": { "message": "Technische Diagnose" },
+  "technicalDiagnosticsHelp": { "message": "Live-Verbindungsdetails zur Fehlerbehebung." },
+  "reportCopiedOpenIssue": { "message": "Bericht kopiert. Fügen Sie ihn in das GitHub-Formular ein." }
 }

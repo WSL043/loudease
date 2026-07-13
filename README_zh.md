@@ -133,4 +133,6 @@ npm run audit
 
 ## 许可证
 
-LoudEase 使用 [MIT License](LICENSE) 发布。
+LoudEase 源代码使用 [Mozilla Public License 2.0](LICENSE) 发布。对 LoudEase 原有源文件的修改在对外分发时仍需公开；独立的新文件可以采用其他许可证。
+
+LoudEase 名称和 Logo 不随源代码授权。欢迎合规分叉，但重新发布的产品必须使用不同的名称和视觉标识。详见 [商标政策](TRADEMARKS.md) 与 [NOTICE](NOTICE)。

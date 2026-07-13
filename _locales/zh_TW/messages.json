@@ -358,6 +358,8 @@
   "themeSystem": { "message": "跟隨系統" },
   "themeLight": { "message": "淺色" },
   "themeDark": { "message": "深色" },
+  "switchToDarkTheme": { "message": "切換到深色主題" },
+  "switchToLightTheme": { "message": "切換到淺色主題" },
   "defaultBalanceHeading": { "message": "所有網站的預設平衡" },
   "enabledHelp": { "message": "分頁接管後保持音量平衡。" },
   "playerLimitShort": { "message": "尊重播放器音量" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "套用於所有已接管網站；網站規則可個別覆寫。" },
   "supportReportHelp": { "message": "產生已去識別化的報告，用於問題回報和支援。" },
   "openIssue": { "message": "回報問題" },
-  "tabLabel": { "message": "分頁" }
+  "tabLabel": { "message": "分頁" },
+  "reportPrivacyLabel": { "message": "報告隱私界線" },
+  "voluntaryReportLabel": { "message": "自願回報" },
+  "helpImproveHeading": { "message": "協助改進 LoudEase" },
+  "voluntaryReportHelp": { "message": "不會自動傳送任何內容。請先查看本機報告，再決定是否提交至 GitHub。" },
+  "noAudioShared": { "message": "不包含音訊" },
+  "noUrlsShared": { "message": "不包含網址或網站名稱" },
+  "noAccountDataShared": { "message": "不包含帳戶識別資訊" },
+  "shareReport": { "message": "複製報告並開啟 GitHub" },
+  "previewReport": { "message": "預覽包含的資料" },
+  "technicalDiagnostics": { "message": "技術診斷" },
+  "technicalDiagnosticsHelp": { "message": "用於疑難排解的即時連線詳情。" },
+  "reportCopiedOpenIssue": { "message": "報告已複製，請貼到 GitHub 表單中。" }
 }

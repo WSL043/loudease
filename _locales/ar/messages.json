@@ -358,6 +358,8 @@
   "themeSystem": { "message": "النظام" },
   "themeLight": { "message": "فاتح" },
   "themeDark": { "message": "داكن" },
+  "switchToDarkTheme": { "message": "التبديل إلى السمة الداكنة" },
+  "switchToLightTheme": { "message": "التبديل إلى السمة الفاتحة" },
   "defaultBalanceHeading": { "message": "التوازن الافتراضي لجميع المواقع" },
   "enabledHelp": { "message": "أبقِ موازنة الصوت مفعلة عند توصيل علامة تبويب." },
   "playerLimitShort": { "message": "احترام مستوى صوت المشغل" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "يُطبّق على جميع المواقع المتصلة ما لم تتجاوزه قاعدة موقع." },
   "supportReportHelp": { "message": "ينشئ تقريرًا يحمي الخصوصية للدعم والإبلاغ عن الأخطاء." },
   "openIssue": { "message": "الإبلاغ عن مشكلة" },
-  "tabLabel": { "message": "علامة تبويب" }
+  "tabLabel": { "message": "علامة تبويب" },
+  "reportPrivacyLabel": { "message": "حدود خصوصية التقرير" },
+  "voluntaryReportLabel": { "message": "تقرير طوعي" },
+  "helpImproveHeading": { "message": "ساعد في تحسين LoudEase" },
+  "voluntaryReportHelp": { "message": "لا يتم إرسال أي شيء تلقائيا. راجع التقرير المحلي ثم اختر ما إذا كنت تريد إرساله على GitHub." },
+  "noAudioShared": { "message": "بدون صوت" },
+  "noUrlsShared": { "message": "بدون روابط أو أسماء مواقع" },
+  "noAccountDataShared": { "message": "بدون معرفات حساب" },
+  "shareReport": { "message": "نسخ التقرير وفتح GitHub" },
+  "previewReport": { "message": "معاينة البيانات المضمنة" },
+  "technicalDiagnostics": { "message": "التشخيص الفني" },
+  "technicalDiagnosticsHelp": { "message": "تفاصيل الاتصال المباشر لاستكشاف الأخطاء وإصلاحها." },
+  "reportCopiedOpenIssue": { "message": "تم نسخ التقرير. الصقه في نموذج GitHub." }
 }

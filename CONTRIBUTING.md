@@ -2,6 +2,10 @@
 
 Thanks for helping improve LoudEase. The project is a beta audio processor, so changes should be narrow, reproducible, and honest about what was tested.
 
+## Contribution license
+
+By submitting a contribution, you confirm that you have the right to provide it and agree that it will be distributed under the Mozilla Public License 2.0. Do not submit copied code, media, model output, or other material whose license is unknown or incompatible. The LoudEase name and logo remain subject to [TRADEMARKS.md](TRADEMARKS.md).
+
 ## Issues
 
 Use the closest issue template when one is available and complete every relevant field. A useful bug report includes:

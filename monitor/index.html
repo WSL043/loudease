@@ -10,10 +10,10 @@
   <main class="shell">
     <header class="topbar">
       <div class="brand">
-        <picture class="brandIcon" aria-hidden="true">
-          <source media="(prefers-color-scheme: dark)" srcset="../assets/logo-ai-a-dark.png">
-          <img src="../assets/logo-ai-a-light.png" alt="">
-        </picture>
+        <span class="brandIcon" aria-hidden="true">
+          <img class="brandLogo logoLight" src="../assets/logo-ai-a-light.png" alt="">
+          <img class="brandLogo logoDark" src="../assets/logo-ai-a-dark.png" alt="">
+        </span>
         <div>
           <strong>LoudEase</strong>
           <span id="version">v--</span>
@@ -43,7 +43,7 @@
           </header>
 
           <div class="settingGroup">
-            <h2 data-i18n="appearanceHeading">Appearance</h2>
+            <h2 class="sectionLabel" data-i18n="appearanceHeading">Appearance</h2>
             <label class="settingRow" for="languageSelect">
               <span><strong data-i18n="languageLabel">Language</strong><small data-i18n="languageHelp">Used in the popup and settings page.</small></span>
               <select id="languageSelect"></select>
@@ -104,14 +104,40 @@
         <section id="diagnosticsView" class="view" data-view-panel="diagnostics" hidden>
           <header class="viewHeader">
             <div><h1 data-i18n="diagnosticsTab">Support &amp; diagnostics</h1><p data-i18n="supportReportHelp">Create a privacy-safe report for bug reports and support.</p><span id="health" class="inlineStatus" data-i18n="waitingForData">Waiting for data</span></div>
-            <div class="diagnosticActions"><button id="copyJson" class="primaryButton" type="button" data-i18n="copyDiagnostics">Copy support report</button><button id="downloadJson" class="quietButton" type="button" data-i18n="downloadDiagnostics">Download report</button><a class="quietButton buttonLink" href="https://github.com/WSL043/loudease/issues/new/choose" target="_blank" rel="noopener noreferrer" data-i18n="openIssue">Report an issue</a><button id="reloadExtension" class="quietButton" type="button" data-i18n="reloadExtension">Reload extension</button></div>
           </header>
+          <section class="reportPanel" aria-labelledby="reportHeading">
+            <div class="reportCopy">
+              <span class="kicker" data-i18n="voluntaryReportLabel">Voluntary report</span>
+              <h2 id="reportHeading" data-i18n="helpImproveHeading">Help improve LoudEase</h2>
+              <p data-i18n="voluntaryReportHelp">Nothing is sent automatically. Review the local report, then choose whether to submit it on GitHub.</p>
+              <ul class="privacyList" data-i18n-aria-label="reportPrivacyLabel" aria-label="Report privacy boundaries">
+                <li data-i18n="noAudioShared">No audio</li>
+                <li data-i18n="noUrlsShared">No URLs or site names</li>
+                <li data-i18n="noAccountDataShared">No account identifiers</li>
+              </ul>
+            </div>
+            <div class="reportActions">
+              <button id="shareReport" class="primaryButton" type="button" data-i18n="shareReport">Copy report &amp; open GitHub</button>
+              <button id="copyJson" class="quietButton" type="button" data-i18n="copyDiagnostics">Copy support report</button>
+              <button id="downloadJson" class="quietButton" type="button" data-i18n="downloadDiagnostics">Download report</button>
+            </div>
+            <details class="reportPreview">
+              <summary data-i18n="previewReport">Preview included data</summary>
+              <pre id="reportJson"></pre>
+            </details>
+          </section>
           <section class="summary" data-i18n-aria-label="summaryLabel" aria-label="Summary"><div><span data-i18n="activeTabsLabel">Active tabs</span><strong id="tabCount">--</strong></div><div><span data-i18n="connectedSourcesLabel">Connected sources</span><strong id="sourceCount">--</strong></div><div><span data-i18n="lastUpdatedLabel">Last updated</span><strong id="updatedAt">--</strong></div></section>
-          <!-- WVB_DEV_DIAGNOSTICS_START -->
-          <label class="toggleRow developerToggle"><span><strong data-i18n="localDiagnosticsLabel">Local diagnostics receiver</strong><small data-i18n="localDiagnosticsHelp">Writes debug snapshots only to 127.0.0.1. Off by default.</small></span><input id="localDiagnostics" type="checkbox"></label>
-          <!-- WVB_DEV_DIAGNOSTICS_END -->
-          <section class="diagnosticSection"><header><h2 data-i18n="pageStatusHeading">Page status</h2></header><div id="tabs" class="tabs"></div></section>
-          <section class="diagnosticSection"><header><h2 data-i18n="recentEventsHeading">Recent events</h2><span data-i18n="backgroundLogLabel">Background log</span></header><div id="events" class="events"></div></section>
+          <details class="technicalDetails">
+            <summary><span><strong data-i18n="technicalDiagnostics">Technical diagnostics</strong><small data-i18n="technicalDiagnosticsHelp">Live connection details for troubleshooting.</small></span></summary>
+            <div class="technicalBody">
+              <!-- WVB_DEV_DIAGNOSTICS_START -->
+              <label class="toggleRow developerToggle"><span><strong data-i18n="localDiagnosticsLabel">Local diagnostics receiver</strong><small data-i18n="localDiagnosticsHelp">Writes debug snapshots only to 127.0.0.1. Off by default.</small></span><input id="localDiagnostics" type="checkbox"></label>
+              <!-- WVB_DEV_DIAGNOSTICS_END -->
+              <section class="diagnosticSection"><header><h2 data-i18n="pageStatusHeading">Page status</h2></header><div id="tabs" class="tabs"></div></section>
+              <section class="diagnosticSection"><header><h2 data-i18n="recentEventsHeading">Recent events</h2><span data-i18n="backgroundLogLabel">Background log</span></header><div id="events" class="events"></div></section>
+              <div class="maintenanceActions"><button id="reloadExtension" class="quietButton" type="button" data-i18n="reloadExtension">Reload extension</button></div>
+            </div>
+          </details>
         </section>
       </div>
     </div>

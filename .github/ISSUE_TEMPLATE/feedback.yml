@@ -1,0 +1,84 @@
+name: Listening feedback
+description: Share a short, structured impression of LoudEase
+title: "[Feedback]: "
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve LoudEase. Do not include private URLs, account data, personal recordings, or copyrighted audio.
+  - type: dropdown
+    id: experience
+    attributes:
+      label: Overall listening experience
+      options:
+        - Much more comfortable
+        - A little more comfortable
+        - No clear difference
+        - Less comfortable
+        - Audio was broken or unusable
+    validations:
+      required: true
+  - type: dropdown
+    id: content
+    attributes:
+      label: What were you listening to?
+      options:
+        - Dialogue video
+        - Music video
+        - Live stream
+        - Audio-only player
+        - Short-video feed
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: balance
+    attributes:
+      label: Loudness consistency
+      options:
+        - Much more consistent
+        - A little more consistent
+        - No clear difference
+        - Less consistent or pumping
+    validations:
+      required: true
+  - type: dropdown
+    id: artifacts
+    attributes:
+      label: Unwanted audio artifacts
+      options:
+        - None noticed
+        - Pumping or breathing
+        - Distortion or crackling
+        - Dull or flattened sound
+        - Quiet details sounded unnatural
+        - Audio dropouts or duplication
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: strengths
+    attributes:
+      label: Strength settings
+      description: Enter Reduce loud / Lift quiet, for example 60 / 80.
+      placeholder: 60 / 80
+  - type: textarea
+    id: impression
+    attributes:
+      label: What sounded better or worse?
+      description: Describe loud jumps, quiet detail, pumping, distortion, or listening fatigue without naming a private page.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Optional redacted support report
+      description: Paste the report copied by LoudEase only after reviewing it. Do not include URLs or account data.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I removed private browsing data, personal information, and media I do not have permission to share.
+          required: true

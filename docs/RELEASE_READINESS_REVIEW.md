@@ -1,6 +1,6 @@
 # Release Readiness Review
 
-Review baseline: version `0.7.0`, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
+Review baseline: version `0.7.1`, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
 
 ## Decision
 
@@ -20,7 +20,7 @@ Review baseline: version `0.7.0`, unified AudioWorklet DSP, independent multi-ta
 - Independent capture ownership for multiple authorized tabs.
 - Development diagnostics are opt-in and removed from the store build.
 - Eleven locale catalogs with English as the default.
-- MIT license, privacy policy, security policy, contribution guide, and CI workflow.
+- MPL-2.0 license, trademark policy, privacy policy, security policy, contribution guide, and CI workflow.
 
 ## Automated gates
 

@@ -358,6 +358,8 @@
   "themeSystem": { "message": "Système" },
   "themeLight": { "message": "Clair" },
   "themeDark": { "message": "Sombre" },
+  "switchToDarkTheme": { "message": "Passer au thème sombre" },
+  "switchToLightTheme": { "message": "Passer au thème clair" },
   "defaultBalanceHeading": { "message": "Équilibrage par défaut pour tous les sites" },
   "enabledHelp": { "message": "Conserver l'équilibrage actif lorsqu'un onglet est connecté." },
   "playerLimitShort": { "message": "Respecter le volume du lecteur" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "S’applique à tous les sites connectés, sauf remplacement par une règle de site." },
   "supportReportHelp": { "message": "Crée un rapport respectueux de la vie privée pour l'assistance." },
   "openIssue": { "message": "Signaler un problème" },
-  "tabLabel": { "message": "Onglet" }
+  "tabLabel": { "message": "Onglet" },
+  "reportPrivacyLabel": { "message": "Limites de confidentialité du rapport" },
+  "voluntaryReportLabel": { "message": "Rapport volontaire" },
+  "helpImproveHeading": { "message": "Contribuer à améliorer LoudEase" },
+  "voluntaryReportHelp": { "message": "Rien n’est envoyé automatiquement. Consultez le rapport local, puis choisissez de l’envoyer ou non sur GitHub." },
+  "noAudioShared": { "message": "Aucun son" },
+  "noUrlsShared": { "message": "Aucune URL ni nom de site" },
+  "noAccountDataShared": { "message": "Aucun identifiant de compte" },
+  "shareReport": { "message": "Copier le rapport et ouvrir GitHub" },
+  "previewReport": { "message": "Prévisualiser les données incluses" },
+  "technicalDiagnostics": { "message": "Diagnostic technique" },
+  "technicalDiagnosticsHelp": { "message": "Détails de connexion en direct pour le dépannage." },
+  "reportCopiedOpenIssue": { "message": "Rapport copié. Collez-le dans le formulaire GitHub." }
 }

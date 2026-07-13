@@ -4,6 +4,14 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+## 0.7.1-beta.1
+
+- Added a one-click light/dark theme switch to the popup, synchronized with the options page.
+- Reworked voluntary support reports into a versioned, privacy-safe DSP snapshot with signal and limiter evidence.
+- Added structured listening feedback fields for consistency, artifacts, content type, and strength settings.
+- Replaced the MIT release posture with MPL-2.0 plus separate notice and trademark policies.
+- Refined the settings, report, localization, theme-logo, and Chrome Web Store packaging paths.
+
 ## 0.7.0-beta.1
 
 - Introduced the LoudEase product name and a rebuilt English-first open-source presentation.

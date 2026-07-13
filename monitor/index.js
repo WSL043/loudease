@@ -8,8 +8,10 @@ const els = {
   tabs: document.getElementById('tabs'),
   events: document.getElementById('events'),
   refreshNow: document.getElementById('refreshNow'),
+  shareReport: document.getElementById('shareReport'),
   copyJson: document.getElementById('copyJson'),
   downloadJson: document.getElementById('downloadJson'),
+  reportJson: document.getElementById('reportJson'),
   reloadExtension: document.getElementById('reloadExtension'),
   languageSelect: document.getElementById('languageSelect'),
   themeSelect: document.getElementById('themeSelect'),
@@ -328,6 +330,7 @@ function renderDiagnostics(snapshot) {
   els.sourceCount.textContent = String(tabs.reduce((sum, tab) => sum + (tab.captureConnected === true || Number(tab.activeProcessorCount) > 0 ? 1 : 0), 0));
   els.updatedAt.textContent = new Date(snapshot.now || Date.now()).toLocaleTimeString();
   els.health.textContent = tabs.some((tab) => tab.staleEngine) ? t('staleEngineFound', undefined, 'Outdated runtime found') : t('liveRefresh', undefined, 'Refreshing live');
+  els.reportJson.textContent = JSON.stringify(supportReport(snapshot), null, 2);
   renderTabs(tabs);
   renderEvents(snapshot.events || []);
 }
@@ -337,18 +340,18 @@ function supportReport(snapshot = {}) {
     .replace(/https?:\/\/\S+/gi, '[url removed]')
     .replace(/[a-z]:\\[^\s]+/gi, '[path removed]')
     .slice(0, 500);
-  const siteCategory = (value) => {
-    try {
-      const host = new URL(value || '').hostname.replace(/^www\./, '');
-      if (/(^|\.)youtube\.com$|(^|\.)youtu\.be$/.test(host)) return 'youtube';
-      if (/(^|\.)bilibili\.com$/.test(host)) return 'bilibili';
-      if (/(^|\.)douyin\.com$/.test(host)) return 'douyin';
-      return host ? 'other-web-site' : 'unknown';
-    } catch (_) {
-      return 'unknown';
-    }
-  };
+  const tabs = snapshot.tabs || [];
+  const eventCounts = {};
+  const recentErrors = [];
+  for (const event of snapshot.events || []) {
+    const type = String(event.type || 'unknown');
+    eventCounts[type] = (eventCounts[type] || 0) + 1;
+    const error = sanitizeError(event.detail?.error || event.detail?.message || '');
+    if (error && !recentErrors.includes(error)) recentErrors.push(error);
+  }
   return {
+    schemaVersion: 1,
+    reportScope: 'manual-support-snapshot',
     product: 'LoudEase',
     version: String(snapshot.version || lastOptionsState?.version || '--'),
     generatedAt: new Date(snapshot.now || Date.now()).toISOString(),
@@ -358,9 +361,13 @@ function supportReport(snapshot = {}) {
       cutStrength: clampPercent(lastOptionsState?.settings?.cutStrength),
       liftStrength: clampPercent(lastOptionsState?.settings?.liftStrength)
     },
-    tabs: (snapshot.tabs || []).map((tab) => ({
-      tabId: Number(tab.tabId) || 0,
-      siteCategory: siteCategory(tab.url || tab.capture?.tabUrl || ''),
+    summary: {
+      sessions: tabs.length,
+      connectedSources: tabs.reduce((sum, tab) => sum + (tab.captureConnected === true || Number(tab.activeProcessorCount) > 0 ? 1 : 0), 0),
+      mediaElements: tabs.reduce((sum, tab) => sum + (Number(tab.mediaCount) || 0), 0),
+      processedElements: tabs.reduce((sum, tab) => sum + (Number(tab.processedCount) || 0), 0)
+    },
+    sessions: tabs.map((tab) => ({
       mediaCount: Number(tab.mediaCount) || 0,
       processedCount: Number(tab.processedCount) || 0,
       captureActive: Boolean(tab.captureActive || tab.capture?.active),
@@ -368,17 +375,25 @@ function supportReport(snapshot = {}) {
       dspLive: tab.captureDspLive === true,
       startupGateOpen: tab.startupGateOpen === true,
       captureState: String(tab.captureState || tab.capture?.state || ''),
+      captureContextState: String(tab.captureContextState || ''),
+      captureAudioTrackCount: Number(tab.captureAudioTrackCount) || 0,
       audibleCount: Number(tab.audibleCount) || 0,
+      signalTickCount: Number(tab.signalTickCount) || 0,
+      lastSignalAgeMs: tab.lastSignalAgeMs == null ? null : Number(tab.lastSignalAgeMs) || 0,
+      averageInputDb: tab.averageInputDb == null ? null : Number(tab.averageInputDb),
+      averageOutputDb: tab.averageOutputDb == null ? null : Number(tab.averageOutputDb),
+      currentGainDb: Number(tab.currentGainDb) || 0,
       averageReductionDb: Number(tab.averageReductionDb) || 0,
       averageLiftDb: Number(tab.averageLiftDb) || 0,
+      limiterMode: String(tab.limiterMode || ''),
+      limiterActive: Boolean(tab.limiterActive),
+      limiterReductionDb: Number(tab.limiterReductionDb) || 0,
+      limiterTickCount: Number(tab.limiterTickCount) || 0,
       staleEngine: Boolean(tab.staleEngine),
       errors: (tab.failedErrors || []).map(sanitizeError)
     })),
-    events: (snapshot.events || []).slice(0, 40).map((event) => ({
-      type: String(event.type || ''),
-      at: Number(event.at) || 0,
-      error: sanitizeError(event.detail?.error || event.detail?.message || '')
-    }))
+    eventCounts,
+    recentErrors: recentErrors.slice(0, 12)
   };
 }
 
@@ -395,6 +410,17 @@ async function copyDiagnostics() {
   if (!lastSnapshot) await loadDiagnostics();
   await navigator.clipboard.writeText(JSON.stringify(supportReport(lastSnapshot), null, 2));
   els.health.textContent = t('diagnosticsCopied', undefined, 'Diagnostics copied');
+}
+
+async function shareDiagnostics() {
+  await copyDiagnostics();
+  const issueUrl = 'https://github.com/WSL043/loudease/issues/new?template=audio-quality.yml';
+  if (globalThis.chrome?.tabs?.create) {
+    await chrome.tabs.create({ url: issueUrl });
+  } else {
+    window.open(issueUrl, '_blank', 'noopener,noreferrer');
+  }
+  els.health.textContent = t('reportCopiedOpenIssue', undefined, 'Report copied. Paste it into the GitHub form.');
 }
 
 async function downloadDiagnostics() {
@@ -445,6 +471,7 @@ function bind() {
     els.settingsHealth.textContent = t('editingSite', siteKey, `Editing ${siteKey}`);
   });
   els.copyJson.addEventListener('click', () => copyDiagnostics().catch(reportDiagnosticsError));
+  els.shareReport.addEventListener('click', () => shareDiagnostics().catch(reportDiagnosticsError));
   els.downloadJson.addEventListener('click', () => downloadDiagnostics().catch(reportDiagnosticsError));
   els.reloadExtension.addEventListener('click', () => {
     if (globalThis.chrome?.runtime?.reload) setTimeout(() => chrome.runtime.reload(), 80);

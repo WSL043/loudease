@@ -7,7 +7,7 @@ const target = process.argv[2];
 const packageZip = process.argv.includes('--zip');
 const outputRoot = path.join(root, 'dist');
 const outputDir = path.join(outputRoot, target === 'store' ? 'store' : 'github-dev');
-const allowlist = ['manifest.json', 'background.js', 'assets', 'content', 'monitor', 'offscreen', 'popup', 'shared', '_locales'];
+const allowlist = ['manifest.json', 'background.js', 'LICENSE', 'NOTICE', 'TRADEMARKS.md', 'assets', 'content', 'monitor', 'offscreen', 'popup', 'shared', '_locales'];
 const forbidden = /(^|\/)(?:\.git|docs?|e2e|node_modules|src|test-pages|tests?|tmp|tools?)(?:\/|$)|(?:^|\/)(?:\.env(?:\..*)?|.*\.(?:key|pem|p12|pfx|crx|log|zip))$/i;
 const textExtensions = new Set(['.css', '.html', '.js', '.json', '.mjs', '.svg', '.txt']);
 const startMarker = buildConfig.markers?.start;

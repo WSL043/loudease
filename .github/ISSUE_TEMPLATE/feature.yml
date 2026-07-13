@@ -25,9 +25,9 @@ body:
     attributes:
       label: Does this require broader permissions, network access, data collection, or audio upload?
       options:
-        - No
+        - "No"
         - Unsure
-        - Yes
+        - "Yes"
     validations:
       required: true
   - type: textarea

@@ -1,9 +1,9 @@
 {
   "name": "loudease",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "Local-first loudness control for more comfortable web audio.",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/WSL043/loudease.git"

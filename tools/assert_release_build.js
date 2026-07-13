@@ -26,10 +26,12 @@ function assertReference(from, value) {
 
 function verify() {
   if (!exists('manifest.json')) fail('Missing manifest.json');
+  for (const notice of ['LICENSE', 'NOTICE', 'TRADEMARKS.md']) if (!exists(notice)) fail(`Missing release notice: ${notice}`);
   let manifest;
   try { manifest = JSON.parse(fs.readFileSync(path.join(build, 'manifest.json'), 'utf8').replace(/^\uFEFF/, '')); }
   catch (error) { fail(`Invalid manifest JSON: ${error.message}`); }
   const required = [manifest.background?.service_worker, manifest.action?.default_popup, manifest.options_page];
+  if (manifest.homepage_url !== 'https://github.com/WSL043/loudease') fail('Manifest must identify the official source repository');
   for (const script of manifest.content_scripts || []) required.push(...(script.js || []), ...(script.css || []));
   for (const icons of [manifest.icons, manifest.action?.default_icon]) required.push(...Object.values(icons || {}));
   for (const name of required.filter(Boolean)) if (!exists(name)) fail(`Missing manifest runtime file: ${name}`);

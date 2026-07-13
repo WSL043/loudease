@@ -358,6 +358,8 @@
   "themeSystem": { "message": "システム" },
   "themeLight": { "message": "ライト" },
   "themeDark": { "message": "ダーク" },
+  "switchToDarkTheme": { "message": "ダークテーマに切り替える" },
+  "switchToLightTheme": { "message": "ライトテーマに切り替える" },
   "defaultBalanceHeading": { "message": "すべてのサイトの既定バランス" },
   "enabledHelp": { "message": "タブ接続後も音量調整を有効にします。" },
   "playerLimitShort": { "message": "プレーヤー音量を尊重" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "接続済みのすべてのサイトに適用され、サイトルールで個別に上書きできます。" },
   "supportReportHelp": { "message": "問題報告用のプライバシーに配慮したレポートを作成します。" },
   "openIssue": { "message": "問題を報告" },
-  "tabLabel": { "message": "タブ" }
+  "tabLabel": { "message": "タブ" },
+  "reportPrivacyLabel": { "message": "レポートのプライバシー範囲" },
+  "voluntaryReportLabel": { "message": "任意のレポート" },
+  "helpImproveHeading": { "message": "LoudEase の改善に協力" },
+  "voluntaryReportHelp": { "message": "自動送信は行いません。ローカルレポートを確認し、GitHub に送信するか選択してください。" },
+  "noAudioShared": { "message": "音声データなし" },
+  "noUrlsShared": { "message": "URL・サイト名なし" },
+  "noAccountDataShared": { "message": "アカウント識別子なし" },
+  "shareReport": { "message": "レポートをコピーして GitHub を開く" },
+  "previewReport": { "message": "送信内容をプレビュー" },
+  "technicalDiagnostics": { "message": "技術診断" },
+  "technicalDiagnosticsHelp": { "message": "トラブルシューティング用のリアルタイム接続情報です。" },
+  "reportCopiedOpenIssue": { "message": "レポートをコピーしました。GitHub フォームに貼り付けてください。" }
 }

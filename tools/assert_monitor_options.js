@@ -10,6 +10,7 @@ function read(relativePath) {
 const background = read('background.js');
 const monitorHtml = read('monitor/index.html');
 const monitorJs = read('monitor/index.js');
+const supportReportBody = monitorJs.match(/function supportReport\([\s\S]*?\n}\n\nasync function loadDiagnostics/)?.[0] || '';
 
 const requiredIds = [
   'localDiagnostics',
@@ -21,7 +22,9 @@ const requiredIds = [
   'saveSite',
   'deleteSite',
   'resetSettings',
-  'downloadJson'
+  'downloadJson',
+  'shareReport',
+  'reportJson'
 ];
 
 const checks = [
@@ -35,7 +38,9 @@ const checks = [
   ['monitor separates general site and diagnostic views', ['general', 'sites', 'diagnostics'].every((view) => monitorHtml.includes(`data-view="${view}"`)) && /function switchView/.test(monitorJs)],
   ['monitor can delete site defaults and reset global settings', /type: 'WVB_DELETE_SITE_SETTINGS'/.test(monitorJs) && /type: 'WVB_RESET_SETTINGS'/.test(monitorJs)],
   ['monitor can toggle local diagnostics and export diagnostics', /type: 'WVB_SET_LOCAL_DIAGNOSTICS'/.test(monitorJs) && /new Blob\(\[JSON\.stringify\(supportReport\(lastSnapshot\), null, 2\)\]/.test(monitorJs)],
-  ['support reports redact URLs paths and unknown site identities', /\[url removed\]/.test(monitorJs) && /\[path removed\]/.test(monitorJs) && /siteCategory/.test(monitorJs) && !/origin: \(\(\) =>/.test(monitorJs)]
+  ['voluntary report is copied locally before GitHub is opened', /async function shareDiagnostics/.test(monitorJs) && /await copyDiagnostics\(\)/.test(monitorJs) && /issues\/new\?template=audio-quality\.yml/.test(monitorJs)],
+  ['support reports redact errors and exclude browsing identifiers', /\[url removed\]/.test(supportReportBody) && /\[path removed\]/.test(supportReportBody) && /eventCounts/.test(supportReportBody) && !/\btabId\b/.test(supportReportBody) && !/siteCategory|hostname|page title/i.test(supportReportBody)],
+  ['support report is versioned and includes privacy-safe DSP evidence', /schemaVersion: 1/.test(supportReportBody) && /reportScope: 'manual-support-snapshot'/.test(supportReportBody) && /averageInputDb/.test(supportReportBody) && /limiterTickCount/.test(supportReportBody)]
 ];
 
 let failed = false;

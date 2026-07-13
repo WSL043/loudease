@@ -40,7 +40,9 @@ Permissions are used only for the extension's single purpose: balancing audio in
 
 The store build does not upload audio, browsing activity, diagnostics, settings, or analytics. It does not load remote executable code.
 
-No remote telemetry is currently implemented. Any future opt-in quality measurement requires a new privacy review, prominent in-product consent, updated store disclosures, and the release gates in [docs/DATA_GOVERNANCE.md](docs/DATA_GOVERNANCE.md).
+No remote telemetry is currently implemented. The optional support report is generated locally and excludes URLs, hostnames, inferred platform names, page titles, tab identifiers, account identifiers, event timestamps, and audio. It leaves the browser only if the user chooses to paste and submit it to a support channel.
+
+Any future opt-in quality measurement requires a dedicated HTTPS endpoint, a new privacy review, prominent in-product consent, updated store disclosures, and the release gates in [docs/DATA_GOVERNANCE.md](docs/DATA_GOVERNANCE.md).
 
 Current feedback channels and the future collection boundary are documented in [docs/FEEDBACK.md](docs/FEEDBACK.md). GitHub issues and store support are user-initiated support routes, not background telemetry.
 

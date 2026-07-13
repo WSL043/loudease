@@ -358,6 +358,8 @@
   "themeSystem": { "message": "Системная" },
   "themeLight": { "message": "Светлая" },
   "themeDark": { "message": "Тёмная" },
+  "switchToDarkTheme": { "message": "Переключиться на тёмную тему" },
+  "switchToLightTheme": { "message": "Переключиться на светлую тему" },
   "defaultBalanceHeading": { "message": "Баланс по умолчанию для всех сайтов" },
   "enabledHelp": { "message": "Сохранять выравнивание включённым после подключения вкладки." },
   "playerLimitShort": { "message": "Учитывать громкость проигрывателя" },
@@ -367,5 +369,17 @@
   "globalDefaultsHelp": { "message": "Применяется ко всем подключённым сайтам, если правило сайта не переопределяет его." },
   "supportReportHelp": { "message": "Создаёт безопасный отчёт для поддержки и сообщений об ошибках." },
   "openIssue": { "message": "Сообщить о проблеме" },
-  "tabLabel": { "message": "Вкладка" }
+  "tabLabel": { "message": "Вкладка" },
+  "reportPrivacyLabel": { "message": "Границы конфиденциальности отчёта" },
+  "voluntaryReportLabel": { "message": "Добровольный отчёт" },
+  "helpImproveHeading": { "message": "Помогите улучшить LoudEase" },
+  "voluntaryReportHelp": { "message": "Ничего не отправляется автоматически. Просмотрите локальный отчёт и решите, отправлять ли его на GitHub." },
+  "noAudioShared": { "message": "Без аудио" },
+  "noUrlsShared": { "message": "Без URL и названий сайтов" },
+  "noAccountDataShared": { "message": "Без идентификаторов аккаунта" },
+  "shareReport": { "message": "Копировать отчёт и открыть GitHub" },
+  "previewReport": { "message": "Просмотреть включённые данные" },
+  "technicalDiagnostics": { "message": "Техническая диагностика" },
+  "technicalDiagnosticsHelp": { "message": "Сведения о подключении в реальном времени для устранения неполадок." },
+  "reportCopiedOpenIssue": { "message": "Отчёт скопирован. Вставьте его в форму GitHub." }
 }
