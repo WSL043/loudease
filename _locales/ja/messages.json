@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase モニター"
+  },
+  "monitorHeading": {
+    "message": "モニターとオプション"
+  },
+  "enabledLabel": {
+    "message": "バランシングを有効にする"
+  },
+  "enabledHint": {
+    "message": "ボリュームバランスの有効化または一時停止"
+  },
+  "statusChecking": {
+    "message": "チェック中"
+  },
+  "statusConnecting": {
+    "message": "接続中"
+  },
+  "statusReadingTab": {
+    "message": "アクティブなタブの読み取り"
+  },
+  "statusSaving": {
+    "message": "保存"
+  },
+  "statusApplying": {
+    "message": "変更を適用する"
+  },
+  "statusOff": {
+    "message": "オフ"
+  },
+  "statusPaused": {
+    "message": "バランス調整が一時停止されました"
+  },
+  "statusOriginalAudio": {
+    "message": "オリジナルオーディオが通過します"
+  },
+  "statusUnavailable": {
+    "message": "利用不可"
+  },
+  "statusRestrictedPage": {
+    "message": "制限されたページ"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome はここでのオーディオ アクセスを許可しません"
+  },
+  "statusError": {
+    "message": "エラー"
+  },
+  "statusMuted": {
+    "message": "ミュート"
+  },
+  "statusPlayerMuted": {
+    "message": "プレーヤーがミュートされています"
+  },
+  "statusNoAudioOutput": {
+    "message": "音声が出力されない"
+  },
+  "statusConnected": {
+    "message": "接続済み"
+  },
+  "statusWaitingForAudio": {
+    "message": "オーディオを待っています"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "接続されていますが、信号が検出されません"
+  },
+  "statusActive": {
+    "message": "アクティブ"
+  },
+  "statusLifting": {
+    "message": "小さな音を持ち上げています"
+  },
+  "statusReducing": {
+    "message": "大きな音を抑えています"
+  },
+  "statusBalancing": {
+    "message": "音量を調整しています"
+  },
+  "statusSignalConfirmed": {
+    "message": "ライブオーディオ信号が確認されました"
+  },
+  "statusActionRequired": {
+    "message": "アクションが必要です"
+  },
+  "statusReconnectRequired": {
+    "message": "オーディオ接続の回復が必要です"
+  },
+  "statusReloadHelp": {
+    "message": "再接続するにはこのページをリロードしてください"
+  },
+  "statusNotConnected": {
+    "message": "オーディオが接続されていません"
+  },
+  "statusReady": {
+    "message": "準備ができて"
+  },
+  "statusMediaDetected": {
+    "message": "メディアが検出されました"
+  },
+  "statusWaitingForMedia": {
+    "message": "メディアを待っています"
+  },
+  "statusPlayToBegin": {
+    "message": "オーディオを再生してバランスを開始します"
+  },
+  "statusCheckingConnection": {
+    "message": "ページの接続を確認する"
+  },
+  "statusLoadFailed": {
+    "message": "ステータスを読み込めませんでした"
+  },
+  "statusReopenPopup": {
+    "message": "ポップアップを閉じて再度開きます"
+  },
+  "strengthControlsLabel": {
+    "message": "強さのコントロール"
+  },
+  "reduceLoudLabel": {
+    "message": "大きな音を抑える"
+  },
+  "reduceLoudHelp": {
+    "message": "ピーク抑制の強さを調整"
+  },
+  "liftQuietLabel": {
+    "message": "小さな音を持ち上げる"
+  },
+  "liftQuietHelp": {
+    "message": "小さな音の細部を持ち上げる強さを調整"
+  },
+  "playerLimitStatement": {
+    "message": "小さな音の持ち上げは、プレーヤーの現在音量を超えません。"
+  },
+  "recoverCapture": {
+    "message": "タブのオーディオを再接続する"
+  },
+  "recoverReload": {
+    "message": "ページをリロードする"
+  },
+  "captureFailed": {
+    "message": "タブのオーディオ接続に失敗しました"
+  },
+  "captureRecoveryHelp": {
+    "message": "再接続してもう一度お試しください"
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome はタブのオーディオ アクセスを許可しませんでした"
+  },
+  "capturePermissionTimeout": {
+    "message": "タブのオーディオアクセスがタイムアウトしました"
+  },
+  "copyDiagnostics": {
+    "message": "サポートレポートをコピー"
+  },
+  "downloadDiagnostics": {
+    "message": "レポートをダウンロード"
+  },
+  "refresh": {
+    "message": "リフレッシュ"
+  },
+  "reloadExtension": {
+    "message": "リロード拡張機能"
+  },
+  "summaryLabel": {
+    "message": "まとめ"
+  },
+  "versionLabel": {
+    "message": "バージョン"
+  },
+  "activeTabsLabel": {
+    "message": "アクティブなタブ"
+  },
+  "connectedSourcesLabel": {
+    "message": "接続されたソース"
+  },
+  "lastUpdatedLabel": {
+    "message": "最終更新日"
+  },
+  "settingsHeading": {
+    "message": "設定"
+  },
+  "waitingForSettings": {
+    "message": "設定待ち"
+  },
+  "localDiagnosticsLabel": {
+    "message": "ローカル診断受信機"
+  },
+  "localDiagnosticsHelp": {
+    "message": "デバッグ スナップショットを 127.0.0.1 にのみ書き込みます。デフォルトではオフです。"
+  },
+  "resetAllSettings": {
+    "message": "すべての設定をリセットする"
+  },
+  "siteLabel": {
+    "message": "サイト"
+  },
+  "presetLabel": {
+    "message": "プリセット"
+  },
+  "saveSite": {
+    "message": "サイトを保存する"
+  },
+  "deleteSite": {
+    "message": "サイトの削除"
+  },
+  "siteDefaultsLabel": {
+    "message": "サイトのデフォルト"
+  },
+  "pageStatusHeading": {
+    "message": "ページのステータス"
+  },
+  "waitingForData": {
+    "message": "データを待っています"
+  },
+  "recentEventsHeading": {
+    "message": "最近の出来事"
+  },
+  "backgroundLogLabel": {
+    "message": "バックグラウンドログ"
+  },
+  "presetStandard": {
+    "message": "標準"
+  },
+  "presetVoice": {
+    "message": "音声"
+  },
+  "presetNight": {
+    "message": "夜"
+  },
+  "presetLive": {
+    "message": "ライブ"
+  },
+  "presetStrong": {
+    "message": "強い"
+  },
+  "presetCustom": {
+    "message": "カスタム"
+  },
+  "noSiteDefaults": {
+    "message": "サイトのデフォルトはまだありません。ホスト名で適用するには、1 つ保存します。"
+  },
+  "settingsSummary": {
+    "message": "v$1、$2サイト"
+  },
+  "saving": {
+    "message": "保存"
+  },
+  "saved": {
+    "message": "保存されました"
+  },
+  "deleted": {
+    "message": "削除されました"
+  },
+  "resetting": {
+    "message": "リセットする"
+  },
+  "resetDone": {
+    "message": "リセット完了"
+  },
+  "selectSiteFirst": {
+    "message": "最初にサイトを選択してください"
+  },
+  "confirmReset": {
+    "message": "すべてのグローバル設定とサイトのデフォルトをリセットしますか?"
+  },
+  "diagnosticsOn": {
+    "message": "ローカル診断が有効になっています"
+  },
+  "diagnosticsOff": {
+    "message": "ローカル診断が無効になっています"
+  },
+  "diagnosticsCopied": {
+    "message": "診断 JSON がコピーされました"
+  },
+  "diagnosticsDownloaded": {
+    "message": "診断 JSON がダウンロードされました"
+  },
+  "noPageStatus": {
+    "message": "まだページステータスを受信して​​いません。"
+  },
+  "noEvents": {
+    "message": "バックグラウンドイベントなし"
+  },
+  "liveRefresh": {
+    "message": "リアルタイム更新中"
+  },
+  "staleEngineFound": {
+    "message": "古いランタイムが見つかりました"
+  },
+  "statusIdle": {
+    "message": "アイドル状態"
+  },
+  "statusPlaying": {
+    "message": "遊ぶ"
+  },
+  "statusCaptured": {
+    "message": "接続済み"
+  },
+  "statusNeedsRefresh": {
+    "message": "リフレッシュが必要です"
+  },
+  "yes": {
+    "message": "はい"
+  },
+  "no": {
+    "message": "いいえ"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "メディア"
+  },
+  "playbackLabel": {
+    "message": "再生"
+  },
+  "analysisLabel": {
+    "message": "分析"
+  },
+  "reductionLabel": {
+    "message": "削減"
+  },
+  "liftLabel": {
+    "message": "リフト"
+  },
+  "errorsLabel": {
+    "message": "エラー"
+  },
+  "editingSite": {
+    "message": "$1 を編集中"
+  },
+  "appShortName": {
+    "message": "ボリュームバランサー"
+  },
+  "appDescription": {
+    "message": "プレーヤーの現在音量を尊重しながら、Webページの大きな音と小さな音をバランス調整します。"
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — 有効"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — 一時停止"
+  },
+  "generalTab": { "message": "一般" },
+  "sitesTab": { "message": "サイトルール" },
+  "diagnosticsTab": { "message": "サポートと診断" },
+  "captureGestureTitle": { "message": "新しいタブでは1回クリック" },
+  "captureGestureHelp": { "message": "Chrome の制限により、新しいタブを調整する前に拡張機能を一度開く必要があります。" },
+  "generalHelp": { "message": "拡張機能の既定の外観と動作を設定します。" },
+  "appearanceHeading": { "message": "外観" },
+  "languageLabel": { "message": "言語" },
+  "languageHelp": { "message": "ポップアップと設定ページで使用します。" },
+  "appearanceLabel": { "message": "テーマ" },
+  "appearanceHelp": { "message": "システムに合わせるか、ライトまたはダークを選びます。" },
+  "themeSystem": { "message": "システム" },
+  "themeLight": { "message": "ライト" },
+  "themeDark": { "message": "ダーク" },
+  "defaultBalanceHeading": { "message": "すべてのサイトの既定バランス" },
+  "enabledHelp": { "message": "タブ接続後も音量調整を有効にします。" },
+  "playerLimitShort": { "message": "プレーヤー音量を尊重" },
+  "resetHelp": { "message": "全体の変更とすべてのサイトルールを削除します。" },
+  "resetAction": { "message": "リセット" },
+  "siteRulesHelp": { "message": "ホスト名ごとに全体の既定値を上書きします。" },
+  "globalDefaultsHelp": { "message": "接続済みのすべてのサイトに適用され、サイトルールで個別に上書きできます。" },
+  "supportReportHelp": { "message": "問題報告用のプライバシーに配慮したレポートを作成します。" },
+  "openIssue": { "message": "問題を報告" },
+  "tabLabel": { "message": "タブ" }
+}

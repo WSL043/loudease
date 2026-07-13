@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase 監視器"
+  },
+  "monitorHeading": {
+    "message": "監視器和選項"
+  },
+  "enabledLabel": {
+    "message": "啟用平衡"
+  },
+  "enabledHint": {
+    "message": "啟用或暫停音量平衡"
+  },
+  "statusChecking": {
+    "message": "檢查中"
+  },
+  "statusConnecting": {
+    "message": "正在連接"
+  },
+  "statusReadingTab": {
+    "message": "讀取目前分頁"
+  },
+  "statusSaving": {
+    "message": "儲存中"
+  },
+  "statusApplying": {
+    "message": "正在套用變更"
+  },
+  "statusOff": {
+    "message": "已關閉"
+  },
+  "statusPaused": {
+    "message": "平衡暫停"
+  },
+  "statusOriginalAudio": {
+    "message": "原始音訊透過"
+  },
+  "statusUnavailable": {
+    "message": "不可用"
+  },
+  "statusRestrictedPage": {
+    "message": "受限頁面"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome 不允許此處的音訊訪問"
+  },
+  "statusError": {
+    "message": "錯誤"
+  },
+  "statusMuted": {
+    "message": "靜音"
+  },
+  "statusPlayerMuted": {
+    "message": "播放器已靜音"
+  },
+  "statusNoAudioOutput": {
+    "message": "沒有音訊輸出"
+  },
+  "statusConnected": {
+    "message": "已連接"
+  },
+  "statusWaitingForAudio": {
+    "message": "等待聲音"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "已連接，暫未偵測到聲音"
+  },
+  "statusActive": {
+    "message": "生效中"
+  },
+  "statusLifting": {
+    "message": "正在提升小聲"
+  },
+  "statusReducing": {
+    "message": "正在壓低大聲"
+  },
+  "statusBalancing": {
+    "message": "正在平衡音量"
+  },
+  "statusSignalConfirmed": {
+    "message": "已偵測到即時音訊"
+  },
+  "statusActionRequired": {
+    "message": "需要操作"
+  },
+  "statusReconnectRequired": {
+    "message": "音訊連線需要恢復"
+  },
+  "statusReloadHelp": {
+    "message": "重新載入此頁面以重新連接"
+  },
+  "statusNotConnected": {
+    "message": "音訊未接管"
+  },
+  "statusReady": {
+    "message": "已就緒"
+  },
+  "statusMediaDetected": {
+    "message": "偵測到媒體"
+  },
+  "statusWaitingForMedia": {
+    "message": "等待媒體播放"
+  },
+  "statusPlayToBegin": {
+    "message": "播放音訊後開始平衡"
+  },
+  "statusCheckingConnection": {
+    "message": "檢查頁面連接"
+  },
+  "statusLoadFailed": {
+    "message": "無法載入狀態"
+  },
+  "statusReopenPopup": {
+    "message": "關閉並重新打開彈出視窗"
+  },
+  "strengthControlsLabel": {
+    "message": "強度控制"
+  },
+  "reduceLoudLabel": {
+    "message": "降低大聲"
+  },
+  "reduceLoudHelp": {
+    "message": "控制峰值降低強度"
+  },
+  "liftQuietLabel": {
+    "message": "提升小聲"
+  },
+  "liftQuietHelp": {
+    "message": "控制小聲細節的提升強度"
+  },
+  "playerLimitStatement": {
+    "message": "小聲提升不會超過播放器目前音量。"
+  },
+  "recoverCapture": {
+    "message": "重新連接選項卡音訊"
+  },
+  "recoverReload": {
+    "message": "重新載入頁面"
+  },
+  "captureFailed": {
+    "message": "Tab 音訊連線失敗"
+  },
+  "captureRecoveryHelp": {
+    "message": "重新連線再試一次"
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome 未授予選項卡音訊存取權限"
+  },
+  "capturePermissionTimeout": {
+    "message": "選項卡音訊存取逾時"
+  },
+  "copyDiagnostics": {
+    "message": "複製支援報告"
+  },
+  "downloadDiagnostics": {
+    "message": "下載報告"
+  },
+  "refresh": {
+    "message": "重新整理"
+  },
+  "reloadExtension": {
+    "message": "重新加載擴充功能"
+  },
+  "summaryLabel": {
+    "message": "概括"
+  },
+  "versionLabel": {
+    "message": "版本"
+  },
+  "activeTabsLabel": {
+    "message": "活動選項卡"
+  },
+  "connectedSourcesLabel": {
+    "message": "連接來源"
+  },
+  "lastUpdatedLabel": {
+    "message": "最後更新"
+  },
+  "settingsHeading": {
+    "message": "設定"
+  },
+  "waitingForSettings": {
+    "message": "等待設定"
+  },
+  "localDiagnosticsLabel": {
+    "message": "本地診斷接收器"
+  },
+  "localDiagnosticsHelp": {
+    "message": "僅將偵錯快照寫入 127.0.0.1。預設關閉。"
+  },
+  "resetAllSettings": {
+    "message": "重置所有設定"
+  },
+  "siteLabel": {
+    "message": "網站"
+  },
+  "presetLabel": {
+    "message": "預設"
+  },
+  "saveSite": {
+    "message": "儲存站點"
+  },
+  "deleteSite": {
+    "message": "刪除站點"
+  },
+  "siteDefaultsLabel": {
+    "message": "站點預設值"
+  },
+  "pageStatusHeading": {
+    "message": "頁面狀態"
+  },
+  "waitingForData": {
+    "message": "等待數據"
+  },
+  "recentEventsHeading": {
+    "message": "近期活動"
+  },
+  "backgroundLogLabel": {
+    "message": "後台日誌"
+  },
+  "presetStandard": {
+    "message": "標準"
+  },
+  "presetVoice": {
+    "message": "人聲"
+  },
+  "presetNight": {
+    "message": "夜晚"
+  },
+  "presetLive": {
+    "message": "居住"
+  },
+  "presetStrong": {
+    "message": "強的"
+  },
+  "presetCustom": {
+    "message": "風俗"
+  },
+  "noSiteDefaults": {
+    "message": "尚無站點預設值。保存一個以按主機名稱應用它。"
+  },
+  "settingsSummary": {
+    "message": "v$1，$2 個網站"
+  },
+  "saving": {
+    "message": "儲存"
+  },
+  "saved": {
+    "message": "已儲存"
+  },
+  "deleted": {
+    "message": "已刪除"
+  },
+  "resetting": {
+    "message": "重置"
+  },
+  "resetDone": {
+    "message": "重置完成"
+  },
+  "selectSiteFirst": {
+    "message": "首先選擇一個站點"
+  },
+  "confirmReset": {
+    "message": "重置所有全域設定和網站預設設定？"
+  },
+  "diagnosticsOn": {
+    "message": "啟用本地診斷"
+  },
+  "diagnosticsOff": {
+    "message": "本地診斷已禁用"
+  },
+  "diagnosticsCopied": {
+    "message": "診斷 JSON 已複製"
+  },
+  "diagnosticsDownloaded": {
+    "message": "診斷 JSON 下載"
+  },
+  "noPageStatus": {
+    "message": "尚未收到頁面狀態。"
+  },
+  "noEvents": {
+    "message": "無後台事件"
+  },
+  "liveRefresh": {
+    "message": "即時更新中"
+  },
+  "staleEngineFound": {
+    "message": "發現過時的運行時"
+  },
+  "statusIdle": {
+    "message": "閒置"
+  },
+  "statusPlaying": {
+    "message": "播放中"
+  },
+  "statusCaptured": {
+    "message": "已接管"
+  },
+  "statusNeedsRefresh": {
+    "message": "需要刷新"
+  },
+  "yes": {
+    "message": "是的"
+  },
+  "no": {
+    "message": "不"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "媒體"
+  },
+  "playbackLabel": {
+    "message": "回放"
+  },
+  "analysisLabel": {
+    "message": "分析"
+  },
+  "reductionLabel": {
+    "message": "減少"
+  },
+  "liftLabel": {
+    "message": "舉起"
+  },
+  "errorsLabel": {
+    "message": "錯誤"
+  },
+  "editingSite": {
+    "message": "正在編輯 $1"
+  },
+  "appShortName": {
+    "message": "音量平衡器"
+  },
+  "appDescription": {
+    "message": "平衡網頁中的大聲和小聲，同時遵循播放器目前音量。"
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — 已啟用"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — 已暫停"
+  },
+  "generalTab": { "message": "一般" },
+  "sitesTab": { "message": "網站規則" },
+  "diagnosticsTab": { "message": "支援與診斷" },
+  "captureGestureTitle": { "message": "新分頁需要點擊一次" },
+  "captureGestureHelp": { "message": "受 Chrome 限制，新分頁首次平衡前需要開啟一次擴充功能。" },
+  "generalHelp": { "message": "設定擴充功能的預設外觀和行為。" },
+  "appearanceHeading": { "message": "外觀" },
+  "languageLabel": { "message": "語言" },
+  "languageHelp": { "message": "用於擴充功能視窗和設定頁面。" },
+  "appearanceLabel": { "message": "主題" },
+  "appearanceHelp": { "message": "跟隨系統，或選擇淺色、深色。" },
+  "themeSystem": { "message": "跟隨系統" },
+  "themeLight": { "message": "淺色" },
+  "themeDark": { "message": "深色" },
+  "defaultBalanceHeading": { "message": "所有網站的預設平衡" },
+  "enabledHelp": { "message": "分頁接管後保持音量平衡。" },
+  "playerLimitShort": { "message": "尊重播放器音量" },
+  "resetHelp": { "message": "清除全域變更和全部網站規則。" },
+  "resetAction": { "message": "重設" },
+  "siteRulesHelp": { "message": "依網站網域覆寫全域預設強度。" },
+  "globalDefaultsHelp": { "message": "套用於所有已接管網站；網站規則可個別覆寫。" },
+  "supportReportHelp": { "message": "產生已去識別化的報告，用於問題回報和支援。" },
+  "openIssue": { "message": "回報問題" },
+  "tabLabel": { "message": "分頁" }
+}

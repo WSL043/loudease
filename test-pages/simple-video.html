@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Simple Video Test</title>
+</head>
+<body>
+  <h1>Simple Video Test</h1>
+  <video id="video" width="640" height="360" autoplay muted playsinline controls></video>
+  <button id="start">Start video and tone</button>
+  <script>
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    let frame = 0;
+    function draw() {
+      frame += 1;
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect((frame * 4) % canvas.width, 120, 120, 80);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '28px sans-serif';
+      ctx.fillText('Generated video', 24, 48);
+      requestAnimationFrame(draw);
+    }
+    draw();
+    document.getElementById('video').srcObject = canvas.captureStream(30);
+    document.getElementById('start').addEventListener('click', async () => {
+      await document.getElementById('video').play();
+      const context = new AudioContext();
+      await context.resume();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = 330;
+      gain.gain.value = 0.08;
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start();
+    }, { once: true });
+  </script>
+</body>
+</html>

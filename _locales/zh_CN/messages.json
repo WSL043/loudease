@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase 监视器"
+  },
+  "monitorHeading": {
+    "message": "监视器和选项"
+  },
+  "enabledLabel": {
+    "message": "启用平衡"
+  },
+  "enabledHint": {
+    "message": "启用或暂停音量平衡"
+  },
+  "statusChecking": {
+    "message": "检查中"
+  },
+  "statusConnecting": {
+    "message": "正在连接"
+  },
+  "statusReadingTab": {
+    "message": "读取当前标签页"
+  },
+  "statusSaving": {
+    "message": "保存中"
+  },
+  "statusApplying": {
+    "message": "正在应用更改"
+  },
+  "statusOff": {
+    "message": "已关闭"
+  },
+  "statusPaused": {
+    "message": "平衡暂停"
+  },
+  "statusOriginalAudio": {
+    "message": "原始音频通过"
+  },
+  "statusUnavailable": {
+    "message": "不可用"
+  },
+  "statusRestrictedPage": {
+    "message": "受限页面"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome 不允许此处的音频访问"
+  },
+  "statusError": {
+    "message": "错误"
+  },
+  "statusMuted": {
+    "message": "静音"
+  },
+  "statusPlayerMuted": {
+    "message": "播放器已静音"
+  },
+  "statusNoAudioOutput": {
+    "message": "没有音频输出"
+  },
+  "statusConnected": {
+    "message": "已连接"
+  },
+  "statusWaitingForAudio": {
+    "message": "等待声音"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "已连接，暂未检测到声音"
+  },
+  "statusActive": {
+    "message": "生效中"
+  },
+  "statusLifting": {
+    "message": "正在提升小声"
+  },
+  "statusReducing": {
+    "message": "正在压低大声"
+  },
+  "statusBalancing": {
+    "message": "正在平衡音量"
+  },
+  "statusSignalConfirmed": {
+    "message": "已检测到实时音频"
+  },
+  "statusActionRequired": {
+    "message": "需要操作"
+  },
+  "statusReconnectRequired": {
+    "message": "音频连接需要恢复"
+  },
+  "statusReloadHelp": {
+    "message": "重新加载此页面以重新连接"
+  },
+  "statusNotConnected": {
+    "message": "音频未接管"
+  },
+  "statusReady": {
+    "message": "已就绪"
+  },
+  "statusMediaDetected": {
+    "message": "检测到媒体"
+  },
+  "statusWaitingForMedia": {
+    "message": "等待媒体播放"
+  },
+  "statusPlayToBegin": {
+    "message": "播放音频后开始平衡"
+  },
+  "statusCheckingConnection": {
+    "message": "检查页面连接"
+  },
+  "statusLoadFailed": {
+    "message": "无法加载状态"
+  },
+  "statusReopenPopup": {
+    "message": "关闭并重新打开弹出窗口"
+  },
+  "strengthControlsLabel": {
+    "message": "强度控制"
+  },
+  "reduceLoudLabel": {
+    "message": "降低大声"
+  },
+  "reduceLoudHelp": {
+    "message": "控制峰值压低强度"
+  },
+  "liftQuietLabel": {
+    "message": "提升小声"
+  },
+  "liftQuietHelp": {
+    "message": "控制小声细节的提升强度"
+  },
+  "playerLimitStatement": {
+    "message": "小声提升不会超过播放器当前音量。"
+  },
+  "recoverCapture": {
+    "message": "重新连接选项卡音频"
+  },
+  "recoverReload": {
+    "message": "重新加载页面"
+  },
+  "captureFailed": {
+    "message": "Tab 音频连接失败"
+  },
+  "captureRecoveryHelp": {
+    "message": "重新连接再试一次"
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome 未授予选项卡音频访问权限"
+  },
+  "capturePermissionTimeout": {
+    "message": "选项卡音频访问超时"
+  },
+  "copyDiagnostics": {
+    "message": "复制支持报告"
+  },
+  "downloadDiagnostics": {
+    "message": "下载报告"
+  },
+  "refresh": {
+    "message": "刷新"
+  },
+  "reloadExtension": {
+    "message": "重新加载扩展"
+  },
+  "summaryLabel": {
+    "message": "概括"
+  },
+  "versionLabel": {
+    "message": "版本"
+  },
+  "activeTabsLabel": {
+    "message": "活动选项卡"
+  },
+  "connectedSourcesLabel": {
+    "message": "连接来源"
+  },
+  "lastUpdatedLabel": {
+    "message": "最后更新"
+  },
+  "settingsHeading": {
+    "message": "设置"
+  },
+  "waitingForSettings": {
+    "message": "等待设置"
+  },
+  "localDiagnosticsLabel": {
+    "message": "本地诊断接收器"
+  },
+  "localDiagnosticsHelp": {
+    "message": "仅将调试快照写入 127.0.0.1。默认关闭。"
+  },
+  "resetAllSettings": {
+    "message": "重置所有设置"
+  },
+  "siteLabel": {
+    "message": "网站"
+  },
+  "presetLabel": {
+    "message": "预设"
+  },
+  "saveSite": {
+    "message": "保存站点"
+  },
+  "deleteSite": {
+    "message": "删除站点"
+  },
+  "siteDefaultsLabel": {
+    "message": "站点默认值"
+  },
+  "pageStatusHeading": {
+    "message": "页面状态"
+  },
+  "waitingForData": {
+    "message": "等待数据"
+  },
+  "recentEventsHeading": {
+    "message": "近期活动"
+  },
+  "backgroundLogLabel": {
+    "message": "后台日志"
+  },
+  "presetStandard": {
+    "message": "标准"
+  },
+  "presetVoice": {
+    "message": "人声"
+  },
+  "presetNight": {
+    "message": "夜晚"
+  },
+  "presetLive": {
+    "message": "居住"
+  },
+  "presetStrong": {
+    "message": "强的"
+  },
+  "presetCustom": {
+    "message": "风俗"
+  },
+  "noSiteDefaults": {
+    "message": "尚无站点默认值。保存一个以按主机名应用它。"
+  },
+  "settingsSummary": {
+    "message": "v$1，$2 个站点"
+  },
+  "saving": {
+    "message": "保存"
+  },
+  "saved": {
+    "message": "已保存"
+  },
+  "deleted": {
+    "message": "已删除"
+  },
+  "resetting": {
+    "message": "重置"
+  },
+  "resetDone": {
+    "message": "重置完成"
+  },
+  "selectSiteFirst": {
+    "message": "首先选择一个站点"
+  },
+  "confirmReset": {
+    "message": "重置所有全局设置和站点默认设置？"
+  },
+  "diagnosticsOn": {
+    "message": "启用本地诊断"
+  },
+  "diagnosticsOff": {
+    "message": "本地诊断已禁用"
+  },
+  "diagnosticsCopied": {
+    "message": "诊断 JSON 已复制"
+  },
+  "diagnosticsDownloaded": {
+    "message": "诊断 JSON 下载"
+  },
+  "noPageStatus": {
+    "message": "尚未收到页面状态。"
+  },
+  "noEvents": {
+    "message": "无后台事件"
+  },
+  "liveRefresh": {
+    "message": "实时刷新中"
+  },
+  "staleEngineFound": {
+    "message": "发现过时的运行时"
+  },
+  "statusIdle": {
+    "message": "空闲"
+  },
+  "statusPlaying": {
+    "message": "播放中"
+  },
+  "statusCaptured": {
+    "message": "已接管"
+  },
+  "statusNeedsRefresh": {
+    "message": "需要刷新"
+  },
+  "yes": {
+    "message": "是的"
+  },
+  "no": {
+    "message": "不"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "媒体"
+  },
+  "playbackLabel": {
+    "message": "回放"
+  },
+  "analysisLabel": {
+    "message": "分析"
+  },
+  "reductionLabel": {
+    "message": "减少"
+  },
+  "liftLabel": {
+    "message": "举起"
+  },
+  "errorsLabel": {
+    "message": "错误"
+  },
+  "editingSite": {
+    "message": "正在编辑 $1"
+  },
+  "appShortName": {
+    "message": "音量平衡器"
+  },
+  "appDescription": {
+    "message": "平衡网页中的大声和小声，同时遵循播放器当前音量。"
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — 已启用"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — 已暂停"
+  },
+  "generalTab": { "message": "常规" },
+  "sitesTab": { "message": "站点规则" },
+  "diagnosticsTab": { "message": "反馈与诊断" },
+  "captureGestureTitle": { "message": "新标签页需要点击一次" },
+  "captureGestureHelp": { "message": "受 Chrome 限制，新标签页首次平衡前需要打开一次扩展。" },
+  "generalHelp": { "message": "设置扩展的默认外观和行为。" },
+  "appearanceHeading": { "message": "外观" },
+  "languageLabel": { "message": "语言" },
+  "languageHelp": { "message": "用于扩展窗口和设置页面。" },
+  "appearanceLabel": { "message": "主题" },
+  "appearanceHelp": { "message": "跟随系统，或选择浅色、深色。" },
+  "themeSystem": { "message": "跟随系统" },
+  "themeLight": { "message": "浅色" },
+  "themeDark": { "message": "深色" },
+  "defaultBalanceHeading": { "message": "所有网站的默认平衡" },
+  "enabledHelp": { "message": "标签页接管后保持音量平衡。" },
+  "playerLimitShort": { "message": "尊重播放器音量" },
+  "resetHelp": { "message": "清除全局更改和全部站点规则。" },
+  "resetAction": { "message": "重置" },
+  "siteRulesHelp": { "message": "按网站域名覆盖全局默认强度。" },
+  "globalDefaultsHelp": { "message": "适用于所有已接管网站；站点规则可单独覆盖。" },
+  "supportReportHelp": { "message": "生成已脱敏的报告，用于问题反馈和支持。" },
+  "openIssue": { "message": "提交问题" },
+  "tabLabel": { "message": "标签页" }
+}

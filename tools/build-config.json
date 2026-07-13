@@ -1,0 +1,16 @@
+{
+  "markers": {
+    "start": "WVB_DEV_DIAGNOSTICS_START",
+    "end": "WVB_DEV_DIAGNOSTICS_END"
+  },
+  "host_permissions": [
+    "http://127.0.0.1/*"
+  ],
+  "assets": [],
+  "locale_message_keys": [
+    "localDiagnosticsLabel",
+    "localDiagnosticsHelp",
+    "diagnosticsOn",
+    "diagnosticsOff"
+  ]
+}

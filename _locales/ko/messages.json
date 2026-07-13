@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase 모니터"
+  },
+  "monitorHeading": {
+    "message": "모니터 및 옵션"
+  },
+  "enabledLabel": {
+    "message": "밸런싱 활성화"
+  },
+  "enabledHint": {
+    "message": "볼륨 밸런싱 활성화 또는 일시 중지"
+  },
+  "statusChecking": {
+    "message": "확인 중"
+  },
+  "statusConnecting": {
+    "message": "연결 중"
+  },
+  "statusReadingTab": {
+    "message": "활성 탭 읽기"
+  },
+  "statusSaving": {
+    "message": "절약"
+  },
+  "statusApplying": {
+    "message": "변경사항 적용"
+  },
+  "statusOff": {
+    "message": "끄다"
+  },
+  "statusPaused": {
+    "message": "균형 조정이 일시중지되었습니다."
+  },
+  "statusOriginalAudio": {
+    "message": "원본 오디오가 통과됩니다."
+  },
+  "statusUnavailable": {
+    "message": "없는"
+  },
+  "statusRestrictedPage": {
+    "message": "제한된 페이지"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome은 여기에서 오디오 액세스를 허용하지 않습니다."
+  },
+  "statusError": {
+    "message": "오류"
+  },
+  "statusMuted": {
+    "message": "음소거됨"
+  },
+  "statusPlayerMuted": {
+    "message": "플레이어가 음소거되었습니다."
+  },
+  "statusNoAudioOutput": {
+    "message": "오디오가 출력되지 않습니다"
+  },
+  "statusConnected": {
+    "message": "연결됨"
+  },
+  "statusWaitingForAudio": {
+    "message": "오디오를 기다리는 중"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "연결되었지만 신호가 감지되지 않습니다"
+  },
+  "statusActive": {
+    "message": "활동적인"
+  },
+  "statusLifting": {
+    "message": "작은 소리를 높이는 중"
+  },
+  "statusReducing": {
+    "message": "큰 소리를 줄이는 중"
+  },
+  "statusBalancing": {
+    "message": "볼륨 균형 조정 중"
+  },
+  "statusSignalConfirmed": {
+    "message": "라이브 오디오 신호가 확인되었습니다."
+  },
+  "statusActionRequired": {
+    "message": "조치 필요"
+  },
+  "statusReconnectRequired": {
+    "message": "오디오 연결을 복구해야 합니다."
+  },
+  "statusReloadHelp": {
+    "message": "다시 연결하려면 이 페이지를 새로고침하세요."
+  },
+  "statusNotConnected": {
+    "message": "오디오가 연결되지 않았습니다."
+  },
+  "statusReady": {
+    "message": "준비가 된"
+  },
+  "statusMediaDetected": {
+    "message": "미디어가 감지되었습니다."
+  },
+  "statusWaitingForMedia": {
+    "message": "미디어를 기다리는 중"
+  },
+  "statusPlayToBegin": {
+    "message": "균형을 맞추려면 오디오를 재생하세요."
+  },
+  "statusCheckingConnection": {
+    "message": "페이지 연결 확인 중"
+  },
+  "statusLoadFailed": {
+    "message": "상태를 로드할 수 없습니다."
+  },
+  "statusReopenPopup": {
+    "message": "팝업을 닫았다가 다시 엽니다."
+  },
+  "strengthControlsLabel": {
+    "message": "강도 조절"
+  },
+  "reduceLoudLabel": {
+    "message": "큰 소리 줄이기"
+  },
+  "reduceLoudHelp": {
+    "message": "피크 감소 강도 조절"
+  },
+  "liftQuietLabel": {
+    "message": "작은 소리 높이기"
+  },
+  "liftQuietHelp": {
+    "message": "작은 소리의 세부 향상 강도 조절"
+  },
+  "playerLimitStatement": {
+    "message": "작은 소리 향상은 플레이어의 현재 볼륨을 넘지 않습니다."
+  },
+  "recoverCapture": {
+    "message": "탭 오디오 다시 연결"
+  },
+  "recoverReload": {
+    "message": "페이지 새로고침"
+  },
+  "captureFailed": {
+    "message": "탭 오디오 연결 실패"
+  },
+  "captureRecoveryHelp": {
+    "message": "다시 시도하려면 다시 연결하세요."
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome이 탭 오디오 액세스 권한을 부여하지 않았습니다."
+  },
+  "capturePermissionTimeout": {
+    "message": "탭 오디오 액세스 시간이 초과되었습니다."
+  },
+  "copyDiagnostics": {
+    "message": "지원 보고서 복사"
+  },
+  "downloadDiagnostics": {
+    "message": "보고서 다운로드"
+  },
+  "refresh": {
+    "message": "새로 고치다"
+  },
+  "reloadExtension": {
+    "message": "확장 프로그램 다시 로드"
+  },
+  "summaryLabel": {
+    "message": "요약"
+  },
+  "versionLabel": {
+    "message": "버전"
+  },
+  "activeTabsLabel": {
+    "message": "활성 탭"
+  },
+  "connectedSourcesLabel": {
+    "message": "연결된 소스"
+  },
+  "lastUpdatedLabel": {
+    "message": "마지막 업데이트"
+  },
+  "settingsHeading": {
+    "message": "설정"
+  },
+  "waitingForSettings": {
+    "message": "설정을 기다리는 중"
+  },
+  "localDiagnosticsLabel": {
+    "message": "로컬 진단 수신기"
+  },
+  "localDiagnosticsHelp": {
+    "message": "127.0.0.1에만 디버그 스냅샷을 씁니다. 기본적으로 꺼져 있습니다."
+  },
+  "resetAllSettings": {
+    "message": "모든 설정 재설정"
+  },
+  "siteLabel": {
+    "message": "사이트"
+  },
+  "presetLabel": {
+    "message": "프리셋"
+  },
+  "saveSite": {
+    "message": "사이트 저장"
+  },
+  "deleteSite": {
+    "message": "사이트 삭제"
+  },
+  "siteDefaultsLabel": {
+    "message": "사이트 기본값"
+  },
+  "pageStatusHeading": {
+    "message": "페이지 상태"
+  },
+  "waitingForData": {
+    "message": "데이터를 기다리는 중"
+  },
+  "recentEventsHeading": {
+    "message": "최근 이벤트"
+  },
+  "backgroundLogLabel": {
+    "message": "백그라운드 로그"
+  },
+  "presetStandard": {
+    "message": "기준"
+  },
+  "presetVoice": {
+    "message": "음성"
+  },
+  "presetNight": {
+    "message": "밤"
+  },
+  "presetLive": {
+    "message": "살다"
+  },
+  "presetStrong": {
+    "message": "강한"
+  },
+  "presetCustom": {
+    "message": "관습"
+  },
+  "noSiteDefaults": {
+    "message": "아직 사이트 기본값이 없습니다. 호스트 이름별로 적용하려면 하나를 저장하세요."
+  },
+  "settingsSummary": {
+    "message": "v$1, 사이트 $2개"
+  },
+  "saving": {
+    "message": "절약"
+  },
+  "saved": {
+    "message": "저장됨"
+  },
+  "deleted": {
+    "message": "삭제됨"
+  },
+  "resetting": {
+    "message": "재설정 중"
+  },
+  "resetDone": {
+    "message": "재설정 완료"
+  },
+  "selectSiteFirst": {
+    "message": "먼저 사이트를 선택하세요"
+  },
+  "confirmReset": {
+    "message": "모든 전역 설정과 사이트 기본값을 재설정하시겠습니까?"
+  },
+  "diagnosticsOn": {
+    "message": "로컬 진단 활성화됨"
+  },
+  "diagnosticsOff": {
+    "message": "로컬 진단이 비활성화되었습니다."
+  },
+  "diagnosticsCopied": {
+    "message": "진단 JSON 복사됨"
+  },
+  "diagnosticsDownloaded": {
+    "message": "진단 JSON 다운로드됨"
+  },
+  "noPageStatus": {
+    "message": "아직 페이지 상태가 수신되지 않았습니다."
+  },
+  "noEvents": {
+    "message": "백그라운드 이벤트 없음"
+  },
+  "liveRefresh": {
+    "message": "실시간 업데이트 중"
+  },
+  "staleEngineFound": {
+    "message": "오래된 런타임이 발견되었습니다."
+  },
+  "statusIdle": {
+    "message": "게으른"
+  },
+  "statusPlaying": {
+    "message": "재생"
+  },
+  "statusCaptured": {
+    "message": "연결됨"
+  },
+  "statusNeedsRefresh": {
+    "message": "새로고침 필요"
+  },
+  "yes": {
+    "message": "예"
+  },
+  "no": {
+    "message": "아니요"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "메디아"
+  },
+  "playbackLabel": {
+    "message": "재생"
+  },
+  "analysisLabel": {
+    "message": "분석"
+  },
+  "reductionLabel": {
+    "message": "절감"
+  },
+  "liftLabel": {
+    "message": "승강기"
+  },
+  "errorsLabel": {
+    "message": "오류"
+  },
+  "editingSite": {
+    "message": "$1 편집 중"
+  },
+  "appShortName": {
+    "message": "볼륨 밸런서"
+  },
+  "appDescription": {
+    "message": "플레이어의 현재 볼륨을 유지하면서 웹 페이지의 큰 소리와 작은 소리의 균형을 조정합니다."
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — 사용"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — 일시 중지"
+  },
+  "generalTab": { "message": "일반" },
+  "sitesTab": { "message": "사이트 규칙" },
+  "diagnosticsTab": { "message": "지원 및 진단" },
+  "captureGestureTitle": { "message": "새 탭은 한 번 클릭 필요" },
+  "captureGestureHelp": { "message": "Chrome 제한으로 새 탭을 조정하기 전에 확장 프로그램을 한 번 열어야 합니다." },
+  "generalHelp": { "message": "확장 프로그램의 기본 모양과 동작을 설정합니다." },
+  "appearanceHeading": { "message": "모양" },
+  "languageLabel": { "message": "언어" },
+  "languageHelp": { "message": "팝업과 설정 페이지에 사용됩니다." },
+  "appearanceLabel": { "message": "테마" },
+  "appearanceHelp": { "message": "시스템을 따르거나 밝게 또는 어둡게를 선택합니다." },
+  "themeSystem": { "message": "시스템" },
+  "themeLight": { "message": "밝게" },
+  "themeDark": { "message": "어둡게" },
+  "defaultBalanceHeading": { "message": "모든 사이트의 기본 밸런스" },
+  "enabledHelp": { "message": "탭이 연결되면 음량 균형을 유지합니다." },
+  "playerLimitShort": { "message": "플레이어 음량 존중" },
+  "resetHelp": { "message": "전역 변경과 모든 사이트 규칙을 삭제합니다." },
+  "resetAction": { "message": "재설정" },
+  "siteRulesHelp": { "message": "호스트 이름별로 전역 기본값을 재정의합니다." },
+  "globalDefaultsHelp": { "message": "연결된 모든 사이트에 적용되며 사이트 규칙으로 개별 재정의할 수 있습니다." },
+  "supportReportHelp": { "message": "문제 보고용 개인정보 보호 지원 보고서를 만듭니다." },
+  "openIssue": { "message": "문제 신고" },
+  "tabLabel": { "message": "탭" }
+}

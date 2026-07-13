@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose a focused improvement to web audio balancing
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Describe the listening or workflow problem, not only the proposed control.
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Why the current two controls are insufficient
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Does this require broader permissions, network access, data collection, or audio upload?
+      options:
+        - No
+        - Unsure
+        - Yes
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or test material
+      description: Explain how the improvement could be measured without sharing copyrighted or private material.

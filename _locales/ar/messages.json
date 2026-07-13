@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase مراقب"
+  },
+  "monitorHeading": {
+    "message": "المراقبة والخيارات"
+  },
+  "enabledLabel": {
+    "message": "تمكين التوازن"
+  },
+  "enabledHint": {
+    "message": "تمكين أو إيقاف موازنة الصوت مؤقتًا"
+  },
+  "statusChecking": {
+    "message": "التحقق"
+  },
+  "statusConnecting": {
+    "message": "الاتصال"
+  },
+  "statusReadingTab": {
+    "message": "قراءة علامة التبويب النشطة"
+  },
+  "statusSaving": {
+    "message": "توفير"
+  },
+  "statusApplying": {
+    "message": "تطبيق التغييرات"
+  },
+  "statusOff": {
+    "message": "عن"
+  },
+  "statusPaused": {
+    "message": "تم إيقاف الموازنة مؤقتًا"
+  },
+  "statusOriginalAudio": {
+    "message": "يمر الصوت الأصلي من خلال"
+  },
+  "statusUnavailable": {
+    "message": "غير متاح"
+  },
+  "statusRestrictedPage": {
+    "message": "صفحة مقيدة"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome لا يسمح بالوصول الصوتي هنا"
+  },
+  "statusError": {
+    "message": "خطأ"
+  },
+  "statusMuted": {
+    "message": "كتم الصوت"
+  },
+  "statusPlayerMuted": {
+    "message": "تم كتم صوت اللاعب"
+  },
+  "statusNoAudioOutput": {
+    "message": "لا يتم إخراج أي صوت"
+  },
+  "statusConnected": {
+    "message": "متصل"
+  },
+  "statusWaitingForAudio": {
+    "message": "في انتظار الصوت"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "متصل، ولكن لم يتم الكشف عن أي إشارة"
+  },
+  "statusActive": {
+    "message": "نشيط"
+  },
+  "statusLifting": {
+    "message": "جارٍ تعزيز الأصوات المنخفضة"
+  },
+  "statusReducing": {
+    "message": "جارٍ خفض الأصوات المرتفعة"
+  },
+  "statusBalancing": {
+    "message": "جارٍ موازنة مستوى الصوت"
+  },
+  "statusSignalConfirmed": {
+    "message": "تم تأكيد الإشارة الصوتية الحية"
+  },
+  "statusActionRequired": {
+    "message": "الإجراء مطلوب"
+  },
+  "statusReconnectRequired": {
+    "message": "يحتاج الاتصال الصوتي إلى الاسترداد"
+  },
+  "statusReloadHelp": {
+    "message": "أعد تحميل هذه الصفحة لإعادة الاتصال"
+  },
+  "statusNotConnected": {
+    "message": "الصوت غير متصل"
+  },
+  "statusReady": {
+    "message": "مستعد"
+  },
+  "statusMediaDetected": {
+    "message": "تم اكتشاف الوسائط"
+  },
+  "statusWaitingForMedia": {
+    "message": "في انتظار الاعلام"
+  },
+  "statusPlayToBegin": {
+    "message": "تشغيل الصوت لبدء التوازن"
+  },
+  "statusCheckingConnection": {
+    "message": "التحقق من اتصال الصفحة"
+  },
+  "statusLoadFailed": {
+    "message": "تعذر تحميل الحالة"
+  },
+  "statusReopenPopup": {
+    "message": "أغلق النافذة المنبثقة وأعد فتحها"
+  },
+  "strengthControlsLabel": {
+    "message": "ضوابط القوة"
+  },
+  "reduceLoudLabel": {
+    "message": "خفض الأصوات المرتفعة"
+  },
+  "reduceLoudHelp": {
+    "message": "يتحكم في مقدار خفض الذروات"
+  },
+  "liftQuietLabel": {
+    "message": "تعزيز الأصوات المنخفضة"
+  },
+  "liftQuietHelp": {
+    "message": "يتحكم في تعزيز تفاصيل الأصوات المنخفضة"
+  },
+  "playerLimitStatement": {
+    "message": "لن يتجاوز تعزيز الأصوات المنخفضة مستوى الصوت الحالي للمشغل."
+  },
+  "recoverCapture": {
+    "message": "أعد توصيل صوت علامة التبويب"
+  },
+  "recoverReload": {
+    "message": "إعادة تحميل الصفحة"
+  },
+  "captureFailed": {
+    "message": "فشل الاتصال الصوتي لعلامة التبويب"
+  },
+  "captureRecoveryHelp": {
+    "message": "أعد الاتصال للمحاولة مرة أخرى"
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome لم يمنح حق الوصول لصوت علامة التبويب"
+  },
+  "capturePermissionTimeout": {
+    "message": "انتهت مهلة الوصول إلى الصوت في علامة التبويب"
+  },
+  "copyDiagnostics": {
+    "message": "نسخ تقرير الدعم"
+  },
+  "downloadDiagnostics": {
+    "message": "تنزيل التقرير"
+  },
+  "refresh": {
+    "message": "ينعش"
+  },
+  "reloadExtension": {
+    "message": "إعادة تحميل الامتداد"
+  },
+  "summaryLabel": {
+    "message": "ملخص"
+  },
+  "versionLabel": {
+    "message": "إصدار"
+  },
+  "activeTabsLabel": {
+    "message": "علامات التبويب النشطة"
+  },
+  "connectedSourcesLabel": {
+    "message": "مصادر متصلة"
+  },
+  "lastUpdatedLabel": {
+    "message": "آخر تحديث"
+  },
+  "settingsHeading": {
+    "message": "إعدادات"
+  },
+  "waitingForSettings": {
+    "message": "في انتظار الإعدادات"
+  },
+  "localDiagnosticsLabel": {
+    "message": "استقبال التشخيص المحلي"
+  },
+  "localDiagnosticsHelp": {
+    "message": "يكتب لقطات التصحيح فقط إلى 127.0.0.1. إيقاف بشكل افتراضي."
+  },
+  "resetAllSettings": {
+    "message": "إعادة ضبط جميع الإعدادات"
+  },
+  "siteLabel": {
+    "message": "موقع"
+  },
+  "presetLabel": {
+    "message": "محددة مسبقا"
+  },
+  "saveSite": {
+    "message": "حفظ الموقع"
+  },
+  "deleteSite": {
+    "message": "حذف الموقع"
+  },
+  "siteDefaultsLabel": {
+    "message": "افتراضيات الموقع"
+  },
+  "pageStatusHeading": {
+    "message": "حالة الصفحة"
+  },
+  "waitingForData": {
+    "message": "في انتظار البيانات"
+  },
+  "recentEventsHeading": {
+    "message": "الأحداث الأخيرة"
+  },
+  "backgroundLogLabel": {
+    "message": "سجل الخلفية"
+  },
+  "presetStandard": {
+    "message": "معيار"
+  },
+  "presetVoice": {
+    "message": "صوت"
+  },
+  "presetNight": {
+    "message": "ليلة"
+  },
+  "presetLive": {
+    "message": "يعيش"
+  },
+  "presetStrong": {
+    "message": "قوي"
+  },
+  "presetCustom": {
+    "message": "مخصص"
+  },
+  "noSiteDefaults": {
+    "message": "لا توجد إعدادات افتراضية للموقع حتى الآن. احفظ واحدًا لتطبيقه حسب اسم المضيف."
+  },
+  "settingsSummary": {
+    "message": "الإصدار $1، المواقع: $2"
+  },
+  "saving": {
+    "message": "توفير"
+  },
+  "saved": {
+    "message": "أنقذ"
+  },
+  "deleted": {
+    "message": "تم الحذف"
+  },
+  "resetting": {
+    "message": "إعادة الضبط"
+  },
+  "resetDone": {
+    "message": "اكتملت عملية إعادة الضبط"
+  },
+  "selectSiteFirst": {
+    "message": "حدد موقعًا أولاً"
+  },
+  "confirmReset": {
+    "message": "هل تريد إعادة تعيين كافة الإعدادات العامة والإعدادات الافتراضية للموقع؟"
+  },
+  "diagnosticsOn": {
+    "message": "تم تمكين التشخيص المحلي"
+  },
+  "diagnosticsOff": {
+    "message": "تم تعطيل التشخيص المحلي"
+  },
+  "diagnosticsCopied": {
+    "message": "تم نسخ بيانات التشخيص JSON"
+  },
+  "diagnosticsDownloaded": {
+    "message": "تم تنزيل بيانات التشخيص JSON"
+  },
+  "noPageStatus": {
+    "message": "لم يتم تلقي حالة الصفحة حتى الآن."
+  },
+  "noEvents": {
+    "message": "لا توجد أحداث الخلفية"
+  },
+  "liveRefresh": {
+    "message": "تحديث مباشر"
+  },
+  "staleEngineFound": {
+    "message": "تم العثور على وقت تشغيل قديم"
+  },
+  "statusIdle": {
+    "message": "عاطل"
+  },
+  "statusPlaying": {
+    "message": "اللعب"
+  },
+  "statusCaptured": {
+    "message": "متصل"
+  },
+  "statusNeedsRefresh": {
+    "message": "يحتاج إلى التحديث"
+  },
+  "yes": {
+    "message": "نعم"
+  },
+  "no": {
+    "message": "لا"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "وسائط"
+  },
+  "playbackLabel": {
+    "message": "التشغيل"
+  },
+  "analysisLabel": {
+    "message": "تحليل"
+  },
+  "reductionLabel": {
+    "message": "تخفيض"
+  },
+  "liftLabel": {
+    "message": "يرفع"
+  },
+  "errorsLabel": {
+    "message": "أخطاء"
+  },
+  "editingSite": {
+    "message": "جارٍ تعديل $1"
+  },
+  "appShortName": {
+    "message": "موازن مستوى الصوت"
+  },
+  "appDescription": {
+    "message": "يوازن الأصوات المرتفعة والمنخفضة على صفحات الويب مع مراعاة مستوى الصوت الحالي للمشغل."
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — مفعّل"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — متوقف مؤقتًا"
+  },
+  "generalTab": { "message": "عام" },
+  "sitesTab": { "message": "قواعد المواقع" },
+  "diagnosticsTab": { "message": "الدعم والتشخيص" },
+  "captureGestureTitle": { "message": "النقر مرة واحدة لكل علامة تبويب جديدة" },
+  "captureGestureHelp": { "message": "يتطلب Chrome فتح الإضافة مرة واحدة قبل موازنة علامة تبويب جديدة." },
+  "generalHelp": { "message": "اختر المظهر والسلوك الافتراضيين للإضافة." },
+  "appearanceHeading": { "message": "المظهر" },
+  "languageLabel": { "message": "اللغة" },
+  "languageHelp": { "message": "تُستخدم في النافذة المنبثقة وصفحة الإعدادات." },
+  "appearanceLabel": { "message": "السمة" },
+  "appearanceHelp": { "message": "اتبع النظام أو اختر الفاتح أو الداكن." },
+  "themeSystem": { "message": "النظام" },
+  "themeLight": { "message": "فاتح" },
+  "themeDark": { "message": "داكن" },
+  "defaultBalanceHeading": { "message": "التوازن الافتراضي لجميع المواقع" },
+  "enabledHelp": { "message": "أبقِ موازنة الصوت مفعلة عند توصيل علامة تبويب." },
+  "playerLimitShort": { "message": "احترام مستوى صوت المشغل" },
+  "resetHelp": { "message": "إزالة التغييرات العامة وجميع قواعد المواقع." },
+  "resetAction": { "message": "إعادة تعيين" },
+  "siteRulesHelp": { "message": "تجاوز الإعدادات العامة لاسم مضيف." },
+  "globalDefaultsHelp": { "message": "يُطبّق على جميع المواقع المتصلة ما لم تتجاوزه قاعدة موقع." },
+  "supportReportHelp": { "message": "ينشئ تقريرًا يحمي الخصوصية للدعم والإبلاغ عن الأخطاء." },
+  "openIssue": { "message": "الإبلاغ عن مشكلة" },
+  "tabLabel": { "message": "علامة تبويب" }
+}

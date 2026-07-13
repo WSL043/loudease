@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase Монитор"
+  },
+  "monitorHeading": {
+    "message": "Монитор и опции"
+  },
+  "enabledLabel": {
+    "message": "Включить балансировку"
+  },
+  "enabledHint": {
+    "message": "Включить или приостановить балансировку громкости"
+  },
+  "statusChecking": {
+    "message": "Проверка"
+  },
+  "statusConnecting": {
+    "message": "Подключение"
+  },
+  "statusReadingTab": {
+    "message": "Чтение активной вкладки"
+  },
+  "statusSaving": {
+    "message": "Сохранение"
+  },
+  "statusApplying": {
+    "message": "Применение изменений"
+  },
+  "statusOff": {
+    "message": "Выключенный"
+  },
+  "statusPaused": {
+    "message": "Балансировка приостановлена"
+  },
+  "statusOriginalAudio": {
+    "message": "Оригинальный звук проходит через"
+  },
+  "statusUnavailable": {
+    "message": "Недоступно"
+  },
+  "statusRestrictedPage": {
+    "message": "Ограниченная страница"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome не разрешает доступ к аудио здесь"
+  },
+  "statusError": {
+    "message": "Ошибка"
+  },
+  "statusMuted": {
+    "message": "Без звука"
+  },
+  "statusPlayerMuted": {
+    "message": "Игрок отключен"
+  },
+  "statusNoAudioOutput": {
+    "message": "Звук не выводится"
+  },
+  "statusConnected": {
+    "message": "Подключено"
+  },
+  "statusWaitingForAudio": {
+    "message": "Ожидание звука"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "Подключено, но сигнал не обнаружен"
+  },
+  "statusActive": {
+    "message": "Активный"
+  },
+  "statusLifting": {
+    "message": "Усиление тихих звуков"
+  },
+  "statusReducing": {
+    "message": "Снижение громких звуков"
+  },
+  "statusBalancing": {
+    "message": "Балансировка громкости"
+  },
+  "statusSignalConfirmed": {
+    "message": "Живой аудиосигнал подтвержден"
+  },
+  "statusActionRequired": {
+    "message": "Требуется действие"
+  },
+  "statusReconnectRequired": {
+    "message": "Аудиосоединение требует восстановления"
+  },
+  "statusReloadHelp": {
+    "message": "Перезагрузите эту страницу, чтобы восстановить соединение"
+  },
+  "statusNotConnected": {
+    "message": "Аудио не подключено"
+  },
+  "statusReady": {
+    "message": "Готовый"
+  },
+  "statusMediaDetected": {
+    "message": "Обнаружен носитель"
+  },
+  "statusWaitingForMedia": {
+    "message": "В ожидании СМИ"
+  },
+  "statusPlayToBegin": {
+    "message": "Воспроизведите аудио, чтобы начать балансировку."
+  },
+  "statusCheckingConnection": {
+    "message": "Проверка подключения страницы"
+  },
+  "statusLoadFailed": {
+    "message": "Не удалось загрузить статус"
+  },
+  "statusReopenPopup": {
+    "message": "Закройте и снова откройте всплывающее окно"
+  },
+  "strengthControlsLabel": {
+    "message": "Контроль силы"
+  },
+  "reduceLoudLabel": {
+    "message": "Снижать громкие звуки"
+  },
+  "reduceLoudHelp": {
+    "message": "Настройка снижения пиков"
+  },
+  "liftQuietLabel": {
+    "message": "Усиливать тихие звуки"
+  },
+  "liftQuietHelp": {
+    "message": "Настройка усиления тихих деталей"
+  },
+  "playerLimitStatement": {
+    "message": "Усиление тихих звуков не превысит текущую громкость плеера."
+  },
+  "recoverCapture": {
+    "message": "Повторно подключить звук вкладки"
+  },
+  "recoverReload": {
+    "message": "Обновить страницу"
+  },
+  "captureFailed": {
+    "message": "Не удалось подключиться к вкладке аудио."
+  },
+  "captureRecoveryHelp": {
+    "message": "Подключитесь повторно, чтобы повторить попытку."
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome не предоставил доступ к звуку вкладок"
+  },
+  "capturePermissionTimeout": {
+    "message": "Время доступа к аудио вкладки истекло"
+  },
+  "copyDiagnostics": {
+    "message": "Копировать отчёт поддержки"
+  },
+  "downloadDiagnostics": {
+    "message": "Скачать отчёт"
+  },
+  "refresh": {
+    "message": "Обновить"
+  },
+  "reloadExtension": {
+    "message": "Перезагрузить расширение"
+  },
+  "summaryLabel": {
+    "message": "Краткое содержание"
+  },
+  "versionLabel": {
+    "message": "Версия"
+  },
+  "activeTabsLabel": {
+    "message": "Активные вкладки"
+  },
+  "connectedSourcesLabel": {
+    "message": "Подключенные источники"
+  },
+  "lastUpdatedLabel": {
+    "message": "Последнее обновление"
+  },
+  "settingsHeading": {
+    "message": "Настройки"
+  },
+  "waitingForSettings": {
+    "message": "Ожидание настроек"
+  },
+  "localDiagnosticsLabel": {
+    "message": "Локальный диагностический приемник"
+  },
+  "localDiagnosticsHelp": {
+    "message": "Записывает снимки отладки только в 127.0.0.1. По умолчанию выключено."
+  },
+  "resetAllSettings": {
+    "message": "Сбросить все настройки"
+  },
+  "siteLabel": {
+    "message": "Сайт"
+  },
+  "presetLabel": {
+    "message": "Предустановка"
+  },
+  "saveSite": {
+    "message": "Сохранить сайт"
+  },
+  "deleteSite": {
+    "message": "Удалить сайт"
+  },
+  "siteDefaultsLabel": {
+    "message": "Настройки сайта по умолчанию"
+  },
+  "pageStatusHeading": {
+    "message": "Статус страницы"
+  },
+  "waitingForData": {
+    "message": "Ожидание данных"
+  },
+  "recentEventsHeading": {
+    "message": "Недавние события"
+  },
+  "backgroundLogLabel": {
+    "message": "Фоновый журнал"
+  },
+  "presetStandard": {
+    "message": "Стандартный"
+  },
+  "presetVoice": {
+    "message": "Голос"
+  },
+  "presetNight": {
+    "message": "Ночь"
+  },
+  "presetLive": {
+    "message": "Жить"
+  },
+  "presetStrong": {
+    "message": "Сильный"
+  },
+  "presetCustom": {
+    "message": "Обычай"
+  },
+  "noSiteDefaults": {
+    "message": "На сайте пока нет настроек по умолчанию. Сохраните один, чтобы применить его по имени хоста."
+  },
+  "settingsSummary": {
+    "message": "v$1, сайтов: $2"
+  },
+  "saving": {
+    "message": "Сохранение"
+  },
+  "saved": {
+    "message": "Сохранено"
+  },
+  "deleted": {
+    "message": "Удалено"
+  },
+  "resetting": {
+    "message": "Сброс"
+  },
+  "resetDone": {
+    "message": "Сброс завершен"
+  },
+  "selectSiteFirst": {
+    "message": "Сначала выберите сайт"
+  },
+  "confirmReset": {
+    "message": "Сбросить все глобальные настройки и настройки сайта по умолчанию?"
+  },
+  "diagnosticsOn": {
+    "message": "Локальная диагностика включена"
+  },
+  "diagnosticsOff": {
+    "message": "Локальная диагностика отключена"
+  },
+  "diagnosticsCopied": {
+    "message": "Диагностика JSON скопирована."
+  },
+  "diagnosticsDownloaded": {
+    "message": "Диагностика JSON загружена"
+  },
+  "noPageStatus": {
+    "message": "Статус страницы пока не получен."
+  },
+  "noEvents": {
+    "message": "Нет фоновых событий"
+  },
+  "liveRefresh": {
+    "message": "Обновление в реальном времени"
+  },
+  "staleEngineFound": {
+    "message": "Обнаружена устаревшая среда выполнения"
+  },
+  "statusIdle": {
+    "message": "Праздный"
+  },
+  "statusPlaying": {
+    "message": "Играя"
+  },
+  "statusCaptured": {
+    "message": "Подключено"
+  },
+  "statusNeedsRefresh": {
+    "message": "Требуется обновление"
+  },
+  "yes": {
+    "message": "Да"
+  },
+  "no": {
+    "message": "Нет"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "СМИ"
+  },
+  "playbackLabel": {
+    "message": "Воспроизведение"
+  },
+  "analysisLabel": {
+    "message": "Анализ"
+  },
+  "reductionLabel": {
+    "message": "Снижение"
+  },
+  "liftLabel": {
+    "message": "Поднимать"
+  },
+  "errorsLabel": {
+    "message": "Ошибки"
+  },
+  "editingSite": {
+    "message": "Редактирование $1"
+  },
+  "appShortName": {
+    "message": "Балансировщик громкости"
+  },
+  "appDescription": {
+    "message": "Балансирует громкие и тихие звуки на веб-страницах, учитывая текущую громкость плеера."
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — включён"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — приостановлен"
+  },
+  "generalTab": { "message": "Общие" },
+  "sitesTab": { "message": "Правила сайтов" },
+  "diagnosticsTab": { "message": "Поддержка и диагностика" },
+  "captureGestureTitle": { "message": "Для новой вкладки нужен один щелчок" },
+  "captureGestureHelp": { "message": "Chrome требует один раз открыть расширение, прежде чем выравнивать звук в новой вкладке." },
+  "generalHelp": { "message": "Настройте внешний вид и поведение расширения по умолчанию." },
+  "appearanceHeading": { "message": "Оформление" },
+  "languageLabel": { "message": "Язык" },
+  "languageHelp": { "message": "Используется во всплывающем окне и на странице настроек." },
+  "appearanceLabel": { "message": "Тема" },
+  "appearanceHelp": { "message": "Используйте системную, светлую или тёмную тему." },
+  "themeSystem": { "message": "Системная" },
+  "themeLight": { "message": "Светлая" },
+  "themeDark": { "message": "Тёмная" },
+  "defaultBalanceHeading": { "message": "Баланс по умолчанию для всех сайтов" },
+  "enabledHelp": { "message": "Сохранять выравнивание включённым после подключения вкладки." },
+  "playerLimitShort": { "message": "Учитывать громкость проигрывателя" },
+  "resetHelp": { "message": "Удалить глобальные изменения и все правила сайтов." },
+  "resetAction": { "message": "Сбросить" },
+  "siteRulesHelp": { "message": "Переопределите глобальные значения для имени хоста." },
+  "globalDefaultsHelp": { "message": "Применяется ко всем подключённым сайтам, если правило сайта не переопределяет его." },
+  "supportReportHelp": { "message": "Создаёт безопасный отчёт для поддержки и сообщений об ошибках." },
+  "openIssue": { "message": "Сообщить о проблеме" },
+  "tabLabel": { "message": "Вкладка" }
+}

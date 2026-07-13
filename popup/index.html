@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoudEase</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body data-i18n-title="appName">
+  <main id="app" class="shell" data-state="loading">
+    <header class="header">
+      <div class="brand">
+        <picture class="brandIcon" aria-hidden="true">
+          <source media="(prefers-color-scheme: dark)" srcset="../assets/logo-ai-a-dark.png">
+          <img src="../assets/logo-ai-a-light.png" alt="">
+        </picture>
+        <div>
+          <h1 data-i18n="appName">LoudEase</h1>
+          <span id="version">v--</span>
+        </div>
+      </div>
+      <div class="headerActions">
+        <button id="settingsButton" class="iconButton" type="button" data-i18n-title="settingsHeading" data-i18n-aria-label="settingsHeading" aria-label="Settings">
+          <img src="../assets/settings.svg" alt="" aria-hidden="true">
+        </button>
+        <label class="switch" data-i18n-title="enabledHint">
+          <span class="srOnly" data-i18n="enabledLabel">Enable balancing</span>
+          <input id="enabled" type="checkbox">
+          <span class="switchTrack" aria-hidden="true"></span>
+        </label>
+      </div>
+    </header>
+
+    <section class="status">
+      <div class="statusInfo">
+        <div class="statusLine">
+          <span id="statusLabel" class="statusBadge" data-i18n="statusChecking">Checking</span>
+          <h2 id="stateTitle" data-i18n="statusConnecting">Connecting</h2>
+        </div>
+        <p id="stateSub" data-i18n="statusReadingTab">Reading the active tab</p>
+        <div id="levelVisual" class="levelVisual" data-active="false" aria-hidden="true">
+          <span class="levelGroup inputLevel"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <i class="balanceNode"></i>
+          <span class="levelGroup outputLevel"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+      </div>
+      <div class="effectReadout"><strong id="effectValue" class="effectValue">--</strong><span id="effectCaption">dB</span></div>
+    </section>
+
+    <section class="strengthPanel" data-i18n-aria-label="strengthControlsLabel" aria-label="Strength controls">
+      <label id="cutDial" class="strengthControl">
+        <span class="strengthTop"><span><strong data-i18n="reduceLoudLabel">Reduce loud sounds</strong><small id="cutHelp" data-i18n="reduceLoudHelp">Controls peak reduction</small></span><output id="cutValue" for="cutRange">100</output></span>
+        <input id="cutRange" class="strengthRange" type="range" min="0" max="100" step="1" value="100" data-i18n-aria-label="reduceLoudLabel" aria-label="Reduce loud sounds" aria-describedby="cutHelp">
+      </label>
+      <label id="liftDial" class="strengthControl">
+        <span class="strengthTop"><span><strong data-i18n="liftQuietLabel">Lift quiet sounds</strong><small id="liftHelp" data-i18n="liftQuietHelp">Controls quiet-detail lift</small></span><output id="liftValue" for="liftRange">100</output></span>
+        <input id="liftRange" class="strengthRange" type="range" min="0" max="100" step="1" value="100" data-i18n-aria-label="liftQuietLabel" aria-label="Lift quiet sounds" aria-describedby="liftHelp">
+      </label>
+    </section>
+
+    <label class="limitSetting">
+      <input id="respectPlayerVolume" type="checkbox">
+      <span data-i18n="playerLimitStatement">Quiet-sound lift will not exceed the player's current volume.</span>
+    </label>
+
+    <div id="noticeStrip" class="noticeStrip" role="status" hidden></div>
+    <div class="recoveryActions">
+      <button id="captureButton" type="button" hidden data-i18n="recoverCapture">Reconnect tab audio</button>
+      <button id="reloadButton" type="button" hidden data-i18n="recoverReload">Reload page</button>
+    </div>
+    <span id="healthLabel" class="srOnly" role="status" aria-live="polite" aria-atomic="true"></span>
+    <span id="sourceValue" hidden></span><span id="audibleValue" hidden></span><span id="protectValue" hidden></span>
+  </main>
+  <script src="../shared/ui-preferences.js"></script>
+  <script src="../shared/i18n.js"></script>
+  <script src="../shared/core.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

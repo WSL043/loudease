@@ -1,0 +1,69 @@
+name: Bug report
+description: Report a reproducible capture, DSP, UI, or compatibility problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include private URLs, account data, tokens, personal recordings, or unredacted diagnostics. Use a private Security Advisory for vulnerabilities.
+  - type: input
+    id: version
+    attributes:
+      label: Extension version and build
+      description: For example, 0.6.0 from dist/github-dev or dist/store.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Chrome and operating system
+      placeholder: Chrome 126, Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: media
+    attributes:
+      label: Media type
+      options:
+        - Video
+        - Live stream
+        - Audio-only
+        - Web Audio
+        - Local test page
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include whether the popup showed a fresh signal and active dB value.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence
+      description: Add relevant counters, a minimal test page, or a short recording you have permission to share.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed private browsing data, personal information, tokens, and unlicensed media.
+          required: true
+        - label: I understand this extension is not a calibrated hearing-protection device.
+          required: true

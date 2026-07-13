@@ -1,0 +1,13 @@
+tmp/
+__pycache__/
+*.pyc
+*.log
+*.zip
+*.crx
+*.pem
+node_modules/
+dist/
+build/
+private-corpus/
+private-data/
+test-data/private/

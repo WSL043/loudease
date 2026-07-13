@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_appName__",
+  "short_name": "__MSG_appShortName__",
+  "description": "__MSG_appDescription__",
+  "version": "0.7.0",
+  "default_locale": "en",
+  "minimum_chrome_version": "116",
+  "action": {
+    "default_title": "__MSG_appName__",
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "32": "assets/icon-32.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
+  },
+  "options_page": "monitor/index.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting",
+    "tabCapture",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "http://127.0.0.1/*"
+  ],
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content/bridge.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_origin_as_fallback": true
+    }
+  ]
+}

@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase Monitorear"
+  },
+  "monitorHeading": {
+    "message": "Monitor y opciones"
+  },
+  "enabledLabel": {
+    "message": "Habilitar equilibrio"
+  },
+  "enabledHint": {
+    "message": "Habilitar o pausar el equilibrio de volumen"
+  },
+  "statusChecking": {
+    "message": "De cheques"
+  },
+  "statusConnecting": {
+    "message": "Conectando"
+  },
+  "statusReadingTab": {
+    "message": "Leyendo la pestaña activa"
+  },
+  "statusSaving": {
+    "message": "Ahorro"
+  },
+  "statusApplying": {
+    "message": "Aplicar cambios"
+  },
+  "statusOff": {
+    "message": "Apagado"
+  },
+  "statusPaused": {
+    "message": "Equilibrio en pausa"
+  },
+  "statusOriginalAudio": {
+    "message": "El audio original pasa"
+  },
+  "statusUnavailable": {
+    "message": "Indisponible"
+  },
+  "statusRestrictedPage": {
+    "message": "Pagina restringida"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome no permite el acceso de audio aquí"
+  },
+  "statusError": {
+    "message": "Error"
+  },
+  "statusMuted": {
+    "message": "Apagado"
+  },
+  "statusPlayerMuted": {
+    "message": "El jugador está silenciado."
+  },
+  "statusNoAudioOutput": {
+    "message": "No se emite ningún audio"
+  },
+  "statusConnected": {
+    "message": "Conectado"
+  },
+  "statusWaitingForAudio": {
+    "message": "esperando audio"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "Conectado, pero no se detecta señal"
+  },
+  "statusActive": {
+    "message": "Activo"
+  },
+  "statusLifting": {
+    "message": "Realzando sonidos suaves"
+  },
+  "statusReducing": {
+    "message": "Reduciendo sonidos fuertes"
+  },
+  "statusBalancing": {
+    "message": "Equilibrando el volumen"
+  },
+  "statusSignalConfirmed": {
+    "message": "Señal de audio en vivo confirmada"
+  },
+  "statusActionRequired": {
+    "message": "Acción requerida"
+  },
+  "statusReconnectRequired": {
+    "message": "La conexión de audio necesita recuperación"
+  },
+  "statusReloadHelp": {
+    "message": "Vuelva a cargar esta página para volver a conectarse"
+  },
+  "statusNotConnected": {
+    "message": "El audio no está conectado"
+  },
+  "statusReady": {
+    "message": "Listo"
+  },
+  "statusMediaDetected": {
+    "message": "Medios detectados"
+  },
+  "statusWaitingForMedia": {
+    "message": "esperando a los medios"
+  },
+  "statusPlayToBegin": {
+    "message": "Reproduzca audio para comenzar a equilibrar"
+  },
+  "statusCheckingConnection": {
+    "message": "Comprobando la conexión de la página"
+  },
+  "statusLoadFailed": {
+    "message": "No se pudo cargar el estado"
+  },
+  "statusReopenPopup": {
+    "message": "Cerrar y volver a abrir la ventana emergente"
+  },
+  "strengthControlsLabel": {
+    "message": "Controles de fuerza"
+  },
+  "reduceLoudLabel": {
+    "message": "Reducir sonidos fuertes"
+  },
+  "reduceLoudHelp": {
+    "message": "Controla la reducción de picos"
+  },
+  "liftQuietLabel": {
+    "message": "Realzar sonidos suaves"
+  },
+  "liftQuietHelp": {
+    "message": "Controla el realce de los detalles suaves"
+  },
+  "playerLimitStatement": {
+    "message": "El realce de sonidos suaves no superará el volumen actual del reproductor."
+  },
+  "recoverCapture": {
+    "message": "Volver a conectar el audio de la pestaña"
+  },
+  "recoverReload": {
+    "message": "Recargar página"
+  },
+  "captureFailed": {
+    "message": "Error en la conexión de audio de la pestaña"
+  },
+  "captureRecoveryHelp": {
+    "message": "Vuelve a conectarte para intentarlo de nuevo"
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome no otorgó acceso de audio a la pestaña"
+  },
+  "capturePermissionTimeout": {
+    "message": "Se agotó el tiempo de espera para acceder al audio de la pestaña"
+  },
+  "copyDiagnostics": {
+    "message": "Copiar informe de soporte"
+  },
+  "downloadDiagnostics": {
+    "message": "Descargar informe"
+  },
+  "refresh": {
+    "message": "Refrescar"
+  },
+  "reloadExtension": {
+    "message": "Recargar extensión"
+  },
+  "summaryLabel": {
+    "message": "Resumen"
+  },
+  "versionLabel": {
+    "message": "Versión"
+  },
+  "activeTabsLabel": {
+    "message": "Pestañas activas"
+  },
+  "connectedSourcesLabel": {
+    "message": "Fuentes conectadas"
+  },
+  "lastUpdatedLabel": {
+    "message": "Última actualización"
+  },
+  "settingsHeading": {
+    "message": "Ajustes"
+  },
+  "waitingForSettings": {
+    "message": "Esperando configuración"
+  },
+  "localDiagnosticsLabel": {
+    "message": "Receptor de diagnóstico local"
+  },
+  "localDiagnosticsHelp": {
+    "message": "Escribe instantáneas de depuración solo en 127.0.0.1. Desactivado de forma predeterminada."
+  },
+  "resetAllSettings": {
+    "message": "Restablecer todas las configuraciones"
+  },
+  "siteLabel": {
+    "message": "Sitio"
+  },
+  "presetLabel": {
+    "message": "Programar"
+  },
+  "saveSite": {
+    "message": "Guardar sitio"
+  },
+  "deleteSite": {
+    "message": "Eliminar sitio"
+  },
+  "siteDefaultsLabel": {
+    "message": "Valores predeterminados del sitio"
+  },
+  "pageStatusHeading": {
+    "message": "Estado de la página"
+  },
+  "waitingForData": {
+    "message": "esperando datos"
+  },
+  "recentEventsHeading": {
+    "message": "Eventos recientes"
+  },
+  "backgroundLogLabel": {
+    "message": "Registro de fondo"
+  },
+  "presetStandard": {
+    "message": "Estándar"
+  },
+  "presetVoice": {
+    "message": "Voz"
+  },
+  "presetNight": {
+    "message": "Noche"
+  },
+  "presetLive": {
+    "message": "Vivir"
+  },
+  "presetStrong": {
+    "message": "Fuerte"
+  },
+  "presetCustom": {
+    "message": "Costumbre"
+  },
+  "noSiteDefaults": {
+    "message": "Aún no hay valores predeterminados del sitio. Guarde uno para aplicarlo por nombre de host."
+  },
+  "settingsSummary": {
+    "message": "v$1, $2 sitios"
+  },
+  "saving": {
+    "message": "Ahorro"
+  },
+  "saved": {
+    "message": "Guardado"
+  },
+  "deleted": {
+    "message": "Eliminado"
+  },
+  "resetting": {
+    "message": "Restablecer"
+  },
+  "resetDone": {
+    "message": "Reinicio completo"
+  },
+  "selectSiteFirst": {
+    "message": "Seleccione un sitio primero"
+  },
+  "confirmReset": {
+    "message": "¿Restablecer todas las configuraciones globales y los valores predeterminados del sitio?"
+  },
+  "diagnosticsOn": {
+    "message": "Diagnóstico local habilitado"
+  },
+  "diagnosticsOff": {
+    "message": "Diagnóstico local deshabilitado"
+  },
+  "diagnosticsCopied": {
+    "message": "Diagnóstico JSON copiado"
+  },
+  "diagnosticsDownloaded": {
+    "message": "Diagnóstico JSON descargado"
+  },
+  "noPageStatus": {
+    "message": "Aún no se ha recibido el estado de la página."
+  },
+  "noEvents": {
+    "message": "Sin eventos en segundo plano"
+  },
+  "liveRefresh": {
+    "message": "Actualización en directo"
+  },
+  "staleEngineFound": {
+    "message": "Se encontró tiempo de ejecución desactualizado"
+  },
+  "statusIdle": {
+    "message": "Inactivo"
+  },
+  "statusPlaying": {
+    "message": "Jugando"
+  },
+  "statusCaptured": {
+    "message": "Conectado"
+  },
+  "statusNeedsRefresh": {
+    "message": "Necesita actualización"
+  },
+  "yes": {
+    "message": "Sí"
+  },
+  "no": {
+    "message": "No"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "Medios de comunicación"
+  },
+  "playbackLabel": {
+    "message": "Reproducción"
+  },
+  "analysisLabel": {
+    "message": "Análisis"
+  },
+  "reductionLabel": {
+    "message": "Reducción"
+  },
+  "liftLabel": {
+    "message": "Elevar"
+  },
+  "errorsLabel": {
+    "message": "Errores"
+  },
+  "editingSite": {
+    "message": "Editando $1"
+  },
+  "appShortName": {
+    "message": "Balanceador de volumen"
+  },
+  "appDescription": {
+    "message": "Equilibra los sonidos fuertes y suaves de las páginas web respetando el volumen actual del reproductor."
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — activado"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — en pausa"
+  },
+  "generalTab": { "message": "General" },
+  "sitesTab": { "message": "Reglas de sitios" },
+  "diagnosticsTab": { "message": "Soporte y diagnóstico" },
+  "captureGestureTitle": { "message": "Un clic para cada pestaña nueva" },
+  "captureGestureHelp": { "message": "Chrome exige abrir la extensión una vez antes de equilibrar una pestaña nueva." },
+  "generalHelp": { "message": "Elige la apariencia y el comportamiento predeterminados de la extensión." },
+  "appearanceHeading": { "message": "Apariencia" },
+  "languageLabel": { "message": "Idioma" },
+  "languageHelp": { "message": "Se usa en la ventana y la página de ajustes." },
+  "appearanceLabel": { "message": "Tema" },
+  "appearanceHelp": { "message": "Sigue el sistema o elige claro u oscuro." },
+  "themeSystem": { "message": "Sistema" },
+  "themeLight": { "message": "Claro" },
+  "themeDark": { "message": "Oscuro" },
+  "defaultBalanceHeading": { "message": "Balance predeterminado para todos los sitios" },
+  "enabledHelp": { "message": "Mantén el equilibrio activo cuando una pestaña esté conectada." },
+  "playerLimitShort": { "message": "Respetar el volumen del reproductor" },
+  "resetHelp": { "message": "Elimina los cambios globales y todas las reglas de sitios." },
+  "resetAction": { "message": "Restablecer" },
+  "siteRulesHelp": { "message": "Sustituye los valores globales para un nombre de host." },
+  "globalDefaultsHelp": { "message": "Se aplica a todos los sitios conectados salvo que una regla del sitio lo reemplace." },
+  "supportReportHelp": { "message": "Crea un informe sin datos sensibles para soporte y errores." },
+  "openIssue": { "message": "Informar de un problema" },
+  "tabLabel": { "message": "Pestaña" }
+}

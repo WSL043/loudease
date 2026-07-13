@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoudEase Settings</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body data-i18n-title="monitorTitle">
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <picture class="brandIcon" aria-hidden="true">
+          <source media="(prefers-color-scheme: dark)" srcset="../assets/logo-ai-a-dark.png">
+          <img src="../assets/logo-ai-a-light.png" alt="">
+        </picture>
+        <div>
+          <strong>LoudEase</strong>
+          <span id="version">v--</span>
+        </div>
+      </div>
+      <div class="topActions">
+        <span id="settingsHealth" class="saveState" role="status" aria-live="polite" data-i18n="waitingForSettings">Waiting for settings</span>
+        <button id="refreshNow" class="quietButton" type="button" data-i18n="refresh">Refresh</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <nav class="sideNav" data-i18n-aria-label="settingsHeading" aria-label="Settings">
+        <button class="navButton isActive" type="button" data-view="general" data-i18n="generalTab">General</button>
+        <button class="navButton" type="button" data-view="sites" data-i18n="sitesTab">Site rules</button>
+        <button class="navButton" type="button" data-view="diagnostics" data-i18n="diagnosticsTab">Support &amp; diagnostics</button>
+        <div class="captureNote">
+          <strong data-i18n="captureGestureTitle">New tabs need one click</strong>
+          <span data-i18n="captureGestureHelp">Chrome requires you to open the extension once before a new tab can be balanced.</span>
+        </div>
+      </nav>
+
+      <div class="content">
+        <section id="generalView" class="view isActive" data-view-panel="general">
+          <header class="viewHeader">
+            <div><h1 data-i18n="settingsHeading">Settings</h1><p data-i18n="generalHelp">Choose how the extension looks and behaves by default.</p></div>
+          </header>
+
+          <div class="settingGroup">
+            <h2 data-i18n="appearanceHeading">Appearance</h2>
+            <label class="settingRow" for="languageSelect">
+              <span><strong data-i18n="languageLabel">Language</strong><small data-i18n="languageHelp">Used in the popup and settings page.</small></span>
+              <select id="languageSelect"></select>
+            </label>
+            <label class="settingRow" for="themeSelect">
+              <span><strong data-i18n="appearanceLabel">Theme</strong><small data-i18n="appearanceHelp">Follow the system or choose light or dark.</small></span>
+              <select id="themeSelect"></select>
+            </label>
+          </div>
+
+          <div class="settingGroup">
+            <div class="groupHeading"><h2 data-i18n="defaultBalanceHeading">Default balance for all sites</h2><p data-i18n="globalDefaultsHelp">Applies to every connected site unless a site rule overrides it.</p></div>
+            <label class="toggleRow">
+              <span><strong data-i18n="enabledLabel">Enable balancing</strong><small data-i18n="enabledHelp">Keep balancing enabled when a tab is connected.</small></span>
+              <input id="globalEnabled" type="checkbox">
+            </label>
+            <label class="toggleRow">
+              <span><strong data-i18n="playerLimitShort">Respect player volume</strong><small data-i18n="playerLimitStatement">Quiet-sound lift will not exceed the player's current volume.</small></span>
+              <input id="globalRespect" type="checkbox">
+            </label>
+            <label class="rangeRow" for="globalCut">
+              <span><strong data-i18n="reduceLoudLabel">Reduce loud sounds</strong><small data-i18n="reduceLoudHelp">Controls peak reduction</small></span>
+              <output id="globalCutValue" for="globalCut">100</output>
+              <input id="globalCut" type="range" min="0" max="100" step="1" value="100">
+            </label>
+            <label class="rangeRow lift" for="globalLift">
+              <span><strong data-i18n="liftQuietLabel">Lift quiet sounds</strong><small data-i18n="liftQuietHelp">Controls quiet-detail lift</small></span>
+              <output id="globalLiftValue" for="globalLift">100</output>
+              <input id="globalLift" type="range" min="0" max="100" step="1" value="100">
+            </label>
+          </div>
+
+          <div class="dangerZone">
+            <div><strong data-i18n="resetAllSettings">Reset all settings</strong><span data-i18n="resetHelp">Remove global changes and every site rule.</span></div>
+            <button id="resetSettings" class="dangerButton" type="button" data-i18n="resetAction">Reset</button>
+          </div>
+        </section>
+
+        <section id="sitesView" class="view" data-view-panel="sites" hidden>
+          <header class="viewHeader"><div><h1 data-i18n="sitesTab">Site rules</h1><p data-i18n="siteRulesHelp">Override the default strength for a hostname.</p></div></header>
+          <form id="siteForm" class="siteEditor">
+            <label class="field"><span data-i18n="siteLabel">Site</span><input id="siteKey" type="text" inputmode="url" autocomplete="off" placeholder="example.com"></label>
+            <label class="rangeRow" for="siteCut">
+              <span><strong data-i18n="reduceLoudLabel">Reduce loud sounds</strong><small data-i18n="reduceLoudHelp">Controls peak reduction</small></span>
+              <output id="siteCutValue" for="siteCut">100</output>
+              <input id="siteCut" type="range" min="0" max="100" step="1" value="100">
+            </label>
+            <label class="rangeRow lift" for="siteLift">
+              <span><strong data-i18n="liftQuietLabel">Lift quiet sounds</strong><small data-i18n="liftQuietHelp">Controls quiet-detail lift</small></span>
+              <output id="siteLiftValue" for="siteLift">100</output>
+              <input id="siteLift" type="range" min="0" max="100" step="1" value="100">
+            </label>
+            <div class="formActions"><button id="saveSite" class="primaryButton" type="submit" data-i18n="saveSite">Save site</button><button id="deleteSite" class="quietButton" type="button" data-i18n="deleteSite">Delete site</button></div>
+          </form>
+          <div id="siteList" class="siteList" data-i18n-aria-label="siteDefaultsLabel" aria-label="Site rules"></div>
+        </section>
+
+        <section id="diagnosticsView" class="view" data-view-panel="diagnostics" hidden>
+          <header class="viewHeader">
+            <div><h1 data-i18n="diagnosticsTab">Support &amp; diagnostics</h1><p data-i18n="supportReportHelp">Create a privacy-safe report for bug reports and support.</p><span id="health" class="inlineStatus" data-i18n="waitingForData">Waiting for data</span></div>
+            <div class="diagnosticActions"><button id="copyJson" class="primaryButton" type="button" data-i18n="copyDiagnostics">Copy support report</button><button id="downloadJson" class="quietButton" type="button" data-i18n="downloadDiagnostics">Download report</button><a class="quietButton buttonLink" href="https://github.com/WSL043/loudease/issues/new/choose" target="_blank" rel="noopener noreferrer" data-i18n="openIssue">Report an issue</a><button id="reloadExtension" class="quietButton" type="button" data-i18n="reloadExtension">Reload extension</button></div>
+          </header>
+          <section class="summary" data-i18n-aria-label="summaryLabel" aria-label="Summary"><div><span data-i18n="activeTabsLabel">Active tabs</span><strong id="tabCount">--</strong></div><div><span data-i18n="connectedSourcesLabel">Connected sources</span><strong id="sourceCount">--</strong></div><div><span data-i18n="lastUpdatedLabel">Last updated</span><strong id="updatedAt">--</strong></div></section>
+          <!-- WVB_DEV_DIAGNOSTICS_START -->
+          <label class="toggleRow developerToggle"><span><strong data-i18n="localDiagnosticsLabel">Local diagnostics receiver</strong><small data-i18n="localDiagnosticsHelp">Writes debug snapshots only to 127.0.0.1. Off by default.</small></span><input id="localDiagnostics" type="checkbox"></label>
+          <!-- WVB_DEV_DIAGNOSTICS_END -->
+          <section class="diagnosticSection"><header><h2 data-i18n="pageStatusHeading">Page status</h2></header><div id="tabs" class="tabs"></div></section>
+          <section class="diagnosticSection"><header><h2 data-i18n="recentEventsHeading">Recent events</h2><span data-i18n="backgroundLogLabel">Background log</span></header><div id="events" class="events"></div></section>
+        </section>
+      </div>
+    </div>
+  </main>
+  <script src="../shared/ui-preferences.js"></script>
+  <script src="../shared/i18n.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

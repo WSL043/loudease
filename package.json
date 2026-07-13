@@ -1,0 +1,36 @@
+{
+  "name": "loudease",
+  "version": "0.7.0",
+  "private": true,
+  "description": "Local-first loudness control for more comfortable web audio.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WSL043/loudease.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WSL043/loudease/issues"
+  },
+  "homepage": "https://github.com/WSL043/loudease#readme",
+  "keywords": [
+    "chrome-extension",
+    "audio-worklet",
+    "loudness",
+    "volume-normalization",
+    "dynamic-range"
+  ],
+  "scripts": {
+    "build:dev": "node tools/build_extension.js dev",
+    "build:store": "node tools/build_extension.js store && node tools/assert_release_build.js --verify-only",
+    "package:store": "node tools/build_extension.js store --zip && node tools/assert_release_build.js --verify-only",
+    "test:release": "node tools/assert_release_build.js",
+    "test": "node tools/run_all_checks.js",
+    "test:dsp": "node tools/dsp_unit_tests.js && node tools/offline_audio_tests.js && node tools/offline_audio_graph_tests.js",
+    "test:slider": "node tools/e2e_slider_persistence.js",
+    "audit": "node tools/acceptance_audit.js --json",
+    "audit:runtime": "node tools/current_runtime_audit.js --json"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

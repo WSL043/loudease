@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Switching Audio Test</title>
+</head>
+<body>
+  <h1>Switching Audio Test</h1>
+  <button id="start">Start audio</button>
+  <button id="switch" disabled>Switch source</button>
+  <pre id="state">idle</pre>
+  <script>
+    let context = null;
+    let oscillator = null;
+    let gain = null;
+    let mode = 0;
+    let switchCount = 0;
+
+    function writeState(text) {
+      document.getElementById('state').textContent = text;
+      window.__WVB_SWITCH_STATE__ = {
+        text,
+        mode,
+        switchCount
+      };
+    }
+
+    async function ensureContext() {
+      if (!context || context.state === 'closed') {
+        context = new AudioContext();
+      }
+      if (context.state !== 'running') {
+        await context.resume();
+      }
+      return context;
+    }
+
+    function stopCurrent() {
+      if (oscillator) {
+        try {
+          oscillator.stop();
+        } catch (_) {}
+        try {
+          oscillator.disconnect();
+        } catch (_) {}
+      }
+      if (gain) {
+        try {
+          gain.disconnect();
+        } catch (_) {}
+      }
+      oscillator = null;
+      gain = null;
+    }
+
+    async function startMode(nextMode) {
+      const audioContext = await ensureContext();
+      stopCurrent();
+      mode = nextMode;
+      oscillator = audioContext.createOscillator();
+      gain = audioContext.createGain();
+      oscillator.frequency.value = mode === 0 ? 180 : 360;
+      gain.gain.value = mode === 0 ? 0.18 : 0.018;
+      oscillator.connect(gain).connect(audioContext.destination);
+      oscillator.start();
+      document.getElementById('switch').disabled = false;
+      writeState(mode === 0 ? 'loud-source' : 'quiet-source');
+    }
+
+    document.getElementById('start').addEventListener('click', () => {
+      switchCount = 0;
+      startMode(0);
+    });
+
+    document.getElementById('switch').addEventListener('click', () => {
+      switchCount += 1;
+      startMode(mode === 0 ? 1 : 0);
+    });
+
+    writeState('idle');
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Live Like Audio Test</title>
+</head>
+<body>
+  <h1>Live Like Audio Test</h1>
+  <button id="start">Start live-like audio</button>
+  <script>
+    document.getElementById('start').addEventListener('click', async () => {
+      const context = new AudioContext();
+      await context.resume();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = 180;
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start();
+      setInterval(() => {
+        const level = 0.02 + Math.random() * 0.16;
+        gain.gain.setTargetAtTime(level, context.currentTime, 0.04);
+      }, 350);
+    }, { once: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SPA Route Change Test</title>
+</head>
+<body>
+  <h1>SPA Route Change Test</h1>
+  <p id="route">route: /one</p>
+  <button id="routeButton">Change route</button>
+  <button id="start">Start tone</button>
+  <script>
+    let route = 1;
+    document.getElementById('routeButton').addEventListener('click', () => {
+      route += 1;
+      history.pushState({ route }, '', '#route-' + route);
+      document.getElementById('route').textContent = 'route: /' + route;
+    });
+    document.getElementById('start').addEventListener('click', async () => {
+      const context = new AudioContext();
+      await context.resume();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = 260;
+      gain.gain.value = 0.08;
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start();
+    }, { once: true });
+  </script>
+</body>
+</html>

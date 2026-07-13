@@ -1,0 +1,75 @@
+name: Audio quality report
+description: Report pumping, distortion, weak lift, excessive reduction, or unstable loudness
+title: "[Audio quality]: "
+labels: [audio-quality]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include private URLs, account data, tokens, personal recordings, or unlicensed media. Copy only a redacted support report.
+  - type: input
+    id: version
+    attributes:
+      label: Extension version and build
+      placeholder: 0.6.0, private beta store build
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Chrome and operating system
+      placeholder: Chrome 126, Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: symptom
+    attributes:
+      label: Main symptom
+      options:
+        - Loud sound was not reduced enough
+        - Quiet sound was not lifted enough
+        - Volume pumped or changed repeatedly
+        - Distortion or crackling
+        - Transients or music dynamics were damaged
+        - Mute or player-volume limit was not respected
+        - Audio was not processed
+        - Audio stopped, echoed, or duplicated
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: media
+    attributes:
+      label: Media type
+      options:
+        - Dialogue video
+        - Music video
+        - Live stream
+        - Web music player
+        - Short-video feed
+        - Protected streaming service
+        - Local test page
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: What happened
+      description: Include the two strength values, player volume, whether the popup showed a fresh signal, and a short reproducible sequence.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted support report or measurements
+      description: Paste only the relevant sanitized fields. Do not paste a private URL or full browsing history.
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Privacy and rights confirmation
+      options:
+        - label: I removed private browsing data, personal information, tokens, and account details.
+          required: true
+        - label: Any media sample I provide is mine or I have permission to share it.
+          required: true

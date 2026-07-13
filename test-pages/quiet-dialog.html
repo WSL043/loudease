@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Quiet Dialog Test</title>
+</head>
+<body>
+  <h1>Quiet Dialog Test</h1>
+  <button id="start">Start quiet dialog simulation</button>
+  <script>
+    document.getElementById('start').addEventListener('click', async () => {
+      const context = new AudioContext();
+      await context.resume();
+      const oscillator = context.createOscillator();
+      const tremolo = context.createOscillator();
+      const tremoloGain = context.createGain();
+      const output = context.createGain();
+      oscillator.frequency.value = 230;
+      tremolo.frequency.value = 4;
+      tremoloGain.gain.value = 0.008;
+      output.gain.value = 0.018;
+      tremolo.connect(tremoloGain).connect(output.gain);
+      oscillator.connect(output).connect(context.destination);
+      oscillator.start();
+      tremolo.start();
+    }, { once: true });
+  </script>
+</body>
+</html>

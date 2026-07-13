@@ -1,0 +1,371 @@
+{
+  "appName": {
+    "message": "LoudEase"
+  },
+  "monitorTitle": {
+    "message": "LoudEase Monitor"
+  },
+  "monitorHeading": {
+    "message": "Monitor & options"
+  },
+  "enabledLabel": {
+    "message": "Enable balancing"
+  },
+  "enabledHint": {
+    "message": "Enable or pause volume balancing"
+  },
+  "statusChecking": {
+    "message": "Checking"
+  },
+  "statusConnecting": {
+    "message": "Connecting"
+  },
+  "statusReadingTab": {
+    "message": "Reading the active tab"
+  },
+  "statusSaving": {
+    "message": "Saving"
+  },
+  "statusApplying": {
+    "message": "Applying changes"
+  },
+  "statusOff": {
+    "message": "Off"
+  },
+  "statusPaused": {
+    "message": "Balancing paused"
+  },
+  "statusOriginalAudio": {
+    "message": "Original audio passes through"
+  },
+  "statusUnavailable": {
+    "message": "Unavailable"
+  },
+  "statusRestrictedPage": {
+    "message": "Restricted page"
+  },
+  "statusRestrictedPageHelp": {
+    "message": "Chrome does not allow audio access here"
+  },
+  "statusError": {
+    "message": "Error"
+  },
+  "statusMuted": {
+    "message": "Muted"
+  },
+  "statusPlayerMuted": {
+    "message": "Player is muted"
+  },
+  "statusNoAudioOutput": {
+    "message": "No audio is being output"
+  },
+  "statusConnected": {
+    "message": "Connected"
+  },
+  "statusWaitingForAudio": {
+    "message": "Waiting for audio"
+  },
+  "statusNoSignalConfirmed": {
+    "message": "Connected, but no signal is detected"
+  },
+  "statusActive": {
+    "message": "Active"
+  },
+  "statusLifting": {
+    "message": "Lifting quiet audio"
+  },
+  "statusReducing": {
+    "message": "Reducing loud audio"
+  },
+  "statusBalancing": {
+    "message": "Balancing audio"
+  },
+  "statusSignalConfirmed": {
+    "message": "Live audio signal confirmed"
+  },
+  "statusActionRequired": {
+    "message": "Action required"
+  },
+  "statusReconnectRequired": {
+    "message": "Audio connection needs recovery"
+  },
+  "statusReloadHelp": {
+    "message": "Reload this page to reconnect"
+  },
+  "statusNotConnected": {
+    "message": "Audio is not connected"
+  },
+  "statusReady": {
+    "message": "Ready"
+  },
+  "statusMediaDetected": {
+    "message": "Media detected"
+  },
+  "statusWaitingForMedia": {
+    "message": "Waiting for media"
+  },
+  "statusPlayToBegin": {
+    "message": "Play audio to begin balancing"
+  },
+  "statusCheckingConnection": {
+    "message": "Checking the page connection"
+  },
+  "statusLoadFailed": {
+    "message": "Could not load status"
+  },
+  "statusReopenPopup": {
+    "message": "Close and reopen the popup"
+  },
+  "strengthControlsLabel": {
+    "message": "Strength controls"
+  },
+  "reduceLoudLabel": {
+    "message": "Reduce loud sounds"
+  },
+  "reduceLoudHelp": {
+    "message": "Controls peak reduction"
+  },
+  "liftQuietLabel": {
+    "message": "Lift quiet sounds"
+  },
+  "liftQuietHelp": {
+    "message": "Controls quiet-detail lift"
+  },
+  "playerLimitStatement": {
+    "message": "Quiet-sound lift will not exceed the player's current volume."
+  },
+  "recoverCapture": {
+    "message": "Reconnect tab audio"
+  },
+  "recoverReload": {
+    "message": "Reload page"
+  },
+  "captureFailed": {
+    "message": "Tab audio connection failed"
+  },
+  "captureRecoveryHelp": {
+    "message": "Reconnect to try again"
+  },
+  "capturePermissionMissing": {
+    "message": "Chrome did not grant tab audio access"
+  },
+  "capturePermissionTimeout": {
+    "message": "Tab audio access timed out"
+  },
+  "copyDiagnostics": {
+    "message": "Copy support report"
+  },
+  "downloadDiagnostics": {
+    "message": "Download report"
+  },
+  "refresh": {
+    "message": "Refresh"
+  },
+  "reloadExtension": {
+    "message": "Reload extension"
+  },
+  "summaryLabel": {
+    "message": "Summary"
+  },
+  "versionLabel": {
+    "message": "Version"
+  },
+  "activeTabsLabel": {
+    "message": "Active tabs"
+  },
+  "connectedSourcesLabel": {
+    "message": "Connected sources"
+  },
+  "lastUpdatedLabel": {
+    "message": "Last updated"
+  },
+  "settingsHeading": {
+    "message": "Settings"
+  },
+  "waitingForSettings": {
+    "message": "Waiting for settings"
+  },
+  "localDiagnosticsLabel": {
+    "message": "Local diagnostics receiver"
+  },
+  "localDiagnosticsHelp": {
+    "message": "Writes debug snapshots only to 127.0.0.1. Off by default."
+  },
+  "resetAllSettings": {
+    "message": "Reset all settings"
+  },
+  "siteLabel": {
+    "message": "Site"
+  },
+  "presetLabel": {
+    "message": "Preset"
+  },
+  "saveSite": {
+    "message": "Save site"
+  },
+  "deleteSite": {
+    "message": "Delete site"
+  },
+  "siteDefaultsLabel": {
+    "message": "Site defaults"
+  },
+  "pageStatusHeading": {
+    "message": "Page status"
+  },
+  "waitingForData": {
+    "message": "Waiting for data"
+  },
+  "recentEventsHeading": {
+    "message": "Recent events"
+  },
+  "backgroundLogLabel": {
+    "message": "Background log"
+  },
+  "presetStandard": {
+    "message": "Standard"
+  },
+  "presetVoice": {
+    "message": "Voice"
+  },
+  "presetNight": {
+    "message": "Night"
+  },
+  "presetLive": {
+    "message": "Live"
+  },
+  "presetStrong": {
+    "message": "Strong"
+  },
+  "presetCustom": {
+    "message": "Custom"
+  },
+  "noSiteDefaults": {
+    "message": "No site defaults yet. Save one to apply it by hostname."
+  },
+  "settingsSummary": {
+    "message": "v$1, $2 sites"
+  },
+  "saving": {
+    "message": "Saving"
+  },
+  "saved": {
+    "message": "Saved"
+  },
+  "deleted": {
+    "message": "Deleted"
+  },
+  "resetting": {
+    "message": "Resetting"
+  },
+  "resetDone": {
+    "message": "Reset complete"
+  },
+  "selectSiteFirst": {
+    "message": "Select a site first"
+  },
+  "confirmReset": {
+    "message": "Reset all global settings and site defaults?"
+  },
+  "diagnosticsOn": {
+    "message": "Local diagnostics enabled"
+  },
+  "diagnosticsOff": {
+    "message": "Local diagnostics disabled"
+  },
+  "diagnosticsCopied": {
+    "message": "Diagnostics JSON copied"
+  },
+  "diagnosticsDownloaded": {
+    "message": "Diagnostics JSON downloaded"
+  },
+  "noPageStatus": {
+    "message": "No page status received yet."
+  },
+  "noEvents": {
+    "message": "No background events"
+  },
+  "liveRefresh": {
+    "message": "Refreshing live"
+  },
+  "staleEngineFound": {
+    "message": "Outdated runtime found"
+  },
+  "statusIdle": {
+    "message": "Idle"
+  },
+  "statusPlaying": {
+    "message": "Playing"
+  },
+  "statusCaptured": {
+    "message": "Connected"
+  },
+  "statusNeedsRefresh": {
+    "message": "Needs refresh"
+  },
+  "yes": {
+    "message": "Yes"
+  },
+  "no": {
+    "message": "No"
+  },
+  "frameLabel": {
+    "message": "Frame"
+  },
+  "mediaLabel": {
+    "message": "Media"
+  },
+  "playbackLabel": {
+    "message": "Playback"
+  },
+  "analysisLabel": {
+    "message": "Analysis"
+  },
+  "reductionLabel": {
+    "message": "Reduction"
+  },
+  "liftLabel": {
+    "message": "Lift"
+  },
+  "errorsLabel": {
+    "message": "Errors"
+  },
+  "editingSite": {
+    "message": "Editing $1"
+  },
+  "appShortName": {
+    "message": "Volume Balancer"
+  },
+  "appDescription": {
+    "message": "Balances loud and quiet audio on web pages while respecting the player's volume."
+  },
+  "actionTitleEnabled": {
+    "message": "LoudEase — enabled"
+  },
+  "actionTitlePaused": {
+    "message": "LoudEase — paused"
+  },
+  "generalTab": { "message": "General" },
+  "sitesTab": { "message": "Site rules" },
+  "diagnosticsTab": { "message": "Support & diagnostics" },
+  "captureGestureTitle": { "message": "New tabs need one click" },
+  "captureGestureHelp": { "message": "Chrome requires you to open the extension once before a new tab can be balanced." },
+  "generalHelp": { "message": "Choose how the extension looks and behaves by default." },
+  "appearanceHeading": { "message": "Appearance" },
+  "languageLabel": { "message": "Language" },
+  "languageHelp": { "message": "Used in the popup and settings page." },
+  "appearanceLabel": { "message": "Theme" },
+  "appearanceHelp": { "message": "Follow the system or choose light or dark." },
+  "themeSystem": { "message": "System" },
+  "themeLight": { "message": "Light" },
+  "themeDark": { "message": "Dark" },
+  "defaultBalanceHeading": { "message": "Default balance for all sites" },
+  "enabledHelp": { "message": "Keep balancing enabled when a tab is connected." },
+  "playerLimitShort": { "message": "Respect player volume" },
+  "resetHelp": { "message": "Remove global changes and every site rule." },
+  "resetAction": { "message": "Reset" },
+  "siteRulesHelp": { "message": "Override the global defaults for a hostname." },
+  "globalDefaultsHelp": { "message": "Applies to every connected site unless a site rule overrides it." },
+  "supportReportHelp": { "message": "Create a privacy-safe report for bug reports and support." },
+  "openIssue": { "message": "Report an issue" },
+  "tabLabel": { "message": "Tab" }
+}

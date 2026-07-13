@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Burst Volume Test</title>
+</head>
+<body>
+  <h1>Burst Volume Test</h1>
+  <button id="start">Start bursts</button>
+  <script>
+    document.getElementById('start').addEventListener('click', async () => {
+      const context = new AudioContext();
+      await context.resume();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = 880;
+      gain.gain.value = 0.02;
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start();
+      setInterval(() => {
+        gain.gain.setValueAtTime(0.02, context.currentTime);
+        gain.gain.linearRampToValueAtTime(0.55, context.currentTime + 0.02);
+        gain.gain.linearRampToValueAtTime(0.02, context.currentTime + 0.16);
+      }, 1200);
+    }, { once: true });
+  </script>
+</body>
+</html>

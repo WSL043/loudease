@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Iframe Video Test</title>
+</head>
+<body>
+  <h1>Iframe Video Test</h1>
+  <iframe id="frame" width="640" height="360"></iframe>
+  <script>
+    document.getElementById('frame').srcdoc = `
+      <!doctype html>
+      <html>
+      <body>
+        <h2>Inner frame</h2>
+        <button id="start">Start inner tone</button>
+        <script>
+          document.getElementById('start').addEventListener('click', async () => {
+            const context = new AudioContext();
+            await context.resume();
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            oscillator.frequency.value = 520;
+            gain.gain.value = 0.08;
+            oscillator.connect(gain).connect(context.destination);
+            oscillator.start();
+          }, { once: true });
+        <\/script>
+      </body>
+      </html>
+    `;
+  </script>
+</body>
+</html>
