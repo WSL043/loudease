@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "不包含音频" },
   "noUrlsShared": { "message": "不包含网址或站点名称" },
   "noAccountDataShared": { "message": "不包含账户标识" },
+  "shareListeningFeedback": { "message": "分享听感反馈" },
   "shareReport": { "message": "复制报告并打开 GitHub" },
   "previewReport": { "message": "预览包含的数据" },
   "technicalDiagnostics": { "message": "技术诊断" },
   "technicalDiagnosticsHelp": { "message": "用于排查问题的实时连接详情。" },
-  "reportCopiedOpenIssue": { "message": "报告已复制，请粘贴到 GitHub 表单中。" }
+  "reportCopiedOpenIssue": { "message": "报告已复制，请粘贴到 GitHub 表单中。" },
+  "feedbackOpened": { "message": "已打开听感反馈表。" }
 }

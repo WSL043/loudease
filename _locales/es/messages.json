@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "Sin audio" },
   "noUrlsShared": { "message": "Sin URL ni nombres de sitios" },
   "noAccountDataShared": { "message": "Sin identificadores de cuenta" },
+  "shareListeningFeedback": { "message": "Compartir opinión de escucha" },
   "shareReport": { "message": "Copiar informe y abrir GitHub" },
   "previewReport": { "message": "Vista previa de los datos incluidos" },
   "technicalDiagnostics": { "message": "Diagnóstico técnico" },
   "technicalDiagnosticsHelp": { "message": "Detalles de conexión en vivo para resolver problemas." },
-  "reportCopiedOpenIssue": { "message": "Informe copiado. Pégalo en el formulario de GitHub." }
+  "reportCopiedOpenIssue": { "message": "Informe copiado. Pégalo en el formulario de GitHub." },
+  "feedbackOpened": { "message": "Formulario de opinión de escucha abierto." }
 }

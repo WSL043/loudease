@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "No audio" },
   "noUrlsShared": { "message": "No URLs or site names" },
   "noAccountDataShared": { "message": "No account identifiers" },
+  "shareListeningFeedback": { "message": "Share listening feedback" },
   "shareReport": { "message": "Copy report & open GitHub" },
   "previewReport": { "message": "Preview included data" },
   "technicalDiagnostics": { "message": "Technical diagnostics" },
   "technicalDiagnosticsHelp": { "message": "Live connection details for troubleshooting." },
-  "reportCopiedOpenIssue": { "message": "Report copied. Paste it into the GitHub form." }
+  "reportCopiedOpenIssue": { "message": "Report copied. Paste it into the GitHub form." },
+  "feedbackOpened": { "message": "Listening feedback form opened." }
 }

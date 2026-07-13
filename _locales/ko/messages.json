@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "오디오 없음" },
   "noUrlsShared": { "message": "URL 또는 사이트 이름 없음" },
   "noAccountDataShared": { "message": "계정 식별자 없음" },
+  "shareListeningFeedback": { "message": "청취 피드백 공유" },
   "shareReport": { "message": "보고서 복사 후 GitHub 열기" },
   "previewReport": { "message": "포함된 데이터 미리보기" },
   "technicalDiagnostics": { "message": "기술 진단" },
   "technicalDiagnosticsHelp": { "message": "문제 해결을 위한 실시간 연결 정보입니다." },
-  "reportCopiedOpenIssue": { "message": "보고서가 복사되었습니다. GitHub 양식에 붙여 넣으세요." }
+  "reportCopiedOpenIssue": { "message": "보고서가 복사되었습니다. GitHub 양식에 붙여 넣으세요." },
+  "feedbackOpened": { "message": "청취 피드백 양식을 열었습니다." }
 }

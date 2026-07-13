@@ -4,6 +4,10 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+## 0.7.1-beta.2
+
+- Added a direct, localized route from Settings to the structured listening-feedback form.
+
 ## 0.7.1-beta.1
 
 - Added a one-click light/dark theme switch to the popup, synchronized with the options page.

@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "音声データなし" },
   "noUrlsShared": { "message": "URL・サイト名なし" },
   "noAccountDataShared": { "message": "アカウント識別子なし" },
+  "shareListeningFeedback": { "message": "聴取フィードバックを共有" },
   "shareReport": { "message": "レポートをコピーして GitHub を開く" },
   "previewReport": { "message": "送信内容をプレビュー" },
   "technicalDiagnostics": { "message": "技術診断" },
   "technicalDiagnosticsHelp": { "message": "トラブルシューティング用のリアルタイム接続情報です。" },
-  "reportCopiedOpenIssue": { "message": "レポートをコピーしました。GitHub フォームに貼り付けてください。" }
+  "reportCopiedOpenIssue": { "message": "レポートをコピーしました。GitHub フォームに貼り付けてください。" },
+  "feedbackOpened": { "message": "聴取フィードバックフォームを開きました。" }
 }

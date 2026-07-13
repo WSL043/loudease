@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "بدون صوت" },
   "noUrlsShared": { "message": "بدون روابط أو أسماء مواقع" },
   "noAccountDataShared": { "message": "بدون معرفات حساب" },
+  "shareListeningFeedback": { "message": "مشاركة ملاحظات الاستماع" },
   "shareReport": { "message": "نسخ التقرير وفتح GitHub" },
   "previewReport": { "message": "معاينة البيانات المضمنة" },
   "technicalDiagnostics": { "message": "التشخيص الفني" },
   "technicalDiagnosticsHelp": { "message": "تفاصيل الاتصال المباشر لاستكشاف الأخطاء وإصلاحها." },
-  "reportCopiedOpenIssue": { "message": "تم نسخ التقرير. الصقه في نموذج GitHub." }
+  "reportCopiedOpenIssue": { "message": "تم نسخ التقرير. الصقه في نموذج GitHub." },
+  "feedbackOpened": { "message": "تم فتح نموذج ملاحظات الاستماع." }
 }

@@ -8,6 +8,7 @@ const els = {
   tabs: document.getElementById('tabs'),
   events: document.getElementById('events'),
   refreshNow: document.getElementById('refreshNow'),
+  shareFeedback: document.getElementById('shareFeedback'),
   shareReport: document.getElementById('shareReport'),
   copyJson: document.getElementById('copyJson'),
   downloadJson: document.getElementById('downloadJson'),
@@ -412,14 +413,22 @@ async function copyDiagnostics() {
   els.health.textContent = t('diagnosticsCopied', undefined, 'Diagnostics copied');
 }
 
+async function openExternal(url) {
+  if (globalThis.chrome?.tabs?.create) {
+    await chrome.tabs.create({ url });
+    return;
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+async function shareListeningFeedback() {
+  await openExternal('https://github.com/WSL043/loudease/issues/new?template=feedback.yml');
+  els.health.textContent = t('feedbackOpened', undefined, 'Listening feedback form opened.');
+}
+
 async function shareDiagnostics() {
   await copyDiagnostics();
-  const issueUrl = 'https://github.com/WSL043/loudease/issues/new?template=audio-quality.yml';
-  if (globalThis.chrome?.tabs?.create) {
-    await chrome.tabs.create({ url: issueUrl });
-  } else {
-    window.open(issueUrl, '_blank', 'noopener,noreferrer');
-  }
+  await openExternal('https://github.com/WSL043/loudease/issues/new?template=audio-quality.yml');
   els.health.textContent = t('reportCopiedOpenIssue', undefined, 'Report copied. Paste it into the GitHub form.');
 }
 
@@ -471,6 +480,7 @@ function bind() {
     els.settingsHealth.textContent = t('editingSite', siteKey, `Editing ${siteKey}`);
   });
   els.copyJson.addEventListener('click', () => copyDiagnostics().catch(reportDiagnosticsError));
+  els.shareFeedback.addEventListener('click', () => shareListeningFeedback().catch(reportDiagnosticsError));
   els.shareReport.addEventListener('click', () => shareDiagnostics().catch(reportDiagnosticsError));
   els.downloadJson.addEventListener('click', () => downloadDiagnostics().catch(reportDiagnosticsError));
   els.reloadExtension.addEventListener('click', () => {

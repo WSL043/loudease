@@ -142,7 +142,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
   .rangeRow { grid-template-columns: minmax(0,1fr) 34px; }
   .rangeRow input { grid-column: 1 / -1; }
   .reportPanel { grid-template-columns: 1fr; }
-  .reportActions { inline-size: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .reportActions { inline-size: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 520px) {
   .topbar, .viewHeader { align-items: flex-start; flex-direction: column; }

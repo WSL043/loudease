@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "不包含音訊" },
   "noUrlsShared": { "message": "不包含網址或網站名稱" },
   "noAccountDataShared": { "message": "不包含帳戶識別資訊" },
+  "shareListeningFeedback": { "message": "分享聽感回饋" },
   "shareReport": { "message": "複製報告並開啟 GitHub" },
   "previewReport": { "message": "預覽包含的資料" },
   "technicalDiagnostics": { "message": "技術診斷" },
   "technicalDiagnosticsHelp": { "message": "用於疑難排解的即時連線詳情。" },
-  "reportCopiedOpenIssue": { "message": "報告已複製，請貼到 GitHub 表單中。" }
+  "reportCopiedOpenIssue": { "message": "報告已複製，請貼到 GitHub 表單中。" },
+  "feedbackOpened": { "message": "已開啟聽感回饋表。" }
 }

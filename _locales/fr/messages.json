@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "Aucun son" },
   "noUrlsShared": { "message": "Aucune URL ni nom de site" },
   "noAccountDataShared": { "message": "Aucun identifiant de compte" },
+  "shareListeningFeedback": { "message": "Partager votre ressenti d’écoute" },
   "shareReport": { "message": "Copier le rapport et ouvrir GitHub" },
   "previewReport": { "message": "Prévisualiser les données incluses" },
   "technicalDiagnostics": { "message": "Diagnostic technique" },
   "technicalDiagnosticsHelp": { "message": "Détails de connexion en direct pour le dépannage." },
-  "reportCopiedOpenIssue": { "message": "Rapport copié. Collez-le dans le formulaire GitHub." }
+  "reportCopiedOpenIssue": { "message": "Rapport copié. Collez-le dans le formulaire GitHub." },
+  "feedbackOpened": { "message": "Formulaire de ressenti d’écoute ouvert." }
 }

@@ -377,9 +377,11 @@
   "noAudioShared": { "message": "Без аудио" },
   "noUrlsShared": { "message": "Без URL и названий сайтов" },
   "noAccountDataShared": { "message": "Без идентификаторов аккаунта" },
+  "shareListeningFeedback": { "message": "Поделиться впечатлением от звука" },
   "shareReport": { "message": "Копировать отчёт и открыть GitHub" },
   "previewReport": { "message": "Просмотреть включённые данные" },
   "technicalDiagnostics": { "message": "Техническая диагностика" },
   "technicalDiagnosticsHelp": { "message": "Сведения о подключении в реальном времени для устранения неполадок." },
-  "reportCopiedOpenIssue": { "message": "Отчёт скопирован. Вставьте его в форму GitHub." }
+  "reportCopiedOpenIssue": { "message": "Отчёт скопирован. Вставьте его в форму GitHub." },
+  "feedbackOpened": { "message": "Форма отзыва о звуке открыта." }
 }
