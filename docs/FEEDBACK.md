@@ -10,6 +10,8 @@ The private beta uses three channels:
 2. The Chrome Web Store Support Hub for questions, bug reports, and feature requests after support is enabled in the publisher dashboard.
 3. GitHub Issue Forms for reproducible engineering reports from invited testers and, later, public contributors.
 
+The [community testing guide](COMMUNITY_TESTING.md) breaks compatibility, listening, endurance, and translation checks into small tasks. The compatibility form accepts successful checks as well as failures, so the evidence matrix can grow without requiring one maintainer to retest every platform.
+
 The extension can create a redacted support report in **Settings -> Support & diagnostics**. The user can preview it, copy or download it, or explicitly copy it and open the GitHub Issue Form. The extension does not submit it automatically.
 
 The generated report excludes URLs, hostnames, inferred platform names, page titles, tab identifiers, account identifiers, event timestamps, and audio. The user remains responsible for reviewing it before a public submission.

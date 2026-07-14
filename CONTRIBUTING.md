@@ -21,6 +21,12 @@ Feature requests should state the user problem, explain why current controls do 
 
 Use the audio-quality issue form for pumping, distortion, weak quiet lift, excessive reduction, transient loss, or unstable loudness. The feedback channel and privacy boundaries are documented in [docs/FEEDBACK.md](docs/FEEDBACK.md).
 
+## Community testing
+
+You do not need to run the entire compatibility matrix. The [community testing guide](docs/COMMUNITY_TESTING.md) separates platform checks, listening comparisons, endurance checks, and translation review into small tasks. Use the compatibility form for both successful and failed site checks so maintainers can distinguish verified behavior from untested targets.
+
+Keep each report focused on one platform and media type. Do not infer broad support from one successful page, and do not change DSP constants from one subjective report without reproducible evidence.
+
 ## Development workflow
 
 Use Node.js 20 or newer. Keep runtime code compatible with Chrome 116 or newer.

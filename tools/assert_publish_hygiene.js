@@ -13,6 +13,8 @@ const security = fs.readFileSync(path.join(root, 'SECURITY.md'), 'utf8');
 const releaseReview = fs.readFileSync(path.join(root, 'docs', 'RELEASE_READINESS_REVIEW.md'), 'utf8');
 const dataGovernance = fs.readFileSync(path.join(root, 'docs', 'DATA_GOVERNANCE.md'), 'utf8');
 const feedback = fs.readFileSync(path.join(root, 'docs', 'FEEDBACK.md'), 'utf8');
+const communityTesting = fs.readFileSync(path.join(root, 'docs', 'COMMUNITY_TESTING.md'), 'utf8');
+const compatibilityForm = fs.readFileSync(path.join(root, '.github', 'ISSUE_TEMPLATE', 'compatibility.yml'), 'utf8');
 const monitor = fs.readFileSync(path.join(root, 'monitor', 'index.html'), 'utf8');
 const monitorScript = fs.readFileSync(path.join(root, 'monitor', 'index.js'), 'utf8');
 const background = fs.readFileSync(path.join(root, 'background.js'), 'utf8');
@@ -28,12 +30,14 @@ const checks = [
   ['bridge mediaDetail diagnostics avoid layout reads', !mediaDetailBody.includes('getBoundingClientRect')],
   ['public project metadata exists', fs.existsSync(path.join(root, 'package.json')) && fs.existsSync(path.join(root, '.github', 'workflows', 'ci.yml')) && /LoudEase/.test(englishReadme)],
   ['contribution and license policies exist', /DSP changes and regressions/.test(contributing) && /Mozilla Public License Version 2\.0/.test(license) && fs.existsSync(path.join(root, 'TRADEMARKS.md')) && fs.existsSync(path.join(root, 'NOTICE'))],
-  ['selected logo and light/dark product screenshots exist', ['assets/logo-ai-a-light.png', 'assets/logo-ai-a-dark.png', 'docs/popup-screenshot-light.png', 'docs/popup-screenshot-dark.png'].every((file) => fs.existsSync(path.join(root, file)))],
+  ['selected logo and current light/dark product screenshots exist', ['assets/logo-ai-a-light.png', 'assets/logo-ai-a-dark.png', 'docs/popup-screenshot-light.png', 'docs/popup-screenshot-dark.png', 'docs/settings-screenshot-light.png', 'docs/settings-screenshot-dark.png'].every((file) => fs.existsSync(path.join(root, file)))],
   ['privacy and security policies exist', /Audio samples are not uploaded/.test(privacy) && /Security Policy/.test(security)],
   ['release review blocks localhost diagnostics from the store package', /no localhost permission, URL, diagnostics symbol/.test(releaseReview)],
   ['readmes link current privacy and release limits', /PRIVACY\.md/.test(readme) && /RELEASE_READINESS_REVIEW\.md/.test(englishReadme)],
   ['private corpus and future telemetry have explicit release gates', /private-corpus\//.test(gitignore) && /Telemetry is not implemented/.test(dataGovernance) && /Raw PCM/.test(dataGovernance) && /clear, separate opt-in/.test(dataGovernance) && /DATA_GOVERNANCE\.md/.test(privacy) && /DATA_GOVERNANCE\.md/.test(releaseReview)],
   ['feedback remains user initiated without embedded service credentials', /GitHub is a manual feedback tracker/.test(feedback) && /must never contain a GitHub access token/.test(feedback) && /issues\/new\?template=audio-quality\.yml/.test(monitorScript)],
+  ['community testing is scoped and privacy preserving', /10-minute platform check/.test(communityTesting) && /one person to validate every platform/.test(communityTesting) && /private or account-specific URL/.test(compatibilityForm)],
+  ['readmes use current themed screenshots and link community testing', /settings-screenshot-dark\.png/.test(englishReadme) && /COMMUNITY_TESTING\.md/.test(englishReadme) && /settings-screenshot-dark\.png/.test(readme) && /COMMUNITY_TESTING\.md/.test(readme)],
   ['automatic quality measurement excludes browsing identity', /must not infer or transmit a platform, hostname, URL/.test(dataGovernance) && /must not include a persistent installation identifier/.test(feedback)]
 ];
 

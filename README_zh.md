@@ -1,74 +1,72 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/logo-ai-a-dark.png">
-    <img src="assets/logo-ai-a-light.png" width="136" alt="LoudEase Logo">
+    <img src="assets/logo-ai-a-light.png" width="112" alt="LoudEase Logo">
   </picture>
 </p>
 
 <h1 align="center">LoudEase</h1>
 
-<p align="center"><strong>让网页声音更稳定，也更舒服。</strong></p>
+<p align="center"><strong>压住突兀的大声，保留该有的细节，把控制权留给你。</strong></p>
 
 <p align="center">
-  LoudEase 压低突然的大声，在安全余量允许时轻柔提起小声，<br>
-  同时始终尊重播放器的音量和静音状态。
+  LoudEase 自动收窄网页音频中让人不舒服的响度落差，<br>
+  同时始终尊重播放器音量和静音状态。
+</p>
+
+<p align="center">
+  <a href="https://github.com/WSL043/loudease/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/WSL043/loudease/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Private beta" src="https://img.shields.io/badge/status-private%20beta-f59e0b">
+  <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">
+  <img alt="Local AudioWorklet" src="https://img.shields.io/badge/processing-local%20AudioWorklet-159669">
+  <a href="LICENSE"><img alt="MPL 2.0 License" src="https://img.shields.io/badge/license-MPL--2.0-17202b"></a>
 </p>
 
 <p align="center">
   <a href="README.md">English</a> ·
-  <a href="#体验测试版">体验</a> ·
-  <a href="docs/AUDIO_DSP.md">声音算法</a> ·
-  <a href="docs/ARCHITECTURE.md">架构</a> ·
-  <a href="docs/RELEASE_READINESS_REVIEW.md">发布状态</a> ·
+  <a href="#安装私有测试版">安装</a> ·
+  <a href="#它如何工作">工作原理</a> ·
+  <a href="#一起完善-loudease">社区测试</a> ·
   <a href="CONTRIBUTING.md">参与贡献</a>
 </p>
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/popup-screenshot-dark.png">
-    <img src="docs/popup-screenshot-light.png" width="420" alt="LoudEase 实时响度处理界面">
+    <img src="docs/popup-screenshot-light.png" width="340" alt="LoudEase 当前实时处理界面">
   </picture>
 </p>
 
 > [!NOTE]
-> 当前版本仍是私有 Beta。README 只陈述已有实现和验证证据，不把测试目标包装成兼容承诺。
+> LoudEase 目前仍是私有 Beta。下面会明确区分已经验证的行为和等待社区验证的目标，不把测试计划写成兼容承诺。
 
-## 把网页声音收进舒服的范围
+## 把网页声音收进更舒服的范围
 
-网页音频经常在低声对白、突然音效、音乐、广告和不同创作者的母带音量之间跳变。普通音量条只能让所有声音一起变大或变小；单纯增强容易破音；固定压缩又可能产生明显抽吸感。
+网页音频很少遵守同一个舒适音量：对白听不清，音效突然冲出来，广告偏响，切换创作者或直播间后又要重新调音量。普通音量条只能让所有声音一起变化；LoudEase 处理的是不同声音时刻之间的落差。
 
-LoudEase 不是音量放大器，也不是均衡器。它遵循三条清晰原则：
+| 压住突兀的大声 | 安全提起小声细节 | 尊重原有控制 |
+|---|---|---|
+| 快速增益衰减与前视限幅共同接住持续大声和短促峰值。 | 只有真实信号、峰值余量和所选强度都允许时才提升，不盲目放大底噪。 | 静音和播放器零音量始终是硬边界；只有收到新鲜运行证据时，界面才显示“生效中”。 |
 
-| | LoudEase 的处理方式 |
-|---|---|
-| **压住大声** | 快速降低持续的大声，并用前视限幅器接住短促峰值。 |
-| **轻提小声** | 只有检测到真实信号且存在峰值余量时，才进行受控提升。 |
-| **尊重控制** | 播放器静音和零音量是硬边界；没有新鲜运行证据时，界面不会假装已经生效。 |
+LoudEase 不是音量放大器、均衡器，也不是经过校准的听力保护设备。它会缩小干扰听感的音量差，同时保留必要的层次和瞬态。
 
-目标不是把所有声音压成一条直线，而是在保留必要层次的同时，缩小让人不舒服的响度落差。
+## 它如何工作
 
-## 真正的实时音频链路
-
-```text
-用户授权的标签页
-  -> 整页音频捕获
-  -> K-weighted 响度分析
-  -> 双时间窗增益调节
-  -> 前视峰值限幅
-  -> 播放器音量边界
-  -> 本机输出
+```mermaid
+flowchart LR
+  A["忽大忽小的网页声音"] --> B["测量响度"]
+  B --> C["调整增益"]
+  C --> D["限制危险峰值"]
+  D --> E["更稳定的输出"]
 ```
 
-- 整页捕获覆盖授权标签页中的媒体元素、直播和 Web Audio。
-- AudioWorklet 负责实时处理，不把音频控制循环塞进网页或 Service Worker。
-- 压大声和提小声是两套独立策略，不用一条粗暴压缩曲线解决所有问题。
-- 音频只在本机处理，原始声音不会上传或用于分析。
+用户授权后，LoudEase 会把标签页作为一条完整音频流捕获，并在本机 `AudioWorklet` 中处理。K-weighted 测量分别驱动“压大声”和“提小声”，前视限幅器负责保护峰值余量，原始音频不会上传。
 
-准确算法、参数依据和当前缺口见 [声音算法说明](docs/AUDIO_DSP.md)。
+实现细节、算法假设和当前缺口见 [声音算法](docs/AUDIO_DSP.md)、[架构](docs/ARCHITECTURE.md) 与 [已知限制](docs/KNOWN_LIMITATIONS.md)。
 
-## 体验测试版
+## 安装私有测试版
 
-要求 Chrome 116+、Node.js 20+。
+需要 Chrome 116+、Node.js 20+。
 
 ```bash
 git clone https://github.com/WSL043/loudease.git
@@ -77,62 +75,70 @@ npm install
 npm run build:dev
 ```
 
-打开 `chrome://extensions`，启用开发者模式，选择“加载已解压的扩展程序”，然后选择 `dist/github-dev`。
+打开 `chrome://extensions`，启用“开发者模式”，选择“加载已解压的扩展程序”，然后选择 `dist/github-dev`。
 
-1. 打开正在播放声音的普通网页。
+1. 打开正在播放声音的普通 `http` 或 `https` 网页。
 2. 点击一次 LoudEase，为当前标签页授权。
-3. 出现实时时域状态和当前 dB 调整值后，才代表真正接管。
+3. 波形开始移动且出现实时 dB 数值，才表示正在处理。
 4. 只有默认听感不合适时，再调整“压大声”和“提小声”。
 
-Chrome 要求 `tabCapture` 由用户手势启动，因此全新标签页不能静默接管。这是浏览器安全边界，不是站点适配失败。
+Chrome 要求 `tabCapture` 由用户手势启动，因此全新标签页不能静默接管；完成授权后，即使切换到其他标签页，LoudEase 仍可继续处理原标签页。
 
-## 兼容范围
+## 已验证范围
 
-| 证据级别 | 当前范围 |
+| 证据 | 当前范围 |
 |---|---|
-| Beta 基线 | YouTube 视频/直播、Bilibili 视频/直播、抖音视频/直播 |
-| 本地回归 | HTML5 媒体、SPA 换源、iframe、Web Audio、静音与播放器音量边界 |
-| 扩展矩阵 | Twitch、TikTok、Spotify Web Player、Vimeo、社交视频、地区平台和受保护流媒体 |
+| 私有 Beta 基线 | YouTube 视频/直播、Bilibili 视频/直播、抖音视频/直播 |
+| 自动回归 | HTML5 媒体、SPA 换源、iframe、Web Audio、静音、播放器零音量、滑块持久化和离线 DSP 音频图 |
+| 社区测试目标 | Twitch、TikTok、Spotify Web Player、Vimeo、社交视频、地区平台和受保护流媒体 |
 
-扩展矩阵是测试目标，不是兼容承诺。Chrome 内部页面以及 Chrome 拒绝捕获的页面不受支持。详见 [站点兼容](docs/SITE_ADAPTERS.md)、[已知限制](docs/KNOWN_LIMITATIONS.md) 和 [测试矩阵](docs/TEST_MATRIX.md)。
+测试目标不是兼容承诺。Chrome 内部页面以及 Chrome 拒绝捕获的页面不受支持。详见 [站点适配](docs/SITE_ADAPTERS.md) 和 [测试矩阵](docs/TEST_MATRIX.md)。
 
-界面提供阿拉伯语、德语、英语、西班牙语、法语、日语、韩语、巴西葡萄牙语、俄语、简体中文和繁体中文，默认语言为英语。
+界面目前提供阿拉伯语、德语、英语、西班牙语、法语、日语、韩语、巴西葡萄牙语、俄语、简体中文和繁体中文，默认语言为英语。
+
+## 一起完善 LoudEase
+
+不需要任何一个人测完所有平台，也不要求每位测试者都跑两小时稳定性测试。范围小、可以复现的检查更有价值：
+
+- 用 10 分钟检查一个网站的接管、换源、静音、播放器音量和标签页切换；
+- 选择一段人声、音乐、直播或强瞬态内容，对比开启和关闭后的听感；
+- 审阅一种自己日常使用的语言；
+- 提交一个范围清晰、带回归测试的修复。
+
+先阅读 [社区测试指南](docs/COMMUNITY_TESTING.md)，再通过 [问题选择器](https://github.com/WSL043/loudease/issues/new/choose) 提交兼容性、音质、Bug 或产品反馈。所有报告都由用户主动提交，扩展没有自动遥测服务。
 
 <details>
-<summary><strong>设置与站点规则</strong></summary>
+<summary><strong>当前设置与站点规则</strong></summary>
 <br>
 <p align="center">
-  <img src="docs/settings-screenshot-light.png" width="760" alt="LoudEase 设置页面">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/settings-screenshot-dark.png">
+    <img src="docs/settings-screenshot-light.png" width="840" alt="LoudEase 当前设置页面">
+  </picture>
 </p>
 </details>
 
 ## 开发与验证
 
 ```bash
-npm test
-npm run test:dsp
-npm run test:slider
-npm run test:release
-npm run audit
+npm test              # 契约、DSP 与离线音频图测试
+npm run test:dsp      # DSP 专项验证
+npm run test:slider   # 弹窗滑块持久化回归
+npm run test:release  # Chrome 商店精简构建验证
+npm run audit         # 发布就绪证据审查
 ```
 
 `dist/github-dev` 保留默认关闭的贡献者诊断；`dist/store` 通过白名单构建移除 localhost 权限、诊断界面、符号和网络代码。修改权限或打包逻辑前请阅读 [构建说明](docs/BUILD.md)。
 
-## 隐私与安全边界
+公开 Beta 与商店发布门槛统一记录在基于证据的 [发布就绪审查](docs/RELEASE_READINESS_REVIEW.md) 中。
 
-- 音频样本只存在于本机扩展音频图中。
-- 不包含广告分析或远程可执行代码。
-- 设置使用 `chrome.storage.sync`，同步行为取决于用户的 Chrome 设置。
-- LoudEase 不是经过校准的听力保护设备，无法控制系统增益、硬件放大或耳边实际声压。
+## 隐私、安全与许可
+
+- 音频只存在于本机扩展音频图中。
+- 不包含广告分析、静默遥测或远程可执行代码。
+- 设置使用 `chrome.storage.sync`，同步行为取决于用户的 Chrome Sync 配置。
+- LoudEase 无法控制系统增益、硬件放大或耳边实际声压。
 
 详见 [隐私说明](PRIVACY.md)、[反馈与数据边界](docs/FEEDBACK.md) 和 [安全说明](SECURITY.md)。
 
-## 参与贡献
-
-欢迎提交问题和范围清晰的 PR。DSP 修改需要可复现输入、输出峰值、增益包络和听测记录；权限、捕获、存储或网络行为变化必须进行明确的隐私审查。请先阅读 [贡献指南](CONTRIBUTING.md)。
-
-## 许可证
-
-LoudEase 源代码使用 [Mozilla Public License 2.0](LICENSE) 发布。对 LoudEase 原有源文件的修改在对外分发时仍需公开；独立的新文件可以采用其他许可证。
-
-LoudEase 名称和 Logo 不随源代码授权。欢迎合规分叉，但重新发布的产品必须使用不同的名称和视觉标识。详见 [商标政策](TRADEMARKS.md) 与 [NOTICE](NOTICE)。
+源代码使用 [MPL-2.0](LICENSE)。对 LoudEase 原有源文件的修改在对外分发时仍需公开；大型作品中的独立文件可以使用其他许可证。LoudEase 名称与 Logo 由 [商标政策](TRADEMARKS.md) 单独管理。

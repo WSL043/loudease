@@ -1,0 +1,106 @@
+name: Platform compatibility check
+description: Share a focused site, source-switch, tab-switch, mute, or player-volume result
+title: "[Compatibility]: "
+labels: [compatibility, community-test]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Successful checks are useful too. Do not include private URLs, account data, tokens, browsing history, personal recordings, or unlicensed media.
+  - type: input
+    id: version
+    attributes:
+      label: Extension version and build
+      placeholder: 0.7.1 from dist/github-dev
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Chrome and operating system
+      placeholder: Chrome 126, Windows 11
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Public website or platform
+      description: Use a public homepage or platform name. Do not paste a private or account-specific URL.
+      placeholder: Twitch, YouTube, Spotify Web Player
+    validations:
+      required: true
+  - type: dropdown
+    id: media
+    attributes:
+      label: Media type
+      options:
+        - Video
+        - Live stream
+        - Audio-only or music player
+        - Short-video feed
+        - Web Audio application
+        - Protected streaming service
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: initial_capture
+    attributes:
+      label: Initial connection
+      options:
+        - Connected and showed fresh signal
+        - Connected but showed no signal
+        - Did not connect
+        - Chrome refused capture
+    validations:
+      required: true
+  - type: dropdown
+    id: source_switch
+    attributes:
+      label: Next video, track, episode, or source
+      options:
+        - Continued processing without refresh
+        - Reconnected automatically after a short wait
+        - Required reopening the popup
+        - Required a page refresh
+        - Lost or duplicated audio
+        - Not tested
+    validations:
+      required: true
+  - type: dropdown
+    id: tab_switch
+    attributes:
+      label: Switching to another tab
+      options:
+        - Authorized tab stayed processed
+        - Processing stopped or changed
+        - Audio dropped, duplicated, or stuttered
+        - Not tested
+    validations:
+      required: true
+  - type: dropdown
+    id: player_boundary
+    attributes:
+      label: Mute and player-volume boundary
+      options:
+        - Mute and zero volume remained silent
+        - Mute or zero volume leaked audio
+        - Player-volume limit was exceeded
+        - Not tested
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Result and reproduction notes
+      description: Include the two strength values and a short reproducible sequence. Successful results can be brief.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I removed private browsing data, personal information, tokens, and media I do not have permission to share.
+          required: true
+
