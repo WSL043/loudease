@@ -1,6 +1,6 @@
 # LoudEase Trademark Policy
 
-The Mozilla Public License 2.0 applies to the source code, not to the LoudEase name, logo, icon, waveform mark, or other brand assets (the "LoudEase Marks"). Those marks identify the official project maintained by WSL043.
+The GNU General Public License v3.0 applies to the source code, not to the LoudEase name, logo, icon, waveform mark, or other brand assets (the "LoudEase Marks"). Those marks identify the official project maintained by WSL043.
 
 ## Allowed uses
 

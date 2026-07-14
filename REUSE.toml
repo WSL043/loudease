@@ -1,0 +1,42 @@
+version = 1
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 WSL043 and LoudEase contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = [
+  "assets/logo-ai-a-light.png",
+  "assets/logo-ai-a-dark.png",
+  "assets/icon-16.png",
+  "assets/icon-32.png",
+  "assets/icon-48.png",
+  "assets/icon-128.png",
+  "docs/popup-screenshot-light.png",
+  "docs/popup-screenshot-dark.png",
+  "docs/settings-screenshot-light.png",
+  "docs/settings-screenshot-dark.png",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 WSL043"
+SPDX-License-Identifier = "LicenseRef-LoudEase-Brand"
+
+[[annotations]]
+path = "assets/moon.svg"
+precedence = "override"
+SPDX-FileCopyrightText = "2013-present Cole Bemis"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["assets/settings.svg", "assets/sun.svg"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Lucide Icons and Contributors"
+SPDX-License-Identifier = "ISC"
+
+[[annotations]]
+path = "DCO"
+precedence = "override"
+SPDX-FileCopyrightText = "2004, 2006 The Linux Foundation and its contributors"
+SPDX-License-Identifier = "LicenseRef-DCO-1.1"

@@ -19,7 +19,7 @@
   <img alt="Private beta" src="https://img.shields.io/badge/status-private%20beta-f59e0b">
   <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">
   <img alt="Local AudioWorklet" src="https://img.shields.io/badge/processing-local%20AudioWorklet-159669">
-  <a href="LICENSE"><img alt="MPL 2.0 License" src="https://img.shields.io/badge/license-MPL--2.0-17202b"></a>
+  <a href="LICENSE"><img alt="GPL 3.0 only License" src="https://img.shields.io/badge/license-GPL--3.0--only-17202b"></a>
 </p>
 
 <p align="center">
@@ -141,4 +141,6 @@ Open beta and store gates are tracked in the evidence-based [Release readiness r
 
 See [Privacy](PRIVACY.md), [Feedback and data boundaries](docs/FEEDBACK.md), and [Security](SECURITY.md).
 
-Source code is licensed under [MPL-2.0](LICENSE). Modified LoudEase source files remain open when distributed; separate files in a larger work may use their own license. The LoudEase name and logo are governed separately by the [Trademark Policy](TRADEMARKS.md).
+Source code is licensed under [GPL-3.0-only](LICENSE). Distributed derivative versions must provide the corresponding source under GPLv3. Historical tagged releases remain available under the license attached to those releases. The LoudEase name and logo are governed separately by the [Trademark Policy](TRADEMARKS.md); bundled icon notices are recorded in [Third-party notices](THIRD_PARTY_NOTICES.md).
+
+The decision and transition boundary are explained in [Licensing](docs/LICENSING.md). Project authority and contribution rights are documented in [Governance](GOVERNANCE.md), [Contributing](CONTRIBUTING.md), and the [Developer Certificate of Origin](DCO). Asset origins and machine-readable license boundaries are recorded in [Asset provenance](ASSET_PROVENANCE.md) and [REUSE.toml](REUSE.toml).

@@ -3,7 +3,7 @@
   "version": "0.7.1",
   "private": true,
   "description": "Local-first loudness control for more comfortable web audio.",
-  "license": "MPL-2.0",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/WSL043/loudease.git"

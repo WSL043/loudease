@@ -4,7 +4,15 @@ Thanks for helping improve LoudEase. The project is a beta audio processor, so c
 
 ## Contribution license
 
-By submitting a contribution, you confirm that you have the right to provide it and agree that it will be distributed under the Mozilla Public License 2.0. Do not submit copied code, media, model output, or other material whose license is unknown or incompatible. The LoudEase name and logo remain subject to [TRADEMARKS.md](TRADEMARKS.md).
+By submitting a contribution, you confirm that you have the right to provide it and agree that it will be distributed under GPL-3.0-only. Contributors retain copyright in their work. A contribution does not grant the project a separate right to relicense it for a proprietary product; any future relicensing agreement must be explicit, optional, and separate from ordinary contribution.
+
+Every commit in a pull request must include a Developer Certificate of Origin sign-off:
+
+```text
+Signed-off-by: Your Name <your.email@example.com>
+```
+
+Use `git commit -s` to add it. The sign-off certifies the statements in [DCO](DCO); it is not a copyright assignment. Do not submit copied code, media, generated output, employer-owned material, or other content whose origin and license you cannot document. The LoudEase name and logo remain subject to [TRADEMARKS.md](TRADEMARKS.md).
 
 ## Issues
 
@@ -74,3 +82,5 @@ Do not commit copyrighted programme audio or private test recordings. Use synthe
 ## Pull requests
 
 Keep pull requests focused and describe the user-visible behavior, risk, and verification performed. Add tests for regressions and update documentation when behavior, limitations, permissions, privacy, build output, or supported environments change. All checks should pass from a clean checkout; note any real-site or hardware checks that could not be run.
+
+Contributing does not grant repository access, maintainer status, release authority, or ownership of the official project. See [GOVERNANCE.md](GOVERNANCE.md).

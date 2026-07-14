@@ -17,8 +17,7 @@
 当前已有 Node 脚本：
 
 ```powershell
-$node='C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
-& $node .\tools\run_all_checks.js
+node .\tools\run_all_checks.js
 ```
 
 该命令会聚合当前所有本地静态/结构检查。它不是行为测试；真实 Chrome 行为由下面的隔离 Chrome E2E 覆盖。
@@ -26,12 +25,11 @@ $node='C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\nod
 当前已有隔离 Chrome E2E：
 
 ```powershell
-$node='C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
-& $node .\tools\e2e_poc_smoke.js
-$env:WVB_E2E_PAGE='quiet-dialog.html'; $env:WVB_E2E_EXPECT='lift'; & $node .\tools\e2e_poc_smoke.js
-$env:WVB_E2E_PAGE='burst-volume.html'; $env:WVB_E2E_EXPECT='burst'; $env:WVB_E2E_MIN_REDUCTION_DB='3'; & $node .\tools\e2e_poc_smoke.js
-& $node .\tools\e2e_stability_smoke.js
-& $node .\tools\e2e_long_run_smoke.js --duration-ms 30000
+node .\tools\e2e_poc_smoke.js
+$env:WVB_E2E_PAGE='quiet-dialog.html'; $env:WVB_E2E_EXPECT='lift'; node .\tools\e2e_poc_smoke.js
+$env:WVB_E2E_PAGE='burst-volume.html'; $env:WVB_E2E_EXPECT='burst'; $env:WVB_E2E_MIN_REDUCTION_DB='3'; node .\tools\e2e_poc_smoke.js
+node .\tools\e2e_stability_smoke.js
+node .\tools\e2e_long_run_smoke.js --duration-ms 30000
 ```
 
 这些 E2E 已证明本地测试页里的 tabCapture 成功、offscreen 有输入/输出 meter、压大声/提小声/burst 恢复有效、连续接管/停止可恢复、页面 reload 后可重新接管，以及本地切源后仍继续处理。`0.4.82` 还包含 `tools/dsp_unit_tests.js` 核心增益计算测试、`tools/offline_audio_tests.js` 合成 PCM 曲线测试、`tools/offline_audio_graph_tests.js` 真实 OfflineAudioContext 图测试，并通过 `tools/e2e_long_run_smoke.js` 对接管后的状态、音轨、信号 tick、输出峰值、AudioContext 和 offscreen heap 做可配置时长监控。它们仍不能替代真实站点矩阵，包括 YouTube、Bilibili、抖音基线和后续全球代表平台。
@@ -39,8 +37,7 @@ $env:WVB_E2E_PAGE='burst-volume.html'; $env:WVB_E2E_EXPECT='burst'; $env:WVB_E2E
 30 分钟长跑验收命令：
 
 ```powershell
-$node='C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
-& $node .\tools\e2e_long_run_smoke.js --duration-ms 1800000 --cycles 3 --sample-ms 5000
+node .\tools\e2e_long_run_smoke.js --duration-ms 1800000 --cycles 3 --sample-ms 5000
 ```
 
 该命令会占用一个隔离 Chrome，不会操作用户正在使用的主 Chrome。
@@ -48,8 +45,7 @@ $node='C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\nod
 当前运行状态审计：
 
 ```powershell
-$node='C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
-& $node .\tools\current_runtime_audit.js
+node .\tools\current_runtime_audit.js
 ```
 
 该命令只读，输出磁盘版本、Chrome Profile 中音量扩展和 Codex Chrome Extension 的注册/禁用状态、`tmp/latest-diagnostics.json` 是否过期，以及诊断文件指向哪个 tab。它不是功能测试，但排查“页面未回传/未接入/截图仍旧版/无法读 DevTools”时必须先跑。
@@ -61,7 +57,7 @@ $node='C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\nod
 当前已有基础测试：
 
 ```powershell
-& $node .\tools\dsp_unit_tests.js
+node .\tools\dsp_unit_tests.js
 ```
 
 覆盖：关闭、0 强度、大声压低、小声提升、峰值余量不足不提升、峰值保护、强度缩放。

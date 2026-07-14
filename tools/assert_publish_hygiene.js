@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
+const packageMetadata = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const gitignore = fs.readFileSync(path.join(root, '.gitignore'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
 const englishReadme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
@@ -13,6 +14,7 @@ const security = fs.readFileSync(path.join(root, 'SECURITY.md'), 'utf8');
 const releaseReview = fs.readFileSync(path.join(root, 'docs', 'RELEASE_READINESS_REVIEW.md'), 'utf8');
 const dataGovernance = fs.readFileSync(path.join(root, 'docs', 'DATA_GOVERNANCE.md'), 'utf8');
 const feedback = fs.readFileSync(path.join(root, 'docs', 'FEEDBACK.md'), 'utf8');
+const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
 const communityTesting = fs.readFileSync(path.join(root, 'docs', 'COMMUNITY_TESTING.md'), 'utf8');
 const compatibilityForm = fs.readFileSync(path.join(root, '.github', 'ISSUE_TEMPLATE', 'compatibility.yml'), 'utf8');
 const monitor = fs.readFileSync(path.join(root, 'monitor', 'index.html'), 'utf8');
@@ -29,7 +31,8 @@ const checks = [
   ['local diagnostics default disabled', /let\s+localDiagnosticsEnabled\s*=\s*false;/.test(background)],
   ['bridge mediaDetail diagnostics avoid layout reads', !mediaDetailBody.includes('getBoundingClientRect')],
   ['public project metadata exists', fs.existsSync(path.join(root, 'package.json')) && fs.existsSync(path.join(root, '.github', 'workflows', 'ci.yml')) && /LoudEase/.test(englishReadme)],
-  ['contribution and license policies exist', /DSP changes and regressions/.test(contributing) && /Mozilla Public License Version 2\.0/.test(license) && fs.existsSync(path.join(root, 'TRADEMARKS.md')) && fs.existsSync(path.join(root, 'NOTICE'))],
+  ['GPL license transition and contribution policies exist', packageMetadata.license === 'GPL-3.0-only' && /GNU GENERAL PUBLIC LICENSE/.test(license) && /Historical tagged releases retain their original license grants/.test(changelog) && /Developer Certificate of Origin/.test(contributing)],
+  ['governance and provenance policies exist', ['GOVERNANCE.md', 'DCO', 'ASSET_PROVENANCE.md', 'THIRD_PARTY_NOTICES.md', '.github/CODEOWNERS', 'REUSE.toml', 'LICENSES/GPL-3.0-only.txt', 'docs/LICENSING.md'].every((file) => fs.existsSync(path.join(root, file))) && fs.existsSync(path.join(root, 'TRADEMARKS.md')) && fs.existsSync(path.join(root, 'NOTICE'))],
   ['selected logo and current light/dark product screenshots exist', ['assets/logo-ai-a-light.png', 'assets/logo-ai-a-dark.png', 'docs/popup-screenshot-light.png', 'docs/popup-screenshot-dark.png', 'docs/settings-screenshot-light.png', 'docs/settings-screenshot-dark.png'].every((file) => fs.existsSync(path.join(root, file)))],
   ['privacy and security policies exist', /Audio samples are not uploaded/.test(privacy) && /Security Policy/.test(security)],
   ['release review blocks localhost diagnostics from the store package', /no localhost permission, URL, diagnostics symbol/.test(releaseReview)],

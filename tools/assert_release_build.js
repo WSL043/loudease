@@ -26,7 +26,7 @@ function assertReference(from, value) {
 
 function verify() {
   if (!exists('manifest.json')) fail('Missing manifest.json');
-  for (const notice of ['LICENSE', 'NOTICE', 'TRADEMARKS.md']) if (!exists(notice)) fail(`Missing release notice: ${notice}`);
+  for (const notice of ['LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.md', 'TRADEMARKS.md']) if (!exists(notice)) fail(`Missing release notice: ${notice}`);
   let manifest;
   try { manifest = JSON.parse(fs.readFileSync(path.join(build, 'manifest.json'), 'utf8').replace(/^\uFEFF/, '')); }
   catch (error) { fail(`Invalid manifest JSON: ${error.message}`); }

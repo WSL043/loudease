@@ -1,11 +1,18 @@
 LoudEase
 Copyright 2026 WSL043 and LoudEase contributors.
 
-This Source Code Form is subject to the terms of the Mozilla Public License,
-v. 2.0. If a copy of the MPL was not distributed with this file, You can
-obtain one at https://mozilla.org/MPL/2.0/.
+Current source code is distributed under the GNU General Public License,
+version 3 only (GPL-3.0-only). See LICENSE.
+
+Historical tagged releases remain available under the license attached to
+each release. In particular, the 0.7.0 and 0.7.1 beta tags were distributed
+under MPL-2.0; those existing grants are not revoked by the later transition.
 
 Project home: https://github.com/WSL043/loudease
 
-The LoudEase name, logo, and related project marks are not licensed under the
-MPL-2.0. See TRADEMARKS.md.
+The LoudEase name, logo, icon, waveform mark, and related project marks are
+not licensed under GPL-3.0-only. See TRADEMARKS.md and
+LICENSES/LicenseRef-LoudEase-Brand.txt.
+
+Third-party icon copyright and permission notices are reproduced in
+THIRD_PARTY_NOTICES.md.

@@ -4,6 +4,9 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Relicensed future LoudEase versions from MPL-2.0 to GPL-3.0-only so distributed derivative extensions must keep their corresponding source available. Historical tagged releases retain their original license grants.
+- Added founder-led governance, DCO sign-offs, CODEOWNERS, machine-readable license metadata, asset provenance, and third-party icon notices.
+
 ## 0.7.1-beta.2
 
 - Added a direct, localized route from Settings to the structured listening-feedback form.

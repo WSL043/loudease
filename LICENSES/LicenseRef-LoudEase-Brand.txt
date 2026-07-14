@@ -1,0 +1,15 @@
+LoudEase Brand Assets License
+
+Copyright 2026 WSL043. All rights reserved except for the permissions below.
+
+The LoudEase name, logo, icon, waveform mark, and official product screenshots are not licensed under GPL-3.0-only.
+
+Permission is granted to:
+
+1. redistribute an unmodified official LoudEase build when it is clearly identified as official and links to the official source;
+2. use unmodified screenshots and the word LoudEase in truthful reviews, documentation, news, compatibility statements, and educational material; and
+3. state that a modified product is based on LoudEase using ordinary text and a link to the official project.
+
+No permission is granted to use a LoudEase mark as the name, icon, logo, or dominant branding of a modified distribution, fork, service, repository, package, domain, or other product, or in a way that implies sponsorship, endorsement, certification, or official status.
+
+Modified distributions must use a distinct name and visual identity. This asset license does not limit nominative fair use or other rights provided by applicable law. See TRADEMARKS.md for the project policy and contact route.

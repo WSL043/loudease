@@ -20,7 +20,7 @@ Review baseline: version `0.7.1`, unified AudioWorklet DSP, independent multi-ta
 - Independent capture ownership for multiple authorized tabs.
 - Development diagnostics are opt-in and removed from the store build.
 - Eleven locale catalogs with English as the default.
-- MPL-2.0 license, trademark policy, privacy policy, security policy, contribution guide, and CI workflow.
+- GPL-3.0-only license for future versions, preserved historical license grants, founder-led governance, DCO, CODEOWNERS, asset provenance, trademark policy, privacy policy, security policy, contribution guide, and CI workflow.
 
 ## Automated gates
 

@@ -1,10 +1,12 @@
 @echo off
 setlocal
 
-where node >nul 2>nul
-if errorlevel 1 (
-  set "NODE_EXE=C:\Users\Omo\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
-) else (
+if not defined NODE_EXE (
+  where node >nul 2>nul
+  if errorlevel 1 (
+    echo Node.js 20 or newer is required. Add node to PATH or set NODE_EXE.
+    exit /b 1
+  )
   set "NODE_EXE=node"
 )
 

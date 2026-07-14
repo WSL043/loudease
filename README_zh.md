@@ -19,7 +19,7 @@
   <img alt="Private beta" src="https://img.shields.io/badge/status-private%20beta-f59e0b">
   <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">
   <img alt="Local AudioWorklet" src="https://img.shields.io/badge/processing-local%20AudioWorklet-159669">
-  <a href="LICENSE"><img alt="MPL 2.0 License" src="https://img.shields.io/badge/license-MPL--2.0-17202b"></a>
+  <a href="LICENSE"><img alt="GPL 3.0 only License" src="https://img.shields.io/badge/license-GPL--3.0--only-17202b"></a>
 </p>
 
 <p align="center">
@@ -141,4 +141,6 @@ npm run audit         # 发布就绪证据审查
 
 详见 [隐私说明](PRIVACY.md)、[反馈与数据边界](docs/FEEDBACK.md) 和 [安全说明](SECURITY.md)。
 
-源代码使用 [MPL-2.0](LICENSE)。对 LoudEase 原有源文件的修改在对外分发时仍需公开；大型作品中的独立文件可以使用其他许可证。LoudEase 名称与 Logo 由 [商标政策](TRADEMARKS.md) 单独管理。
+源代码使用 [GPL-3.0-only](LICENSE)。对外分发的衍生版本必须按照 GPLv3 提供对应源码；历史标签版本继续适用各版本当时附带的许可证。LoudEase 名称与 Logo 由 [商标政策](TRADEMARKS.md) 单独管理，内置图标的许可见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+
+许可证选择和历史边界见 [许可说明](docs/LICENSING.md)。项目管理权与贡献规则见 [治理说明](GOVERNANCE.md)、[贡献指南](CONTRIBUTING.md) 和 [开发者原创声明](DCO)；素材来源与机器可读许可边界见 [资产来源](ASSET_PROVENANCE.md) 和 [REUSE.toml](REUSE.toml)。
