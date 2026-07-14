@@ -18,6 +18,9 @@ path = [
   "docs/popup-screenshot-dark.png",
   "docs/settings-screenshot-light.png",
   "docs/settings-screenshot-dark.png",
+  "store/assets/screenshot-balancing-1280x800.png",
+  "store/assets/screenshot-settings-1280x800.png",
+  "store/assets/promo-small-440x280.png",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 WSL043"

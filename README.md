@@ -32,10 +32,7 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/popup-screenshot-dark.png">
-    <img src="docs/popup-screenshot-light.png" width="340" alt="Current LoudEase popup showing live processing">
-  </picture>
+  <img src="store/assets/screenshot-balancing-1280x800.png" width="960" alt="LoudEase balancing an authorized browser tab with live input and output status">
 </p>
 
 > [!NOTE]
@@ -53,17 +50,21 @@ LoudEase is not a volume booster, an equalizer, or a calibrated hearing-protecti
 
 ## How it works
 
-```mermaid
-flowchart LR
-  A["Uneven web audio"] --> B["Measure loudness"]
-  B --> C["Balance gain"]
-  C --> D["Limit unsafe peaks"]
-  D --> E["More consistent output"]
-```
+<p align="center">
+  <img src="docs/processing-flow.png" width="960" alt="Uneven input is measured, balanced, and peak limited into a narrower output range while retaining variation">
+</p>
 
 The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted measurements guide separate loud-cut and quiet-lift policies; a look-ahead limiter protects peak headroom. No raw audio is uploaded.
 
 For implementation details, assumptions, and current gaps, read [Audio DSP](docs/AUDIO_DSP.md), [Architecture](docs/ARCHITECTURE.md), and [Known limitations](docs/KNOWN_LIMITATIONS.md).
+
+## One audio core, two distributions
+
+| Chrome Web Store build | GitHub development build |
+|---|---|
+| The same DSP, popup, settings, languages, and per-site rules. Localhost diagnostics and contributor-only controls are physically removed from the package. | The complete open-source project, including opt-in local diagnostics, test pages, evidence tools, and reproducible store packaging. |
+
+The store build is smaller for privacy and review compliance; it does not use a weaker balancing algorithm. The exact package boundary is enforced by an allowlist build and verified in CI. Store copy, permission explanations, privacy fields, and submission assets live in [`store/`](store/).
 
 ## Install the private beta
 
@@ -138,7 +139,7 @@ Open beta and store gates are tracked in the evidence-based [Release readiness r
 ## Privacy, safety, and license
 
 - Audio stays inside the local extension audio graph.
-- There is no advertising analytics, silent telemetry, or remote executable code.
+- There is no advertising, analytics, silent telemetry, or remote executable code.
 - Settings use `chrome.storage.sync`, subject to the user's Chrome Sync configuration.
 - LoudEase cannot control operating-system gain, hardware amplification, or acoustic output at the ear.
 

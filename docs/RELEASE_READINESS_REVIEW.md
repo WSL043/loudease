@@ -8,7 +8,7 @@ Review baseline: version `0.7.1`, unified AudioWorklet DSP, independent multi-ta
 |---|---|---|
 | Private GitHub beta | Ready | Private prerelease and clean store ZIP exist; this is not a public compatibility claim |
 | Public GitHub beta | Not yet | Needs refreshed real-site, endurance, listening, and feedback evidence |
-| Chrome Web Store | Not yet | Needs final permission justification, listing assets, and refreshed real-site endurance evidence |
+| Chrome Web Store | Not yet | Submission copy, privacy fields, and required-size assets are prepared; public URLs and refreshed real-site endurance evidence remain |
 | Version `1.0.0` | Not yet | Requires the stable-release gates in `docs/VERSIONING.md` |
 
 ## Confirmed implementation
@@ -48,8 +48,8 @@ The store verifier must confirm:
 1. Refresh the unpacked extension and collect current-version evidence for YouTube video/live, Bilibili video/live, and Douyin video/live.
 2. Run at least a two-hour mixed-content endurance session and record capture count, track count, context state, stale status, limiter overshoot, and hard-clipped samples.
 3. Complete controlled A/B listening on dialogue, music, live speech, ads, sparse ambience, and loud transient material.
-4. Confirm every required permission is justified in the store dashboard and remove any permission proven unnecessary.
-5. Prepare final store icon, screenshots, small promotional tile, description, privacy fields, support URL, and contact route.
+4. Reconfirm the permission justifications in `store/PRIVACY_PRACTICES.md` against the final package. The redundant `activeTab` and `tabs` permissions have been removed.
+5. Reinspect the required-size assets and copy in `store/`, then make the privacy and support URLs publicly reachable before submission.
 6. Review translated store copy for accuracy; do not use keyword lists or compatibility claims unsupported by the matrix.
 7. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
 8. Enable the Chrome Web Store Support Hub or configure a reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.

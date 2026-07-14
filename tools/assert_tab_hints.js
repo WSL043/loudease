@@ -21,7 +21,8 @@ const background = read('background.js');
 const bridge = read('content/bridge.js');
 const audit = read('tools/current_runtime_audit.js');
 
-ok(manifest.permissions.includes('tabs'), 'manifest grants tabs permission for diagnostic tab hints');
+ok(!manifest.permissions.includes('tabs'), 'manifest avoids redundant tabs permission because matching host access exposes required tab fields');
+ok(!manifest.permissions.includes('activeTab'), 'manifest avoids redundant activeTab permission because HTTP(S) hosts are declared');
 ok(manifest.host_permissions.includes('http://*/*'), 'manifest grants http host access for reinjection');
 ok(manifest.host_permissions.includes('https://*/*'), 'manifest grants https host access for reinjection');
 ok(background.includes('const tabHints = new Map();'), 'background tracks diagnostic tab hints');

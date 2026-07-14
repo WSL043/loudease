@@ -437,8 +437,10 @@ async function evaluateValue(cdp, expression, options = {}) {
 }
 
 async function main() {
-  if (process.env.CI !== 'true' && process.env.WVB_E2E_ALLOW_LOCAL_AUDIO !== '1') {
-    throw new Error('Local audio E2E is disabled by default because it emits test tones. Set WVB_E2E_ALLOW_LOCAL_AUDIO=1 only when a silent audio endpoint is selected.');
+  const muteAudio = process.env.WVB_E2E_MUTE_AUDIO === '1';
+  const captureOnly = muteAudio || process.env.WVB_E2E_CAPTURE_ONLY === '1';
+  if (process.env.CI !== 'true' && process.env.WVB_E2E_ALLOW_LOCAL_AUDIO !== '1' && !muteAudio) {
+    throw new Error('Local audio E2E is disabled by default because it emits test tones. Set WVB_E2E_MUTE_AUDIO=1 for a muted browser run, or WVB_E2E_ALLOW_LOCAL_AUDIO=1 only when a silent audio endpoint is selected.');
   }
   const chrome = findChrome();
   fs.mkdirSync(tmpDir, { recursive: true });
@@ -464,9 +466,13 @@ async function main() {
   if (process.env.WVB_E2E_HEADLESS === '1') {
     args.push('--headless=new');
   }
+  if (muteAudio) {
+    args.push('--mute-audio');
+  }
 
   log(`launching isolated Chrome profile at ${profileDir}`);
   log(`scenario page=${scenario.page} expect=${scenario.expect}`);
+  if (captureOnly) log('capture-only verification enabled; signal and gain assertions are skipped');
   const child = spawn(chrome, args, { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
   let chromeStderr = '';
   child.stderr?.on('data', (chunk) => {
@@ -861,17 +867,17 @@ async function main() {
       throw new Error(`Audio meter became stale: ${tab.meterFrameAgeMs}`);
     }
     const signalTicks = Number(tab.capture?.signalTickCount || tab.signalTickCount || 0);
-    if (scenario.expect !== 'muted' && signalTicks < scenario.minSignalTicks) {
+    if (!captureOnly && scenario.expect !== 'muted' && signalTicks < scenario.minSignalTicks) {
       throw new Error('capture became active but no input signal was measured');
     }
-    if (scenario.expect !== 'muted' && !Number.isFinite(Number(tab.averageInputDb))) {
+    if (!captureOnly && scenario.expect !== 'muted' && !Number.isFinite(Number(tab.averageInputDb))) {
       throw new Error('capture signal was measured but averageInputDb was missing');
     }
-    if (scenario.expect !== 'muted' && !Number.isFinite(Number(tab.averageOutputDb))) {
+    if (!captureOnly && scenario.expect !== 'muted' && !Number.isFinite(Number(tab.averageOutputDb))) {
       throw new Error('capture signal was measured but averageOutputDb was missing');
     }
     const observed = status.observed || {};
-    if (scenario.expect === 'reduce') {
+    if (!captureOnly && scenario.expect === 'reduce') {
       if (Number(tab.averageReductionDb) < scenario.minReductionDb) {
         throw new Error(`leveler did not reduce enough: ${tab.averageReductionDb}`);
       }
@@ -879,7 +885,7 @@ async function main() {
         throw new Error(`leveler currentGainDb did not show active reduction: ${tab.currentGainDb}`);
       }
     }
-    if (scenario.expect === 'lift') {
+    if (!captureOnly && scenario.expect === 'lift') {
       if (Number(observed.maxLiftDb || tab.averageLiftDb) < scenario.minLiftDb) {
         throw new Error(`leveler did not lift the quiet test tone enough: ${tab.averageLiftDb}`);
       }
@@ -896,7 +902,7 @@ async function main() {
         throw new Error(`leveler exceeded player-volume-aware lift ceiling: ${JSON.stringify({ outputDb: tab.averageOutputDb, outputCeilingDb, playerVolume: scenario.playerVolume })}`);
       }
     }
-    if (scenario.expect === 'hold') {
+    if (!captureOnly && scenario.expect === 'hold') {
       const currentGain = Math.abs(Number(tab.currentGainDb) || 0);
       const liftDb = Number(observed.maxLiftDb || tab.averageLiftDb) || 0;
       const reductionDb = Number(observed.maxReductionDb || tab.averageReductionDb) || 0;
@@ -904,7 +910,7 @@ async function main() {
         throw new Error(`leveler should hold low player-volume normal source near unity: ${JSON.stringify({ currentGain, liftDb, reductionDb })}`);
       }
     }
-    if (scenario.expect === 'burst') {
+    if (!captureOnly && scenario.expect === 'burst') {
       if (Number(observed.maxReductionDb) < scenario.minReductionDb) {
         throw new Error(`burst scenario did not reduce during the observation window: ${observed.maxReductionDb}`);
       }
@@ -912,7 +918,7 @@ async function main() {
         throw new Error(`burst scenario did not return near unity during a quiet interval: ${tab.currentGainDb}`);
       }
     }
-    if (scenario.expect === 'muted' || scenario.expect === 'muted-during-capture') {
+    if (!captureOnly && (scenario.expect === 'muted' || scenario.expect === 'muted-during-capture')) {
       if (!tab.playerMuted || Number(tab.playerVolumeCap) > 0.01) {
         throw new Error(`player mute state was not respected: ${JSON.stringify({ playerMuted: tab.playerMuted, playerVolumeCap: tab.playerVolumeCap })}`);
       }
@@ -930,6 +936,7 @@ async function main() {
       version: manifestVersion,
       generatedAt: new Date().toISOString(),
       passed: true,
+      captureOnly,
       scenario,
       phase: status.phase,
       stopPhase: status.stopPhase,

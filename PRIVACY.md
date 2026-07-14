@@ -31,8 +31,8 @@ The Chrome Web Store build removes the localhost host permission, diagnostics se
 - `tabCapture`: obtain audio from a tab after the user invokes the extension.
 - `offscreen`: run the local Web Audio graph outside the service worker.
 - `storage`: save settings.
-- `activeTab`, `tabs`: identify the active tab, track authorized capture sessions, and recover status.
 - `scripting` and HTTP(S) host access: install or restore the lightweight media/player-state observer after navigation.
+- HTTP(S) host access also lets the extension identify the current page, apply its site rule, and track the authorized tab without requesting the broader `tabs` permission separately.
 
 Permissions are used only for the extension's single purpose: balancing audio in user-authorized web tabs.
 
@@ -45,6 +45,12 @@ No remote telemetry is currently implemented. The optional support report is gen
 Any future opt-in quality measurement requires a dedicated HTTPS endpoint, a new privacy review, prominent in-product consent, updated store disclosures, and the release gates in [docs/DATA_GOVERNANCE.md](docs/DATA_GOVERNANCE.md).
 
 Current feedback channels and the future collection boundary are documented in [docs/FEEDBACK.md](docs/FEEDBACK.md). GitHub issues and store support are user-initiated support routes, not background telemetry.
+
+## Chrome Web Store Limited Use
+
+LoudEase's use of information received from Chrome APIs complies with the [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data-policy/), including the Limited Use requirements.
+
+Information accessed through Chrome APIs is used only to provide LoudEase's single purpose: balancing audio in tabs the user authorizes. It is not transferred to third parties except when necessary to provide that user-facing purpose, comply with applicable law, or address security abuse. It is not used for advertising, creditworthiness, lending, or unrelated analytics. Human access is not permitted except when the user deliberately includes redacted information in a support request or when another Limited Use exception applies.
 
 ## Contact
 

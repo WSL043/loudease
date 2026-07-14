@@ -32,10 +32,7 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/popup-screenshot-dark.png">
-    <img src="docs/popup-screenshot-light.png" width="340" alt="LoudEase 当前实时处理界面">
-  </picture>
+  <img src="store/assets/screenshot-balancing-1280x800.png" width="960" alt="LoudEase 正在处理已授权标签页，并显示实时输入与输出状态">
 </p>
 
 > [!NOTE]
@@ -53,17 +50,21 @@ LoudEase 不是音量放大器、均衡器，也不是经过校准的听力保�
 
 ## 它如何工作
 
-```mermaid
-flowchart LR
-  A["忽大忽小的网页声音"] --> B["测量响度"]
-  B --> C["调整增益"]
-  C --> D["限制危险峰值"]
-  D --> E["更稳定的输出"]
-```
+<p align="center">
+  <img src="docs/processing-flow.png" width="960" alt="忽大忽小的输入经过响度测量、增益平衡和峰值保护后，变成保留层次但范围更窄的输出">
+</p>
 
 用户授权后，LoudEase 会把标签页作为一条完整音频流捕获，并在本机 `AudioWorklet` 中处理。K-weighted 测量分别驱动“压大声”和“提小声”，前视限幅器负责保护峰值余量，原始音频不会上传。
 
 实现细节、算法假设和当前缺口见 [声音算法](docs/AUDIO_DSP.md)、[架构](docs/ARCHITECTURE.md) 与 [已知限制](docs/KNOWN_LIMITATIONS.md)。
+
+## 一套声音核心，两种发行构建
+
+| Chrome 商店版 | GitHub 开发版 |
+|---|---|
+| 保留相同的 DSP、弹窗、设置、语言和站点规则；本机诊断和贡献者专用入口会从安装包中物理移除。 | 提供完整开源工程，包括默认关闭的本机诊断、测试页、证据工具和可复现的商店打包流程。 |
+
+商店版为了隐私和审核更精简，但不会使用更弱的平衡算法。白名单构建和 CI 会强制验证两种发行边界。商店文案、权限理由、隐私字段和提交素材统一放在 [`store/`](store/) 中。
 
 ## 安装私有测试版
 

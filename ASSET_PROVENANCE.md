@@ -9,6 +9,7 @@ This inventory records the origin and license boundary of non-code assets distri
 | `assets/logo-ai-a-light.png`, `assets/logo-ai-a-dark.png` | AI-assisted generation from a waveform identity concept directed and selected by WSL043 during private product development | Not offered under GPL-3.0-only; governed by `TRADEMARKS.md` and `LICENSES/LicenseRef-LoudEase-Brand.txt` |
 | `assets/icon-16.png`, `assets/icon-32.png`, `assets/icon-48.png`, `assets/icon-128.png` | Raster sizes derived from the selected LoudEase logo | Same brand-asset boundary |
 | `docs/popup-screenshot-*.png`, `docs/settings-screenshot-*.png` | Captured from the current first-party extension UI with test state and no private browsing content | May be reused for truthful review and documentation as described in `TRADEMARKS.md`; not licensed as program source |
+| `store/assets/*.png` | Reproducible first-party store compositions rendered from `store/assets-source.html`, the selected logo, and current UI screenshots | Same truthful-review and brand-asset boundary; not licensed as program source |
 
 Modified distributions must replace the LoudEase name, logo, and icons with a distinct identity. Unmodified official builds may be redistributed under the conditions in `TRADEMARKS.md`.
 

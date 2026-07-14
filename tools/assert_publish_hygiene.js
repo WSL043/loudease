@@ -24,6 +24,14 @@ const background = fs.readFileSync(path.join(root, 'background.js'), 'utf8');
 const bridge = fs.readFileSync(path.join(root, 'content', 'bridge.js'), 'utf8');
 const mediaDetailBody = bridge.match(/function mediaDetail\(media, index\) \{[\s\S]*?\n  \}/)?.[0] || '';
 
+function pngHasSize(file, width, height) {
+  const bytes = fs.readFileSync(path.join(root, file));
+  return bytes.length >= 24
+    && bytes.toString('ascii', 1, 4) === 'PNG'
+    && bytes.readUInt32BE(16) === width
+    && bytes.readUInt32BE(20) === height;
+}
+
 const checks = [
   ['gitignore excludes local diagnostics', /^tmp\/$/m.test(gitignore)],
   ['gitignore excludes extension packages and keys', /^\*\.zip$/m.test(gitignore) && /^\*\.crx$/m.test(gitignore) && /^\*\.pem$/m.test(gitignore)],
@@ -35,13 +43,16 @@ const checks = [
   ['GPL license transition and contribution policies exist', packageMetadata.license === 'GPL-3.0-only' && /GNU GENERAL PUBLIC LICENSE/.test(license) && /Historical tagged releases retain their original license grants/.test(changelog) && /Developer Certificate of Origin/.test(contributing)],
   ['governance and provenance policies exist', ['GOVERNANCE.md', 'DCO', 'ASSET_PROVENANCE.md', 'THIRD_PARTY_NOTICES.md', '.github/CODEOWNERS', 'REUSE.toml', 'LICENSES/GPL-3.0-only.txt', 'docs/LICENSING.md'].every((file) => fs.existsSync(path.join(root, file))) && fs.existsSync(path.join(root, 'TRADEMARKS.md')) && fs.existsSync(path.join(root, 'NOTICE'))],
   ['selected logo and current light/dark product screenshots exist', ['assets/logo-ai-a-light.png', 'assets/logo-ai-a-dark.png', 'docs/popup-screenshot-light.png', 'docs/popup-screenshot-dark.png', 'docs/settings-screenshot-light.png', 'docs/settings-screenshot-dark.png'].every((file) => fs.existsSync(path.join(root, file)))],
-  ['privacy and security policies exist', /Audio samples are not uploaded/.test(privacy) && /Security Policy/.test(security)],
+  ['privacy and security policies exist', /Audio samples are not uploaded/.test(privacy) && /Limited Use requirements/.test(privacy) && /Security Policy/.test(security)],
+  ['manifest avoids redundant tab permissions', !manifest.permissions.includes('tabs') && !manifest.permissions.includes('activeTab')],
+  ['store dashboard copy and privacy fields exist', ['store/STORE_LISTING.md', 'store/PRIVACY_PRACTICES.md', 'store/ASSETS.md'].every((file) => fs.existsSync(path.join(root, file))) && /Single purpose/.test(fs.readFileSync(path.join(root, 'store', 'PRIVACY_PRACTICES.md'), 'utf8'))],
+  ['store screenshots and promotional tile use exact dimensions', pngHasSize('store/assets/screenshot-balancing-1280x800.png', 1280, 800) && pngHasSize('store/assets/screenshot-settings-1280x800.png', 1280, 800) && pngHasSize('store/assets/promo-small-440x280.png', 440, 280)],
   ['release review blocks localhost diagnostics from the store package', /no localhost permission, URL, diagnostics symbol/.test(releaseReview)],
   ['readmes link current privacy and release limits', /PRIVACY\.md/.test(readme) && /RELEASE_READINESS_REVIEW\.md/.test(englishReadme)],
   ['private corpus and future telemetry have explicit release gates', /private-corpus\//.test(gitignore) && /Telemetry is not implemented/.test(dataGovernance) && /Raw PCM/.test(dataGovernance) && /clear, separate opt-in/.test(dataGovernance) && /DATA_GOVERNANCE\.md/.test(privacy) && /DATA_GOVERNANCE\.md/.test(releaseReview)],
   ['feedback remains user initiated without embedded service credentials', /GitHub is a manual feedback tracker/.test(feedback) && /must never contain a GitHub access token/.test(feedback) && /issues\/new\?template=audio-quality\.yml/.test(monitorScript)],
   ['community testing is scoped and privacy preserving', /10-minute platform check/.test(communityTesting) && /one person to validate every platform/.test(communityTesting) && /private or account-specific URL/.test(compatibilityForm)],
-  ['readmes use current themed screenshots and link community testing', /settings-screenshot-dark\.png/.test(englishReadme) && /COMMUNITY_TESTING\.md/.test(englishReadme) && /settings-screenshot-dark\.png/.test(readme) && /COMMUNITY_TESTING\.md/.test(readme)],
+  ['readmes use current product visuals and link community testing', /screenshot-balancing-1280x800\.png/.test(englishReadme) && /processing-flow\.png/.test(englishReadme) && /COMMUNITY_TESTING\.md/.test(englishReadme) && /screenshot-balancing-1280x800\.png/.test(readme) && /processing-flow\.png/.test(readme) && /COMMUNITY_TESTING\.md/.test(readme)],
   ['automatic quality measurement excludes browsing identity', /must not infer or transmit a platform, hostname, URL/.test(dataGovernance) && /must not include a persistent installation identifier/.test(feedback)],
   ['community support routes reports through Issue Forms', /Security vulnerability/.test(support) && /GitHub Issue/.test(support) && /WSL043/.test(support)]
 ];
