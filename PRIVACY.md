@@ -31,6 +31,7 @@ The Chrome Web Store build removes the localhost host permission, diagnostics se
 - `tabCapture`: obtain audio from a tab after the user invokes the extension.
 - `offscreen`: run the local Web Audio graph outside the service worker.
 - `storage`: save settings.
+- `activeTab`: grant temporary access to the tab the user invokes LoudEase on so Chrome can authorize it as the `tabCapture` target.
 - `scripting` and HTTP(S) host access: install or restore the lightweight media/player-state observer after navigation.
 - HTTP(S) host access also lets the extension identify the current page, apply its site rule, and track the authorized tab without requesting the broader `tabs` permission separately.
 

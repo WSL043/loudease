@@ -48,7 +48,7 @@ The store verifier must confirm:
 1. Refresh the unpacked extension and collect current-version evidence for YouTube video/live, Bilibili video/live, and Douyin video/live.
 2. Run at least a two-hour mixed-content endurance session and record capture count, track count, context state, stale status, limiter overshoot, and hard-clipped samples.
 3. Complete controlled A/B listening on dialogue, music, live speech, ads, sparse ambience, and loud transient material.
-4. Reconfirm the permission justifications in `store/PRIVACY_PRACTICES.md` against the final package. The redundant `activeTab` and `tabs` permissions have been removed.
+4. Reconfirm the permission justifications in `store/PRIVACY_PRACTICES.md` against the final package. The redundant `tabs` permission has been removed; `activeTab` remains as the user-invocation grant for the `tabCapture` target.
 5. Reinspect the required-size assets and copy in `store/`, then make the privacy and support URLs publicly reachable before submission.
 6. Review translated store copy for accuracy; do not use keyword lists or compatibility claims unsupported by the matrix.
 7. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.

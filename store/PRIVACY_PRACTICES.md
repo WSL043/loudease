@@ -11,12 +11,13 @@ LoudEase balances audio in browser tabs explicitly authorized by the user. It re
 | Permission | Store justification |
 | --- | --- |
 | `storage` | Saves the enabled state, appearance and language choices, two balance strengths, and per-site rules. Settings use Chrome Sync when the user has Sync enabled; LoudEase operates no settings server. |
+| `activeTab` | Grants temporary access to the tab on which the user invokes LoudEase. Chrome uses that user-authorized tab as the target of `tabCapture`; the grant is not used to read unrelated tabs. |
 | `scripting` | Restores the lightweight media-state observer after navigation when Chrome did not instantiate the declared content script. It does not inject the DSP engine or remote code. |
 | `tabCapture` | Obtains the audio stream for the current tab after the user invokes LoudEase. The stream is processed and played locally. |
 | `offscreen` | Hosts the local Web Audio and AudioWorklet graph because an MV3 service worker cannot own the required DOM audio context. |
 | `http://*/*`, `https://*/*` | Lets the lightweight observer follow media, mute, player-volume, and SPA navigation state on ordinary web pages so the DSP can preserve user intent. It also provides current-page access needed for per-site rules and authorized-session recovery. No page text, form data, cookies, or credentials are read. |
 
-The store build does not request `activeTab` or `tabs`; their relevant access is already covered by the user invocation and the implemented HTTP(S) host behavior.
+The store build does not request `tabs`. Matching HTTP(S) host access already exposes the limited tab fields used by the implemented observer and session recovery. `activeTab` remains because it is the explicit user-invocation grant for the `tabCapture` target.
 
 ## Remote code declaration
 
