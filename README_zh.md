@@ -108,7 +108,7 @@ Chrome 要求 `tabCapture` 由用户手势启动，因此全新标签页不能�
 
 先阅读 [社区测试指南](docs/COMMUNITY_TESTING.md)，再通过 [问题选择器](https://github.com/WSL043/loudease/issues/new/choose) 提交兼容性、音质、Bug 或产品反馈。所有报告都由用户主动提交，扩展没有自动遥测服务。
 
-维护者分诊会分开已观测证据、可能推断和已确认根因。社区协作路径与决策边界见 [支持](SUPPORT.md)、[维护者分诊](docs/MAINTAINER_TRIAGE.md) 与 [治理](GOVERNANCE.md)。
+官方项目由 WSL043 单独维护。问题与建议通过 [支持](SUPPORT.md) 中的 GitHub Issue Form 提交；项目边界见 [治理](GOVERNANCE.md)。
 
 <details>
 <summary><strong>当前设置与站点规则</strong></summary>
@@ -133,7 +133,7 @@ npm run audit         # 发布就绪证据审查
 
 `dist/github-dev` 保留默认关闭的贡献者诊断；`dist/store` 通过白名单构建移除 localhost 权限、诊断界面、符号和网络代码。修改权限或打包逻辑前请阅读 [构建说明](docs/BUILD.md)。
 
-公开 Beta 与商店发布门槛统一记录在基于证据的 [发布就绪审查](docs/RELEASE_READINESS_REVIEW.md) 中。稳定版发布、公开仓库与发布后 Beta 清理见 [发布流程](docs/RELEASE_PROCESS.md) 和 [公开发布检查表](docs/PUBLIC_LAUNCH_CHECKLIST.md)。
+公开 Beta 与商店发布门槛统一记录在基于证据的 [发布就绪审查](docs/RELEASE_READINESS_REVIEW.md) 中。
 
 ## 隐私、安全与许可
 

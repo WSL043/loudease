@@ -1,6 +1,6 @@
 # LoudEase support
 
-LoudEase support is public by default and organized by the kind of evidence needed. There is no automatic telemetry service and no guaranteed response time.
+LoudEase support is public by default and organized by the kind of evidence needed. All ordinary reports and proposals are submitted through GitHub Issue Forms. There is no automatic telemetry service and no guaranteed response time.
 
 ## Choose a channel
 
@@ -27,8 +27,8 @@ Do not submit private URLs, page titles, account details, tokens, browsing histo
 
 ## What happens next
 
-Maintainers triage reports by safety impact, reproducibility, scope, and evidence. A report may be closed when it cannot be reproduced and lacks enough information to distinguish a LoudEase defect from a website, Chrome, another extension, or the source material.
+WSL043 reviews reports by safety impact, reproducibility, scope, and evidence. A report may be closed when it cannot be reproduced and lacks enough information to distinguish a LoudEase defect from a website, Chrome, another extension, or the source material.
 
-DSP constants are not changed from one subjective report. Audio behavior changes require a reproducible signal, repeatable measurements, or multiple consistent listening reports plus regression coverage. The process is documented in [Maintainer triage](docs/MAINTAINER_TRIAGE.md).
+DSP constants are not changed from one subjective report. Audio behavior changes require a reproducible signal, repeatable measurements, or multiple consistent listening reports plus regression coverage.
 
 See [Feedback and quality improvement](docs/FEEDBACK.md), [Data governance](docs/DATA_GOVERNANCE.md), and [Security](SECURITY.md) for the privacy and disclosure boundaries.

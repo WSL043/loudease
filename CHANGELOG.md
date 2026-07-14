@@ -6,8 +6,7 @@ All notable public changes to LoudEase are recorded here.
 
 - Relicensed future LoudEase versions from MPL-2.0 to GPL-3.0-only so distributed derivative extensions must keep their corresponding source available. Historical tagged releases retain their original license grants.
 - Added founder-led governance, DCO sign-offs, CODEOWNERS, machine-readable license metadata, asset provenance, and third-party icon notices.
-- Added public support and maintainer-triage policies plus a private-to-public launch checklist.
-- Added a guarded, preview-first tool for removing GitHub Beta Releases and Beta tags only after a verified stable release exists.
+- Added a public, Issue-based support route while keeping official maintenance and releases under WSL043.
 
 ## 0.7.1-beta.2
 
