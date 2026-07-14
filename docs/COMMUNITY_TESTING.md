@@ -4,7 +4,7 @@ LoudEase does not expect one person to validate every platform, content type, an
 
 ## Before you start
 
-- Use the latest private beta build from `main` and record the extension version and build target.
+- Use the beta build identified by the maintainer or the latest public prerelease, and record the extension version, source commit when available, and build target.
 - Use a normal Chrome profile or a dedicated test profile. Disable other audio-processing extensions for the test.
 - Do not publish private URLs, account data, tokens, browsing history, personal recordings, or copyrighted audio samples.
 - A visual popup state is useful evidence, but listening and player-control behavior are still required.
@@ -57,4 +57,3 @@ Review only a language you use confidently. Check the popup, settings, diagnosti
 Maintainers should label reports by platform and failure class, reproduce the smallest reliable case, and avoid changing DSP constants from a single subjective report. Algorithm changes need a reproducible signal or multiple consistent listening reports plus the automated evidence required by [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 Raw audio, private evaluation corpora, and user browsing data are not accepted into the public repository. See [Feedback and quality improvement](FEEDBACK.md) and [Data governance](DATA_GOVERNANCE.md).
-

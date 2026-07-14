@@ -55,9 +55,11 @@ While the repository is private, these links are not usable by store reviewers o
 - Default language: English
 - Initial distribution: all Chrome Web Store regions where the product is allowed
 - UI locales already bundled: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Russian, German, French, Spanish, Brazilian Portuguese, and Arabic
-- Store listing localization: publish English first; add localized listing copy only after a native or fluent review of each translation
+- Store listing localization: English is source-ready; copy-ready drafts for the other 10 UI locales are tracked in `store/LOCALIZATION_STATUS.md` and must not be published before native or fluent review
 
 Do not claim support for a named site unless current-version evidence exists for its video and live-audio paths. Use the broader claim "ordinary web tab audio" until the public compatibility matrix supports stronger wording.
+
+Developer registration and account-owner steps are tracked separately in `store/ACCOUNT_SETUP.md`. They require WSL043 to accept the agreements, pay the registration fee, verify the account, and enable two-step verification.
 
 ## Submission notes
 

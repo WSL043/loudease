@@ -7,6 +7,8 @@ The repository has two deterministic, allowlist-based targets:
 - `npm run package:store` also writes `dist/loudease-store.zip` with sorted paths, stored entries, and a fixed timestamp.
 - `npm run test:release` rebuilds and verifies the store target.
 
+`dist/loudease-store.zip` is the only installable release archive. Attach that exact verified file to GitHub Releases and submit the same file to the Chrome Web Store. Never publish `dist/github-dev` or an ad hoc archive of it; the development tree intentionally retains localhost diagnostics.
+
 Only `manifest.json`, `background.js`, the release notices (`LICENSE`, `NOTICE`, `TRADEMARKS.md`), and runtime files below `assets`, `content`, `monitor`, `offscreen`, `popup`, `shared`, and `_locales` are eligible. Tests, temporary output, tools, other documentation, source-only files, logs, archives, keys, secrets, and Git metadata are never copied.
 
 ## Development diagnostics marker contract

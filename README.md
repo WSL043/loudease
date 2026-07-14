@@ -24,7 +24,7 @@
 
 <p align="center">
   <a href="README_zh.md">简体中文</a> ·
-  <a href="#install-the-private-beta">Install</a> ·
+  <a href="#install">Install</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#help-shape-loudease">Community testing</a> ·
   <a href="CONTRIBUTING.md">Contribute</a> ·
@@ -64,16 +64,29 @@ For implementation details, assumptions, and current gaps, read [Audio DSP](docs
 |---|---|
 | The same DSP, popup, settings, languages, and per-site rules. Localhost diagnostics and contributor-only controls are physically removed from the package. | The complete open-source project, including opt-in local diagnostics, test pages, evidence tools, and reproducible store packaging. |
 
-The store build is smaller for privacy and review compliance; it does not use a weaker balancing algorithm. The exact package boundary is enforced by an allowlist build and verified in CI. Store copy, permission explanations, privacy fields, and submission assets live in [`store/`](store/).
+The store build is smaller for privacy and review compliance; it does not use a weaker balancing algorithm. The exact package boundary is enforced by an allowlist build and verified in CI. Public GitHub Releases attach this same stripped store ZIP; `dist/github-dev` is never a public release artifact. Store copy, permission explanations, privacy fields, and submission assets live in [`store/`](store/).
 
-## Install the private beta
+## Install
 
-Requirements: Chrome 116+ and Node.js 20+.
+Ordinary users install the future public release from the Chrome Web Store and need only Chrome 116 or newer. They do not need Node.js, a server, or a database.
+
+### Manual beta sideload for trusted testers
+
+This Developer-mode route is for testing trusted code, not normal public distribution.
+
+1. Download the verified `loudease-store.zip` from the selected GitHub prerelease and extract it to a permanent folder.
+2. Open `chrome://extensions` and enable **Developer mode**.
+3. Choose **Load unpacked** and select the extracted directory containing `manifest.json`.
+
+Updates are manual: replace the files in the same directory with the next verified ZIP, click the extension's **Reload** button, and reload affected web pages. Managed Chrome installations may block Developer mode or unpacked extensions.
+
+### Build from source
+
+Contributors need Node.js 20 or newer:
 
 ```bash
 git clone https://github.com/WSL043/loudease.git
 cd loudease
-npm install
 npm run build:dev
 ```
 
@@ -85,6 +98,8 @@ Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
 4. Adjust **Reduce loud sounds** and **Lift quiet sounds** only when the defaults do not fit.
 
 Chrome requires a user gesture before `tabCapture` starts. A completely new tab cannot be captured silently; after authorization, LoudEase can keep processing while you switch to another tab.
+
+See [Installation](docs/INSTALLATION.md) for the store, packaged-beta, and source-development paths.
 
 ## Verified scope
 
@@ -132,7 +147,7 @@ npm run test:release  # stripped Chrome Web Store package
 npm run audit         # release-readiness evidence audit
 ```
 
-`dist/github-dev` keeps contributor diagnostics available but off by default. `dist/store` removes localhost permissions, diagnostic UI, symbols, and network code through an allowlist build. Read [Build and release](docs/BUILD.md) before changing permissions or packaging.
+`dist/github-dev` keeps contributor diagnostics available but off by default. `dist/store` removes localhost permissions, diagnostic UI, symbols, and network code through an allowlist build. Read [Build](docs/BUILD.md), [Publishing](docs/PUBLISHING.md), and [AGENTS.md](AGENTS.md) before changing permissions, packaging, or release state.
 
 Open beta and store gates are tracked in the evidence-based [Release readiness review](docs/RELEASE_READINESS_REVIEW.md).
 

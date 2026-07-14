@@ -15,6 +15,12 @@ const releaseReview = fs.readFileSync(path.join(root, 'docs', 'RELEASE_READINESS
 const dataGovernance = fs.readFileSync(path.join(root, 'docs', 'DATA_GOVERNANCE.md'), 'utf8');
 const feedback = fs.readFileSync(path.join(root, 'docs', 'FEEDBACK.md'), 'utf8');
 const support = fs.readFileSync(path.join(root, 'SUPPORT.md'), 'utf8');
+const agentGuide = fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8');
+const installation = fs.readFileSync(path.join(root, 'docs', 'INSTALLATION.md'), 'utf8');
+const publishing = fs.readFileSync(path.join(root, 'docs', 'PUBLISHING.md'), 'utf8');
+const accountSetup = fs.readFileSync(path.join(root, 'store', 'ACCOUNT_SETUP.md'), 'utf8');
+const localizationStatus = fs.readFileSync(path.join(root, 'store', 'LOCALIZATION_STATUS.md'), 'utf8');
+const buildGuide = fs.readFileSync(path.join(root, 'docs', 'BUILD.md'), 'utf8');
 const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
 const communityTesting = fs.readFileSync(path.join(root, 'docs', 'COMMUNITY_TESTING.md'), 'utf8');
 const compatibilityForm = fs.readFileSync(path.join(root, '.github', 'ISSUE_TEMPLATE', 'compatibility.yml'), 'utf8');
@@ -23,6 +29,8 @@ const monitorScript = fs.readFileSync(path.join(root, 'monitor', 'index.js'), 'u
 const background = fs.readFileSync(path.join(root, 'background.js'), 'utf8');
 const bridge = fs.readFileSync(path.join(root, 'content', 'bridge.js'), 'utf8');
 const mediaDetailBody = bridge.match(/function mediaDetail\(media, index\) \{[\s\S]*?\n  \}/)?.[0] || '';
+const storeLocaleDrafts = ['zh_CN', 'zh_TW', 'ja', 'ko', 'ru', 'de', 'fr', 'es', 'pt_BR', 'ar'];
+const localizationDraftMarker = 'Draft - fluent review required before publishing';
 
 function pngHasSize(file, width, height) {
   const bytes = fs.readFileSync(path.join(root, file));
@@ -54,7 +62,18 @@ const checks = [
   ['community testing is scoped and privacy preserving', /10-minute platform check/.test(communityTesting) && /one person to validate every platform/.test(communityTesting) && /private or account-specific URL/.test(compatibilityForm)],
   ['readmes use current product visuals and link community testing', /screenshot-balancing-1280x800\.png/.test(englishReadme) && /processing-flow\.png/.test(englishReadme) && /COMMUNITY_TESTING\.md/.test(englishReadme) && /screenshot-balancing-1280x800\.png/.test(readme) && /processing-flow\.png/.test(readme) && /COMMUNITY_TESTING\.md/.test(readme)],
   ['automatic quality measurement excludes browsing identity', /must not infer or transmit a platform, hostname, URL/.test(dataGovernance) && /must not include a persistent installation identifier/.test(feedback)],
-  ['community support routes reports through Issue Forms', /Security vulnerability/.test(support) && /GitHub Issue/.test(support) && /WSL043/.test(support)]
+  ['community support routes reports through Issue Forms', /Security vulnerability/.test(support) && /GitHub Issue/.test(support) && /WSL043/.test(support)],
+  ['agent and installation documentation records the user and contributor boundary', /only audio-processing path/.test(agentGuide) && /Manual beta sideload for trusted testers/.test(installation) && /Ordinary users do not deploy a server, run a database, or install Node\.js/.test(installation)],
+  ['release documentation records durable public beta history', /one public GitHub beta/.test(publishing) && /Public beta releases are durable history/.test(publishing) && /explicit maintainer approval/.test(agentGuide)],
+  ['GitHub and store releases use one stripped archive', /npm run package:store/.test(publishing) && /exact same ZIP to the Chrome Web Store/.test(publishing) && /only installable release archive/.test(buildGuide) && /Never attach `dist\/github-dev`/.test(publishing)],
+  ['source instructions do not create an unrelated lockfile', !englishReadme.includes('npm install') && !readme.includes('npm install') && !installation.includes('npm install')],
+  ['Chrome Web Store account checklist is documented', /one-time developer registration fee/.test(accountSetup) && /two-step verification/.test(accountSetup) && /never automated/.test(publishing)],
+  ['localized store drafts and status table agree on fluent review', /English remains the default listing/.test(localizationStatus) && storeLocaleDrafts.every((locale) => {
+    const file = path.join(root, 'store', 'locales', `${locale}.md`);
+    return fs.existsSync(file)
+      && fs.readFileSync(file, 'utf8').includes(`Review status: ${localizationDraftMarker}`)
+      && localizationStatus.includes(`(\`${locale}\`): ${localizationDraftMarker}.`);
+  })]
 ];
 
 let failed = false;

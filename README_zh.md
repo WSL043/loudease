@@ -24,7 +24,7 @@
 
 <p align="center">
   <a href="README.md">English</a> ·
-  <a href="#安装私有测试版">安装</a> ·
+  <a href="#安装">安装</a> ·
   <a href="#它如何工作">工作原理</a> ·
   <a href="#一起完善-loudease">社区测试</a> ·
   <a href="CONTRIBUTING.md">参与贡献</a> ·
@@ -64,16 +64,29 @@ LoudEase 不是音量放大器、均衡器，也不是经过校准的听力保�
 |---|---|
 | 保留相同的 DSP、弹窗、设置、语言和站点规则；本机诊断和贡献者专用入口会从安装包中物理移除。 | 提供完整开源工程，包括默认关闭的本机诊断、测试页、证据工具和可复现的商店打包流程。 |
 
-商店版为了隐私和审核更精简，但不会使用更弱的平衡算法。白名单构建和 CI 会强制验证两种发行边界。商店文案、权限理由、隐私字段和提交素材统一放在 [`store/`](store/) 中。
+商店版为了隐私和审核更精简，但不会使用更弱的平衡算法。白名单构建和 CI 会强制验证两种发行边界。公开 GitHub Release 附带的也是同一个已剥离商店 ZIP，`dist/github-dev` 绝不会作为公开发布包。商店文案、权限理由、隐私字段和提交素材统一放在 [`store/`](store/) 中。
 
-## 安装私有测试版
+## 安装
 
-需要 Chrome 116+、Node.js 20+。
+正式公开后，普通用户从 Chrome 应用商店安装，只需要 Chrome 116 或更高版本，不需要 Node.js、服务器或数据库。
+
+### 受信任测试者手动侧载 Beta
+
+这是用于测试受信任代码的开发者模式流程，不是面向普通用户的正式分发方式。
+
+1. 从选定的 GitHub 预发布下载已验证的 `loudease-store.zip`，并解压到一个长期保留的目录。
+2. 打开 `chrome://extensions`，启用“开发者模式”。
+3. 选择“加载已解压的扩展程序”，再选择包含 `manifest.json` 的解压目录。
+
+Beta 更新需要手动完成：用下一个已验证 ZIP 替换同一目录里的文件，点击扩展的“重新加载”按钮，并刷新受影响的网页。受企业策略管理的 Chrome 可能会禁用开发者模式或未打包扩展。
+
+### 从源码构建
+
+只有贡献者需要 Node.js 20 或更高版本：
 
 ```bash
 git clone https://github.com/WSL043/loudease.git
 cd loudease
-npm install
 npm run build:dev
 ```
 
@@ -85,6 +98,8 @@ npm run build:dev
 4. 只有默认听感不合适时，再调整“压大声”和“提小声”。
 
 Chrome 要求 `tabCapture` 由用户手势启动，因此全新标签页不能静默接管；完成授权后，即使切换到其他标签页，LoudEase 仍可继续处理原标签页。
+
+商店安装、扩展包导入和源码开发的完整区别见 [安装说明](docs/INSTALLATION.md)。
 
 ## 已验证范围
 
@@ -132,7 +147,7 @@ npm run test:release  # Chrome 商店精简构建验证
 npm run audit         # 发布就绪证据审查
 ```
 
-`dist/github-dev` 保留默认关闭的贡献者诊断；`dist/store` 通过白名单构建移除 localhost 权限、诊断界面、符号和网络代码。修改权限或打包逻辑前请阅读 [构建说明](docs/BUILD.md)。
+`dist/github-dev` 保留默认关闭的贡献者诊断；`dist/store` 通过白名单构建移除 localhost 权限、诊断界面、符号和网络代码。修改权限、打包或发布状态前，请阅读 [构建说明](docs/BUILD.md)、[发布流程](docs/PUBLISHING.md) 和 [AGENTS.md](AGENTS.md)。
 
 公开 Beta 与商店发布门槛统一记录在基于证据的 [发布就绪审查](docs/RELEASE_READINESS_REVIEW.md) 中。
 

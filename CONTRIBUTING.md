@@ -2,6 +2,8 @@
 
 Thanks for helping improve LoudEase. The project is a beta audio processor, so changes should be narrow, reproducible, and honest about what was tested.
 
+Read [AGENTS.md](AGENTS.md) before changing the repository. It defines the runtime invariants, evidence order, test gates, and actions that require explicit maintainer approval.
+
 ## Contribution license
 
 By submitting a contribution, you confirm that you have the right to provide it and agree that it will be distributed under GPL-3.0-only. Contributors retain copyright in their work. A contribution does not grant the project a separate right to relicense it for a proprietary product; any future relicensing agreement must be explicit, optional, and separate from ordinary contribution.
@@ -38,6 +40,8 @@ Keep each report focused on one platform and media type. Do not infer broad supp
 ## Development workflow
 
 Use Node.js 20 or newer. Keep runtime code compatible with Chrome 116 or newer.
+
+Ordinary users do not need this toolchain. The no-build installation path is documented in [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ```bash
 npm run build:dev

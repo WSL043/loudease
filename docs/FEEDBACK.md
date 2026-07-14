@@ -2,13 +2,13 @@
 
 LoudEase currently has no developer-operated telemetry service. Feedback is voluntary, user-initiated, and separated from audio processing.
 
-## Current private beta
+## Beta feedback channels
 
-The private beta uses three channels:
+The beta programme uses three channels:
 
 1. Chrome Web Store reviews for public ratings and short product impressions after a store listing exists.
 2. The Chrome Web Store Support Hub for questions, bug reports, and feature requests after support is enabled in the publisher dashboard.
-3. GitHub Issue Forms for reproducible engineering reports from invited testers and, later, public contributors.
+3. GitHub Issue Forms for reproducible engineering reports from invited testers while the repository is private and from public contributors after it opens.
 
 The [community testing guide](COMMUNITY_TESTING.md) breaks compatibility, listening, endurance, and translation checks into small tasks. The compatibility form accepts successful checks as well as failures, so the evidence matrix can grow without requiring one maintainer to retest every platform.
 

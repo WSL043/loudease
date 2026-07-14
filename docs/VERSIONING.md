@@ -1,38 +1,45 @@
-# 版本晋级标准
+# Versioning and release evidence
 
-版本号表示已经取得的证据，不表示开发次数。
+LoudEase versions describe the evidence and compatibility boundary of a build. They do not count edits or attempts.
 
-## 0.4.x 开发预览
+## Version format
 
-- 允许算法、状态协议和 UI 继续变化。
-- 每次修改必须通过静态检查、DSP 单元测试、离线 PCM 与 OfflineAudioContext 图测试。
-- 真实站点未完成当前版本矩阵时，不能宣称稳定可发布。
+- `manifest.json` and `package.json` use Chrome-compatible numeric versions such as `0.8.0` or `1.0.0`.
+- GitHub tags may add a SemVer prerelease suffix such as `v0.8.0-beta.1`.
+- Documentation, package metadata, release assets, and runtime diagnostics must identify the same source commit and product version.
 
-## 0.5.x DSP v3 候选
+## Private beta: 0.7.x
 
-只有同时满足以下条件才升级：
+The current private series may continue receiving focused fixes without creating a release for every commit. A maintenance commit on `main` does not automatically bump the version, create a tag, or publish a package.
 
-1. `leveler-v3` 的连续 AudioWorklet 计量、感知加权、双时间窗、增益稳定器和 limiter 在隔离 Chrome E2E 全部通过。
-2. 强度滑块、静音、低播放器音量、动态换源、多标签并行和长跑回归全部通过。
-3. 当前磁盘版本在 Bilibili 普通视频、Bilibili 直播、抖音短视频、抖音直播四类场景均取得 `processing / running / audioTrack=1` 证据。
+Before the repository becomes public, stale private prereleases may be removed once, using the exact approval boundary in `docs/PUBLISHING.md`.
 
-## 0.6.x 全球化 UI/UX 候选
+## Public beta: 0.8.x or 0.9.x
 
-1. popup 和设置页完成面向普通用户的信息架构重构，明确区分“已开启”和“实际正在处理”。
-2. 完成英文默认语言以及简体中文、日语、韩语、俄语、德语、法语、西班牙语和葡萄牙语本地化。
-3. 键盘、屏幕阅读器、缩放、长文本和 RTL 预备布局通过可访问性检查。
-4. 开发诊断从普通用户设置中隔离，不进入默认商店体验。
+Create one public GitHub prerelease only after:
 
-## 1.0.0 公开发布
+1. automated tests and the stripped store build pass from a clean checkout;
+2. the current build has direct evidence for the baseline YouTube, Bilibili, and Douyin video/live paths;
+3. mute, zero player volume, tab switching, source switching, slider persistence, and multi-tab capture have current-version evidence;
+4. the public README, installation steps, privacy policy, issue forms, known limitations, license, asset provenance, and checksums are complete;
+5. there is no unresolved P0/P1 audio interruption, uncontrolled gain, mute bypass, cross-tab ownership, or release-package defect.
 
-只有同时满足以下条件才升级：
+The first public beta tag should be new and unambiguous, for example `v0.8.0-beta.1`. Do not expose the obsolete private prereleases as the public launch sequence.
 
-1. `0.6.x` 在真实使用中稳定至少两周，没有 P0/P1 音频中断、失控增益、静音绕过或跨标签状态错误。
-2. 完成至少 2 小时本地长跑和 Bilibili、抖音、YouTube 各不少于 30 分钟的当前版本实站测试。
-3. 完成 Twitch、TikTok、Spotify Web Player、Vimeo 和至少一个 EME/DRM 流媒体服务的代表性兼容验证；未验证的平台不得写入商店兼容声明。
-4. 完成有/无扩展 AB 听测，覆盖人声、音乐、直播、突发声和安静片段，并保存可复核结果。
-5. 商店包移除默认本地诊断链路，权限、隐私说明、开源许可证、构建与发布流程完成审查。
-6. Chrome Web Store Support Hub 或经过审核的 Support URL 已启用，GitHub Issue Form 和脱敏支持报告链路可用。
-7. GitHub CI、安装说明、已知限制、安全策略和可复现测试均与发布代码一致。
+## Stable release: 1.0.0
 
-不因“版本改了很多次”或“功能看起来差不多”提前升级大版本。
+Promote to `1.0.0` only when the project has evidence, whether collected by WSL043 or reproducibly contributed by the community, for all of the following:
+
+1. no open P0/P1 audio interruption, uncontrolled gain, mute bypass, capture ownership, or privacy defect;
+2. representative endurance evidence covering mixed content and the baseline platform matrix;
+3. controlled on/off listening evidence for dialogue, music, live speech, quiet material, and strong transients, with pumping, distortion, clipping, lost transients, settling, and recovery reviewed;
+4. compatibility claims restricted to current-version evidence, with unsupported or protected surfaces documented honestly;
+5. the store package contains no localhost diagnostics, remote executable code, secrets, development markers, or undeclared data flow;
+6. Chrome Web Store listing, permissions, privacy fields, screenshots, support route, account setup, and test instructions are complete;
+7. public CI, installation instructions, issue forms, security policy, license, source archive, and the checksum of the single stripped release ZIP match the release commit.
+
+Do not promote a major version because the project has accumulated many edits or appears feature-complete. Stable means that the published evidence and support boundary are coherent.
+
+## Public history
+
+Once a beta is public, retain its release and tag. The stable release becomes **Latest** and the beta remains a prerelease in project history. Rewriting public release history is reserved for legal or security incidents, not cosmetic cleanup.

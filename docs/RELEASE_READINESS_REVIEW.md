@@ -50,10 +50,11 @@ The store verifier must confirm:
 3. Complete controlled A/B listening on dialogue, music, live speech, ads, sparse ambience, and loud transient material.
 4. Reconfirm the permission justifications in `store/PRIVACY_PRACTICES.md` against the final package. The redundant `tabs` permission has been removed; `activeTab` remains as the user-invocation grant for the `tabCapture` target.
 5. Reinspect the required-size assets and copy in `store/`, then make the privacy and support URLs publicly reachable before submission.
-6. Review translated store copy for accuracy; do not use keyword lists or compatibility claims unsupported by the matrix.
+6. Obtain fluent review before publishing any draft in `store/LOCALIZATION_STATUS.md`. English remains the default; unreviewed localized listings stay unpublished and do not block an English-only first release. Do not use keyword lists or compatibility claims unsupported by the matrix.
 7. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
 8. Enable the Chrome Web Store Support Hub or configure a reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.
 9. Record representative global playback evidence before advertising support beyond the baseline matrix; use `docs/TEST_MATRIX.md` as the claim boundary.
+10. Complete the account-owner checklist in `store/ACCOUNT_SETUP.md`; registration fee, agreements, two-step verification, and final submission are manual maintainer actions.
 
 ## Residual technical risk
 
