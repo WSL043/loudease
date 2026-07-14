@@ -27,7 +27,8 @@
   <a href="#install-the-private-beta">Install</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#help-shape-loudease">Community testing</a> ·
-  <a href="CONTRIBUTING.md">Contribute</a>
+  <a href="CONTRIBUTING.md">Contribute</a> ·
+  <a href="SUPPORT.md">Support</a>
 </p>
 
 <p align="center">
@@ -107,6 +108,8 @@ No single tester needs to cover every platform or run a two-hour endurance sessi
 
 Start with the [community testing guide](docs/COMMUNITY_TESTING.md), then use the [issue chooser](https://github.com/WSL043/loudease/issues/new/choose) for compatibility, audio-quality, bug, or product feedback. Reports are voluntary and user-initiated; LoudEase contains no automatic telemetry service.
 
+Maintainer triage separates observed evidence, likely inferences, and confirmed root causes. See [Support](SUPPORT.md), [Maintainer triage](docs/MAINTAINER_TRIAGE.md), and [Governance](GOVERNANCE.md) for the collaboration path and decision boundaries.
+
 <details>
 <summary><strong>Current settings and per-site controls</strong></summary>
 <br>
@@ -130,7 +133,7 @@ npm run audit         # release-readiness evidence audit
 
 `dist/github-dev` keeps contributor diagnostics available but off by default. `dist/store` removes localhost permissions, diagnostic UI, symbols, and network code through an allowlist build. Read [Build and release](docs/BUILD.md) before changing permissions or packaging.
 
-Open beta and store gates are tracked in the evidence-based [Release readiness review](docs/RELEASE_READINESS_REVIEW.md).
+Open beta and store gates are tracked in the evidence-based [Release readiness review](docs/RELEASE_READINESS_REVIEW.md). Stable publication, public-repository opening, and the post-release Beta cleanup are documented in [Release process](docs/RELEASE_PROCESS.md) and [Public launch checklist](docs/PUBLIC_LAUNCH_CHECKLIST.md).
 
 ## Privacy, safety, and license
 
@@ -141,6 +144,6 @@ Open beta and store gates are tracked in the evidence-based [Release readiness r
 
 See [Privacy](PRIVACY.md), [Feedback and data boundaries](docs/FEEDBACK.md), and [Security](SECURITY.md).
 
-Source code is licensed under [GPL-3.0-only](LICENSE). Distributed derivative versions must provide the corresponding source under GPLv3. Historical tagged releases remain available under the license attached to those releases. The LoudEase name and logo are governed separately by the [Trademark Policy](TRADEMARKS.md); bundled icon notices are recorded in [Third-party notices](THIRD_PARTY_NOTICES.md).
+Source code is licensed under [GPL-3.0-only](LICENSE). Distributed derivative versions must provide the corresponding source under GPLv3. Copies previously distributed under historical Beta tags retain the license grants attached to those copies, even if a prerelease or tag is later removed from GitHub. The LoudEase name and logo are governed separately by the [Trademark Policy](TRADEMARKS.md); bundled icon notices are recorded in [Third-party notices](THIRD_PARTY_NOTICES.md).
 
 The decision and transition boundary are explained in [Licensing](docs/LICENSING.md). Project authority and contribution rights are documented in [Governance](GOVERNANCE.md), [Contributing](CONTRIBUTING.md), and the [Developer Certificate of Origin](DCO). Asset origins and machine-readable license boundaries are recorded in [Asset provenance](ASSET_PROVENANCE.md) and [REUSE.toml](REUSE.toml).

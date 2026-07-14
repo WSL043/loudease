@@ -21,6 +21,8 @@ Maintainer access is granted by the Project Lead based on sustained, trustworthy
 
 External contributors should use issues and pull requests. Direct pushes to protected branches are not part of the normal contribution path.
 
+Maintainer candidates are evaluated from sustained, technically sound participation: reproducible issue work, focused reviews, regression-backed changes, careful handling of privacy and permissions, and respectful community support. Appointment remains explicit; contribution count alone does not grant access.
+
 ## Decisions
 
 Technical decisions should be supported by reproducible evidence, especially for DSP, privacy, permissions, security, and compatibility claims. Maintainers should explain material decisions in an issue, pull request, or canonical project document when practical.

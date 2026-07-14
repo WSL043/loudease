@@ -27,7 +27,8 @@
   <a href="#安装私有测试版">安装</a> ·
   <a href="#它如何工作">工作原理</a> ·
   <a href="#一起完善-loudease">社区测试</a> ·
-  <a href="CONTRIBUTING.md">参与贡献</a>
+  <a href="CONTRIBUTING.md">参与贡献</a> ·
+  <a href="SUPPORT.md">支持</a>
 </p>
 
 <p align="center">
@@ -107,6 +108,8 @@ Chrome 要求 `tabCapture` 由用户手势启动，因此全新标签页不能�
 
 先阅读 [社区测试指南](docs/COMMUNITY_TESTING.md)，再通过 [问题选择器](https://github.com/WSL043/loudease/issues/new/choose) 提交兼容性、音质、Bug 或产品反馈。所有报告都由用户主动提交，扩展没有自动遥测服务。
 
+维护者分诊会分开已观测证据、可能推断和已确认根因。社区协作路径与决策边界见 [支持](SUPPORT.md)、[维护者分诊](docs/MAINTAINER_TRIAGE.md) 与 [治理](GOVERNANCE.md)。
+
 <details>
 <summary><strong>当前设置与站点规则</strong></summary>
 <br>
@@ -130,7 +133,7 @@ npm run audit         # 发布就绪证据审查
 
 `dist/github-dev` 保留默认关闭的贡献者诊断；`dist/store` 通过白名单构建移除 localhost 权限、诊断界面、符号和网络代码。修改权限或打包逻辑前请阅读 [构建说明](docs/BUILD.md)。
 
-公开 Beta 与商店发布门槛统一记录在基于证据的 [发布就绪审查](docs/RELEASE_READINESS_REVIEW.md) 中。
+公开 Beta 与商店发布门槛统一记录在基于证据的 [发布就绪审查](docs/RELEASE_READINESS_REVIEW.md) 中。稳定版发布、公开仓库与发布后 Beta 清理见 [发布流程](docs/RELEASE_PROCESS.md) 和 [公开发布检查表](docs/PUBLIC_LAUNCH_CHECKLIST.md)。
 
 ## 隐私、安全与许可
 
@@ -141,6 +144,6 @@ npm run audit         # 发布就绪证据审查
 
 详见 [隐私说明](PRIVACY.md)、[反馈与数据边界](docs/FEEDBACK.md) 和 [安全说明](SECURITY.md)。
 
-源代码使用 [GPL-3.0-only](LICENSE)。对外分发的衍生版本必须按照 GPLv3 提供对应源码；历史标签版本继续适用各版本当时附带的许可证。LoudEase 名称与 Logo 由 [商标政策](TRADEMARKS.md) 单独管理，内置图标的许可见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+源代码使用 [GPL-3.0-only](LICENSE)。对外分发的衍生版本必须按照 GPLv3 提供对应源码；已经通过历史 Beta 标签分发的副本继续适用当时附带的许可证，即使相应预发布记录或标签以后从 GitHub 移除也不会撤销。LoudEase 名称与 Logo 由 [商标政策](TRADEMARKS.md) 单独管理，内置图标的许可见 [第三方声明](THIRD_PARTY_NOTICES.md)。
 
 许可证选择和历史边界见 [许可说明](docs/LICENSING.md)。项目管理权与贡献规则见 [治理说明](GOVERNANCE.md)、[贡献指南](CONTRIBUTING.md) 和 [开发者原创声明](DCO)；素材来源与机器可读许可边界见 [资产来源](ASSET_PROVENANCE.md) 和 [REUSE.toml](REUSE.toml)。

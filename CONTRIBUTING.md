@@ -84,3 +84,5 @@ Do not commit copyrighted programme audio or private test recordings. Use synthe
 Keep pull requests focused and describe the user-visible behavior, risk, and verification performed. Add tests for regressions and update documentation when behavior, limitations, permissions, privacy, build output, or supported environments change. All checks should pass from a clean checkout; note any real-site or hardware checks that could not be run.
 
 Contributing does not grant repository access, maintainer status, release authority, or ownership of the official project. See [GOVERNANCE.md](GOVERNANCE.md).
+
+Support requests and incoming reports are classified using [SUPPORT.md](SUPPORT.md) and [docs/MAINTAINER_TRIAGE.md](docs/MAINTAINER_TRIAGE.md). Release changes must follow [docs/RELEASE_PROCESS.md](docs/RELEASE_PROCESS.md); contributors must not create, replace, or delete official release tags or artifacts.

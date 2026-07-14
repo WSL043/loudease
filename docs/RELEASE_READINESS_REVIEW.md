@@ -54,6 +54,7 @@ The store verifier must confirm:
 7. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
 8. Enable the Chrome Web Store Support Hub or configure a reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.
 9. Record representative global playback evidence before advertising support beyond the baseline matrix; use `docs/TEST_MATRIX.md` as the claim boundary.
+10. Complete `docs/PUBLIC_LAUNCH_CHECKLIST.md`; publish and verify the stable Release while private before previewing or executing the documented Beta cleanup.
 
 ## Residual technical risk
 

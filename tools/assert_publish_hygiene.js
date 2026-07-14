@@ -14,6 +14,10 @@ const security = fs.readFileSync(path.join(root, 'SECURITY.md'), 'utf8');
 const releaseReview = fs.readFileSync(path.join(root, 'docs', 'RELEASE_READINESS_REVIEW.md'), 'utf8');
 const dataGovernance = fs.readFileSync(path.join(root, 'docs', 'DATA_GOVERNANCE.md'), 'utf8');
 const feedback = fs.readFileSync(path.join(root, 'docs', 'FEEDBACK.md'), 'utf8');
+const support = fs.readFileSync(path.join(root, 'SUPPORT.md'), 'utf8');
+const maintainerTriage = fs.readFileSync(path.join(root, 'docs', 'MAINTAINER_TRIAGE.md'), 'utf8');
+const releaseProcess = fs.readFileSync(path.join(root, 'docs', 'RELEASE_PROCESS.md'), 'utf8');
+const publicLaunch = fs.readFileSync(path.join(root, 'docs', 'PUBLIC_LAUNCH_CHECKLIST.md'), 'utf8');
 const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
 const communityTesting = fs.readFileSync(path.join(root, 'docs', 'COMMUNITY_TESTING.md'), 'utf8');
 const compatibilityForm = fs.readFileSync(path.join(root, '.github', 'ISSUE_TEMPLATE', 'compatibility.yml'), 'utf8');
@@ -41,7 +45,9 @@ const checks = [
   ['feedback remains user initiated without embedded service credentials', /GitHub is a manual feedback tracker/.test(feedback) && /must never contain a GitHub access token/.test(feedback) && /issues\/new\?template=audio-quality\.yml/.test(monitorScript)],
   ['community testing is scoped and privacy preserving', /10-minute platform check/.test(communityTesting) && /one person to validate every platform/.test(communityTesting) && /private or account-specific URL/.test(compatibilityForm)],
   ['readmes use current themed screenshots and link community testing', /settings-screenshot-dark\.png/.test(englishReadme) && /COMMUNITY_TESTING\.md/.test(englishReadme) && /settings-screenshot-dark\.png/.test(readme) && /COMMUNITY_TESTING\.md/.test(readme)],
-  ['automatic quality measurement excludes browsing identity', /must not infer or transmit a platform, hostname, URL/.test(dataGovernance) && /must not include a persistent installation identifier/.test(feedback)]
+  ['automatic quality measurement excludes browsing identity', /must not infer or transmit a platform, hostname, URL/.test(dataGovernance) && /must not include a persistent installation identifier/.test(feedback)],
+  ['community support and evidence-based triage are documented', /Security vulnerability/.test(support) && /Do not label a plausible explanation as a confirmed root cause/.test(maintainerTriage)],
+  ['stable release cleanup is guarded and does not rewrite history', /published stable GitHub Release/.test(releaseProcess) && /does not rewrite commit history/.test(releaseProcess) && /while the repository is still private/.test(publicLaunch)]
 ];
 
 let failed = false;

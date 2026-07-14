@@ -4,9 +4,10 @@ Copyright 2026 WSL043 and LoudEase contributors.
 Current source code is distributed under the GNU General Public License,
 version 3 only (GPL-3.0-only). See LICENSE.
 
-Historical tagged releases remain available under the license attached to
-each release. In particular, the 0.7.0 and 0.7.1 beta tags were distributed
-under MPL-2.0; those existing grants are not revoked by the later transition.
+Copies distributed under historical tags remain under the license attached to
+those copies. In particular, the 0.7.0 and 0.7.1 beta tags were distributed
+under MPL-2.0; removing a prerelease or tag from GitHub does not revoke those
+existing grants or the rights already received.
 
 Project home: https://github.com/WSL043/loudease
 
