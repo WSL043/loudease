@@ -555,10 +555,23 @@ async function main() {
             resolve(error ? { error: String(error.message || error) } : response);
           });
         });
-        const input = document.querySelector('#cutRange');
-        const output = document.querySelector('#cutValue');
+        let input = null;
+        let output = null;
+        const controlStartedAt = Date.now();
+        while (Date.now() - controlStartedAt < 5000) {
+          input = document.querySelector('#cutRange');
+          output = document.querySelector('#cutValue');
+          if (input && output) break;
+          await sleep(100);
+        }
         if (!input || !output) {
-          return { ok: false, error: 'missing-strength-control' };
+          return {
+            ok: false,
+            error: 'missing-strength-control',
+            readyState: document.readyState,
+            url: location.href,
+            bodyChildCount: document.body?.children?.length ?? null
+          };
         }
         const tabs = await chrome.tabs.query({});
         const target = tabs.find((tab) => String(tab.url || '').startsWith(targetOrigin))
