@@ -4,6 +4,9 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Strengthened full-scale quiet leveling so genuinely quiet passages move toward the same bounded target as loud material.
+- Replaced the quiet detector's mean-energy window with a robust 100 ms median window so isolated peaks no longer suppress the whole passage.
+- Added a strength-scaled, bounded look-ahead limiter allowance for high-crest quiet material, plus convergence and no-hard-clip regressions.
 - Relicensed future LoudEase versions from MPL-2.0 to GPL-3.0-only so distributed derivative extensions must keep their corresponding source available. Historical tagged releases retain their original license grants.
 - Added founder-led governance, DCO sign-offs, CODEOWNERS, machine-readable license metadata, asset provenance, and third-party icon notices.
 - Added a public, Issue-based support route while keeping official maintenance and releases under WSL043.

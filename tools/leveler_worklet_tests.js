@@ -33,6 +33,12 @@ function configure(processor, overrides = {}, media = {}) {
 }
 
 function render(processor, seconds, amplitude, startSample = 0) {
+  return renderGenerated(processor, seconds, (sampleIndex) => (
+    amplitude * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
+  ), startSample);
+}
+
+function renderGenerated(processor, seconds, generator, startSample = 0) {
   const blocks = Math.ceil(seconds * SAMPLE_RATE / BLOCK_SIZE);
   let peak = 0;
   let energy = 0;
@@ -40,7 +46,7 @@ function render(processor, seconds, amplitude, startSample = 0) {
   for (let block = 0; block < blocks; block += 1) {
     const input = new Float32Array(BLOCK_SIZE);
     const output = new Float32Array(BLOCK_SIZE);
-    for (let i = 0; i < BLOCK_SIZE; i += 1) input[i] = amplitude * Math.sin(2 * Math.PI * 997 * (startSample + block * BLOCK_SIZE + i) / SAMPLE_RATE);
+    for (let i = 0; i < BLOCK_SIZE; i += 1) input[i] = generator(startSample + block * BLOCK_SIZE + i);
     processor.process([[input]], [[output]]);
     if (block > 2) for (const value of output) { peak = Math.max(peak, Math.abs(value)); energy += value * value; samples += 1; }
   }
@@ -68,18 +74,23 @@ assert('zero strength remains unity', Math.abs(zeroOut.rms - 0.2 / Math.SQRT2) <
 
 const loud = new ProcessorClass();
 configure(loud);
-render(loud, 1.2, 0.35);
-assert('loud material is attenuated', latest(loud).currentGainDb < -4, JSON.stringify(latest(loud)));
+const loudOut = render(loud, 1.2, 0.35);
+assert('loud material is attenuated to the common target', latest(loud).currentGainDb < -15 && Math.abs(latest(loud).outputMomentaryDb - (-29)) < 1, JSON.stringify(latest(loud)));
 
 const quiet = new ProcessorClass();
 configure(quiet);
-render(quiet, 1.2, 0.008);
-assert('quiet material lifts when peak headroom exists', latest(quiet).currentGainDb > 2, JSON.stringify(latest(quiet)));
+const quietOut = render(quiet, 1.2, 0.008);
+assert('quiet material receives strong lift to the common target', latest(quiet).currentGainDb > 15 && Math.abs(latest(quiet).outputMomentaryDb - (-29)) < 1, JSON.stringify(latest(quiet)));
+assert(
+  'worklet loud and quiet outputs converge',
+  Math.abs(latest(loud).outputMomentaryDb - latest(quiet).outputMomentaryDb) < 1,
+  JSON.stringify({ loud: latest(loud).outputMomentaryDb, quiet: latest(quiet).outputMomentaryDb, loudRms: loudOut.rms, quietRms: quietOut.rms })
+);
 
-const noHeadroom = new ProcessorClass();
-configure(noHeadroom);
-render(noHeadroom, 1.2, 0.75);
-assert('quiet lift is unavailable without peak headroom', latest(noHeadroom).currentGainDb <= 0, JSON.stringify(latest(noHeadroom)));
+const highLevel = new ProcessorClass();
+configure(highLevel);
+render(highLevel, 1.2, 0.75);
+assert('high-level material never receives upward gain', latest(highLevel).currentGainDb <= 0, JSON.stringify(latest(highLevel)));
 
 const silence = new ProcessorClass();
 configure(silence);
@@ -92,7 +103,41 @@ render(stepped, 0.8, 0.35);
 const before = latest(stepped).currentGainDb;
 render(stepped, 0.02, 0.006, 40000);
 const after = latest(stepped).currentGainDb;
-assert('gain envelope has bounded upward steps', after - before <= 1.41, JSON.stringify({ before, after }));
+assert('gain envelope has bounded upward steps', after - before <= 3.01, JSON.stringify({ before, after }));
+
+const highCrest = new ProcessorClass();
+configure(highCrest);
+const highCrestOut = renderGenerated(highCrest, 3, (sampleIndex) => {
+  const quietBed = 0.006 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE);
+  return sampleIndex % Math.round(SAMPLE_RATE * 0.25) === 4000 ? 0.55 : quietBed;
+});
+const highCrestStates = highCrest.messages.filter((message) => message.type === 'state');
+const highCrestLimitedSamples = highCrestStates.reduce((sum, state) => sum + Number(state.limitedSamples || 0), 0);
+const highCrestHardClips = highCrestStates.reduce((sum, state) => sum + Number(state.hardClippedSamples || 0), 0);
+const highCrestSteadyStates = highCrestStates.slice(Math.floor(highCrestStates.length / 2));
+const highCrestSummary = highCrestSteadyStates.reduce((summary, state) => ({
+  minTargetGainDb: Math.min(summary.minTargetGainDb, Number(state.targetGainDb || 0)),
+  maxTargetGainDb: Math.max(summary.maxTargetGainDb, Number(state.targetGainDb || 0)),
+  averageCurrentGainDb: summary.averageCurrentGainDb + (Number(state.currentGainDb || 0) / highCrestSteadyStates.length),
+  averageOutputMomentaryDb: summary.averageOutputMomentaryDb + (Number(state.outputMomentaryDb || 0) / highCrestSteadyStates.length)
+}), {
+  minTargetGainDb: Infinity,
+  maxTargetGainDb: -Infinity,
+  averageCurrentGainDb: 0,
+  averageOutputMomentaryDb: 0
+});
+const highCrestLoudGapDb = Math.abs(
+  highCrestSummary.averageOutputMomentaryDb - latest(loud).outputMomentaryDb
+);
+assert(
+  'full-strength high-crest quiet material converges through bounded limiting',
+  highCrestSummary.averageCurrentGainDb > 18
+    && highCrestLoudGapDb < 3.5
+    && highCrestLimitedSamples > 0,
+  JSON.stringify({ latest: latest(highCrest), highCrestLimitedSamples, highCrestLoudGapDb, highCrestSummary })
+);
+assert('high-crest lift remains below the ceiling', highCrestOut.peak <= Math.pow(10, -3 / 20) + 1e-6, String(highCrestOut.peak));
+assert('high-crest lift uses lookahead limiting without hard clipping', highCrestHardClips === 0, String(highCrestHardClips));
 
 const limited = new ProcessorClass();
 configure(limited);

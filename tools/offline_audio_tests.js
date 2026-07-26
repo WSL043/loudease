@@ -20,24 +20,27 @@ const FRAME_SIZE = Math.round(SAMPLE_RATE * FRAME_MS / 1000);
 const NOISE_FLOOR_DB = -62;
 const SIGNAL_PEAK_FLOOR = 0.00035;
 const TARGET_RMS_DB = -29;
-const LIFT_TARGET_RMS_DB = -35;
-const MAX_LIFT_DB = 12;
+const LIFT_TARGET_RMS_DB = -29;
+const MAX_LIFT_DB = 34;
 const MAX_CUT_DB = 30;
 const LIMITER_CEILING_DB = -3;
 const PEAK_GUARD_DB = -6;
+const LIFT_LIMITER_BUDGET_DB = 15;
 const CUT_ATTACK_SECONDS = 0.012;
 const CUT_RELEASE_SECONDS = 0.18;
-const LIFT_ATTACK_SECONDS = 0.35;
+const LIFT_ATTACK_SECONDS = 0.10;
 const LIFT_RELEASE_SECONDS = 0.25;
-const MAX_GAIN_INCREASE_STEP_DB = 1.4;
+const MAX_GAIN_INCREASE_STEP_DB = 3;
 const FAST_CUT_HISTORY_FRAMES = 5;
 const MOMENTARY_HISTORY_FRAMES = 20;
 const SHORT_TERM_HISTORY_FRAMES = 150;
+const LIFT_LOUDNESS_HISTORY_FRAMES = 5;
 const LIFT_CONTROL_HISTORY_FRAMES = 10;
 const MAX_HISTORY_FRAMES = SHORT_TERM_HISTORY_FRAMES;
+const LIFT_LOUDNESS_PERCENTILE = 0.5;
 const LIFT_PEAK_PERCENTILE = 0.65;
 const TARGET_DEADBAND_DB = 0.8;
-const TARGET_HOLD_MS = 200;
+const TARGET_HOLD_MS = 80;
 const CEILING_LINEAR = dbToLinear(LIMITER_CEILING_DB);
 
 const settings = {
@@ -244,9 +247,9 @@ function processFixture(samples) {
     const momentaryEnergy = meanLast(energyHistory, MOMENTARY_HISTORY_FRAMES);
     const shortTermEnergy = meanLast(energyHistory, SHORT_TERM_HISTORY_FRAMES);
     const loudness = computeDualWindowLoudnessDb(momentaryEnergy, shortTermEnergy);
+    const liftControlDb = energyToDb(percentileLast(energyHistory, LIFT_LOUDNESS_HISTORY_FRAMES, LIFT_LOUDNESS_PERCENTILE));
     const liftPeak = percentileLast(peakHistory, LIFT_CONTROL_HISTORY_FRAMES, LIFT_PEAK_PERCENTILE);
     const controlDb = Math.max(loudness.controlDb, energyToDb(fastCutEnergy));
-    const liftControlDb = loudness.liftDb;
     const peakDb = linearToDb(peak);
     const liftPeakDb = linearToDb(liftPeak || peak);
 
@@ -272,7 +275,8 @@ function processFixture(samples) {
         maxLiftDb: MAX_LIFT_DB,
         maxCutDb: MAX_CUT_DB,
         limiterCeilingDb: LIMITER_CEILING_DB,
-        peakGuardDb: PEAK_GUARD_DB
+        peakGuardDb: PEAK_GUARD_DB,
+        liftLimiterBudgetDb: LIFT_LIMITER_BUDGET_DB
       });
 
       const nowMs = (start / SAMPLE_RATE) * 1000;
@@ -403,32 +407,52 @@ const metrics = Object.fromEntries(
     segmentMetrics(fixture.samples, processed.output, segment)
   ])
 );
+// Program-level assertions exclude the first 200 ms after a fixture boundary.
+// That interval deliberately exercises the bounded gain transition and would
+// otherwise dominate an RMS average even though the steady passage converges.
+const settledMetrics = Object.fromEntries(
+  Object.entries(fixture.segments).map(([name, segment]) => [
+    name,
+    segmentMetrics(fixture.samples, processed.output, {
+      start: Math.min(segment.end, segment.start + Math.round(0.2 * SAMPLE_RATE)),
+      end: segment.end
+    })
+  ])
+);
 
 const overallOutputPeak = maxAbs(processed.output);
 const gainStep = gainStepSummary(processed.gainByFrame);
 const recoveryStart = segmentFrameSummary(processed.gainByFrame, fixture.segments.recovery, 0.8);
 const alternatingGain = segmentGainRange(processed.gainByFrame, fixture.segments.alternating);
+const quietLoudGapDb = Math.abs(settledMetrics.quietVoice.outputDb - settledMetrics.loudTone.outputDb);
+const noisyQuietLoudGapDb = Math.abs(settledMetrics.noiseQuietVoice.outputDb - settledMetrics.loudTone.outputDb);
 
 assert('silence is not lifted into noise', metrics.silence.outputDb < -80, JSON.stringify(metrics.silence));
-assert('quiet voice is lifted clearly', metrics.quietVoice.deltaDb > 7 && metrics.quietVoice.deltaDb <= MAX_LIFT_DB + 0.5, JSON.stringify(metrics.quietVoice));
-assert('loud 1kHz tone is reduced', metrics.loudTone.deltaDb < -5, JSON.stringify(metrics.loudTone));
+assert('quiet voice receives strong lift', metrics.quietVoice.deltaDb > 18 && metrics.quietVoice.deltaDb <= MAX_LIFT_DB + 0.5, JSON.stringify(metrics.quietVoice));
+assert('loud 1kHz tone settles at the common target', settledMetrics.loudTone.deltaDb < -10 && Math.abs(settledMetrics.loudTone.outputDb - TARGET_RMS_DB) < 1, JSON.stringify(settledMetrics.loudTone));
+assert('quiet and loud program levels converge', quietLoudGapDb <= 3.5, `gapDb=${quietLoudGapDb.toFixed(3)}`);
 assert('burst peak is limited below ceiling', metrics.burst.outputPeakDb <= LIMITER_CEILING_DB + 0.1, JSON.stringify(metrics.burst));
-assert('noise plus quiet voice is lifted but remains bounded', metrics.noiseQuietVoice.deltaDb > 5 && metrics.noiseQuietVoice.deltaDb < MAX_LIFT_DB, JSON.stringify(metrics.noiseQuietVoice));
+assert('noise plus quiet voice is strongly lifted but remains bounded', metrics.noiseQuietVoice.deltaDb > 18 && metrics.noiseQuietVoice.deltaDb < MAX_LIFT_DB, JSON.stringify(metrics.noiseQuietVoice));
+assert('noisy quiet voice also converges toward the loud program', noisyQuietLoudGapDb <= 3.5, `gapDb=${noisyQuietLoudGapDb.toFixed(3)}`);
 assert('alternating loud quiet sequence remains bounded', metrics.alternating.outputPeakDb <= LIMITER_CEILING_DB + 0.1, JSON.stringify(metrics.alternating));
-assert('rapid alternation does not chase every loudness block', alternatingGain.spanDb <= 10 && alternatingGain.polarityChanges <= 2, JSON.stringify(alternatingGain));
 assert(
-  'quiet recovery lifts within 800ms without an immediate jump',
-  recoveryStart.maxGainDb > 0.5
+  'strong leveling applies opposite correction to alternating loud and quiet blocks',
+  alternatingGain.minGainDb < -8 && alternatingGain.maxGainDb > 10 && alternatingGain.polarityChanges >= 4,
+  JSON.stringify(alternatingGain)
+);
+assert(
+  'quiet recovery becomes audible within 400ms without an immediate jump',
+  recoveryStart.maxGainDb > 10
     && recoveryStart.firstPositiveAtMs != null
-    && recoveryStart.firstPositiveAtMs >= 200
-    && recoveryStart.firstPositiveAtMs <= 800,
+    && recoveryStart.firstPositiveAtMs >= 100
+    && recoveryStart.firstPositiveAtMs <= 400,
   JSON.stringify(recoveryStart)
 );
 assert('overall output never clips', overallOutputPeak <= CEILING_LINEAR + 0.000001, `peak=${overallOutputPeak}`);
-assert('gain recovery has no abrupt upward jump', gainStep.maxIncrease <= 1.41, `maxIncreaseDb=${gainStep.maxIncrease.toFixed(3)}`);
+assert('gain recovery has bounded upward steps', gainStep.maxIncrease <= MAX_GAIN_INCREASE_STEP_DB + 0.01, `maxIncreaseDb=${gainStep.maxIncrease.toFixed(3)}`);
 assert('protective cut remains bounded', gainStep.maxDecrease <= MAX_CUT_DB + 1, `maxDecreaseDb=${gainStep.maxDecrease.toFixed(3)}`);
 
 if (process.exitCode) {
-  console.log(JSON.stringify({ metrics, overallOutputPeak, gainStep, recoveryStart, alternatingGain }, null, 2));
+  console.log(JSON.stringify({ metrics, settledMetrics, quietLoudGapDb, noisyQuietLoudGapDb, overallOutputPeak, gainStep, recoveryStart, alternatingGain }, null, 2));
   process.exit(process.exitCode);
 }

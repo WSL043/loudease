@@ -1,6 +1,6 @@
 # Research and design basis
 
-The runtime combines established browser and audio engineering techniques. The value is in their browser-safe integration, conservative policy, tuning, and verification rather than a claim of a novel scientific algorithm.
+The runtime combines established browser and audio engineering techniques. The value is in their browser-safe integration, bounded policy, tuning, and verification rather than a claim of a novel scientific algorithm.
 
 ## Primary references
 
@@ -21,9 +21,9 @@ Tab capture avoids one-source-node ownership conflicts and follows SPA media rep
 
 The product needs slow program-level consistency and fast peak protection. One aggressive compressor can pump, alter transients, and make music tiring. The current design separates loudness measurement, gain target policy, envelope stability, and final limiting.
 
-### Conservative upward gain
+### Strength-scaled bounded upward gain
 
-Quiet material is not automatically safe to amplify. Low RMS can coexist with high peaks or noise. Upward gain therefore depends on a signal gate, a quiet deficit, robust and instantaneous peak headroom, and player-volume reliability.
+Quiet material is not automatically safe to amplify. Low RMS can coexist with high peaks or noise. Upward gain therefore depends on a signal gate, a median-based 100 ms quiet deficit, robust and instantaneous peak headroom, and player-volume reliability. Full strength can use up to `15 dB` of bounded look-ahead peak compression to move high-crest quiet passages closer to the common target; lower settings scale that allowance down.
 
 ### Sample-peak look-ahead limiter
 

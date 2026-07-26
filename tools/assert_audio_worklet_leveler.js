@@ -13,6 +13,8 @@ const checks = [
   ['render path uses fixed buffers', /new Float64Array\(HISTORY_SIZE\)/.test(worklet) && /new Float32Array\(DELAY_LENGTH\)/.test(worklet)],
   ['render path avoids wall clocks timers DOM and network', !/Date\.now|setTimeout|document\.|fetch\(|XMLHttpRequest/.test(worklet)],
   ['worklet owns loudness gain and limiting', /finishFrame\(\)/.test(worklet) && /targetGainDb/.test(worklet) && /limiterGain/.test(worklet)],
+  ['worklet uses robust quiet-window loudness', /LIFT_LOUDNESS_PERCENTILE = 0\.5/.test(worklet) && /percentileLast\(this\.energyHistory, 5, LIFT_LOUDNESS_PERCENTILE\)/.test(worklet)],
+  ['worklet strong lift stays explicitly bounded', /MAX_LIFT_DB = 34/.test(worklet) && /LIFT_LIMITER_BUDGET_DB = 15/.test(worklet) && /effectiveLiftBudget/.test(worklet)],
   ['diagnostics are returned by the worklet', /type: 'state'/.test(worklet) && /handleLevelerMessage/.test(offscreen)]
 ];
 let failed = false;

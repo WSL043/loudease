@@ -31,12 +31,14 @@
   });
   const DEFAULT_LEVELER_PARAMS = Object.freeze({
     targetRmsDb: -29,
-    liftTargetRmsDb: -35,
-    maxLiftDb: 12,
+    liftTargetRmsDb: -29,
+    maxLiftDb: 34,
     maxCutDb: 30,
     limiterCeilingDb: -3,
     peakGuardDb: -6,
     liftHeadroomReserveDb: 2,
+    liftLimiterBudgetDb: 15,
+    quietTransitionCutMarginDb: 3,
     quietLiftBiasDb: 0
   });
 
@@ -159,6 +161,10 @@
         liftDb: 0,
         reductionDb: 0,
         peakHeadroomDb: 0,
+        rawPeakHeadroomDb: 0,
+        effectiveLiftHeadroomDb: 0,
+        liftLimiterBudgetDb: 0,
+        effectiveLiftBudgetDb: 0,
         quietDeficitDb: 0,
         loudnessCutDb: 0,
         peakCutDb: 0
@@ -175,6 +181,10 @@
         liftDb: 0,
         reductionDb: 0,
         peakHeadroomDb: 0,
+        rawPeakHeadroomDb: 0,
+        effectiveLiftHeadroomDb: 0,
+        liftLimiterBudgetDb: 0,
+        effectiveLiftBudgetDb: 0,
         quietDeficitDb: 0,
         loudnessCutDb: 0,
         peakCutDb: 0
@@ -190,26 +200,40 @@
     const peakGuardDb = finite(params.peakGuardDb, DEFAULT_LEVELER_PARAMS.peakGuardDb);
     const limiterCeilingDb = finite(params.limiterCeilingDb, DEFAULT_LEVELER_PARAMS.limiterCeilingDb);
     const liftHeadroomReserveDb = finite(params.liftHeadroomReserveDb, DEFAULT_LEVELER_PARAMS.liftHeadroomReserveDb);
+    const liftLimiterBudgetDb = Math.max(0, finite(
+      params.liftLimiterBudgetDb,
+      DEFAULT_LEVELER_PARAMS.liftLimiterBudgetDb
+    )) * liftScale;
+    const quietTransitionCutMarginDb = Math.max(0, finite(
+      params.quietTransitionCutMarginDb,
+      DEFAULT_LEVELER_PARAMS.quietTransitionCutMarginDb
+    ));
     const quietLiftBiasDb = finite(params.quietLiftBiasDb, DEFAULT_LEVELER_PARAMS.quietLiftBiasDb) * liftScale;
 
-    const loudnessCutDb = Math.max(0, rmsDb - targetRmsDb) * (0.65 + 0.35 * cutScale);
-    const peakCutDb = Math.max(0, peakDb - peakGuardDb);
     const quietDeficitDb = Math.max(0, liftTargetRmsDb - liftRmsDb);
+    // Once the faster lift window confirms a quiet passage, stale long-window
+    // loudness must not keep cancelling the requested recovery gain.
+    const loudnessControlDb = quietDeficitDb > 0
+      ? Math.min(rmsDb, liftRmsDb + quietTransitionCutMarginDb)
+      : rmsDb;
+    const loudnessCutDb = Math.max(0, loudnessControlDb - targetRmsDb) * (0.65 + 0.35 * cutScale);
+    const peakCutDb = Math.max(0, peakDb - peakGuardDb);
     const quietnessRatio = clamp(quietDeficitDb / 12, 0, 1);
     const effectivePeakCutDb = peakCutDb * (1 - (0.5 * quietnessRatio));
     const reductionDb = clamp(Math.max(loudnessCutDb, effectivePeakCutDb) * cutScale, 0, maxCutDb);
 
     const peakHeadroomDb = limiterCeilingDb - liftPeakDb - liftHeadroomReserveDb;
     const rawPeakHeadroomDb = limiterCeilingDb - peakDb - 0.5;
-    // Sustained upward gain must fit below both the robust and instantaneous
-    // peak ceilings. The limiter is a safety net, not extra gain budget.
     const effectiveLiftHeadroomDb = Math.min(peakHeadroomDb, rawPeakHeadroomDb);
+    // Strong leveling may intentionally compress brief peaks, but the limiter
+    // allowance is bounded so upward gain cannot turn into unbounded clipping.
+    const effectiveLiftBudgetDb = effectiveLiftHeadroomDb + liftLimiterBudgetDb;
     const liftFullness = 1;
     const requestedLiftDb = quietDeficitDb > 0
       ? (quietDeficitDb * liftScale * liftFullness) + quietLiftBiasDb
       : 0;
-    const liftDb = clamp(Math.min(requestedLiftDb, effectiveLiftHeadroomDb), 0, maxLiftDb);
-    const targetGainDb = clamp(Math.min(liftDb - reductionDb, effectiveLiftHeadroomDb), -maxCutDb, maxLiftDb);
+    const liftDb = clamp(Math.min(requestedLiftDb, effectiveLiftBudgetDb), 0, maxLiftDb);
+    const targetGainDb = clamp(Math.min(liftDb - reductionDb, effectiveLiftBudgetDb), -maxCutDb, maxLiftDb);
 
     return {
       targetGainDb,
@@ -218,8 +242,11 @@
       peakHeadroomDb,
       rawPeakHeadroomDb,
       effectiveLiftHeadroomDb,
+      liftLimiterBudgetDb,
+      effectiveLiftBudgetDb,
       quietDeficitDb,
       requestedLiftDb,
+      loudnessControlDb,
       loudnessCutDb,
       peakCutDb,
       effectivePeakCutDb
