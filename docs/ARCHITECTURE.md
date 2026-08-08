@@ -58,7 +58,7 @@ The popup is both the authorization surface and the compact status UI. Opening i
 The two strength controls are independent:
 
 - **Reduce loud sounds** maps to downward loudness control and peak protection.
-- **Lift quiet sounds** maps to signal-gated upward gain with headroom and player-volume constraints.
+- **Lift quiet sounds** maps to signal-gated upward gain toward the common target, with a `+34 dB` cap, up to `15 dB` of bounded full-strength peak-compression allowance, and player-volume constraints.
 
 ### Monitor and options (`monitor/`)
 

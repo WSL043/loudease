@@ -165,6 +165,17 @@ const quiet = computeLevelerGainDb({
 });
 assert('quiet input is lifted when headroom exists', quiet.targetGainDb > 0 && quiet.liftDb > 0 && closeToZero(quiet.reductionDb), JSON.stringify(quiet));
 
+const veryQuiet = computeLevelerGainDb({
+  rmsDb: -50,
+  peakDb: -36,
+  settings: baseSettings
+});
+assert(
+  'full lift strength moves very quiet material toward the common target',
+  veryQuiet.targetGainDb >= 20 && veryQuiet.targetGainDb <= DEFAULT_LEVELER_PARAMS.maxLiftDb,
+  JSON.stringify(veryQuiet)
+);
+
 const quietHighCrest = computeLevelerGainDb({
   rmsDb: -42,
   peakDb: -8,
@@ -172,10 +183,12 @@ const quietHighCrest = computeLevelerGainDb({
   settings: baseSettings
 });
 assert(
-  'quiet high-crest speech stays within raw peak headroom',
-  quietHighCrest.targetGainDb > 0
+  'full-strength quiet high-crest speech converges despite brief peaks',
+  quietHighCrest.targetGainDb >= 12.5
     && quietHighCrest.targetGainDb <= DEFAULT_LEVELER_PARAMS.maxLiftDb
-    && quietHighCrest.targetGainDb <= quietHighCrest.rawPeakHeadroomDb + 0.001,
+    && quietHighCrest.targetGainDb > quietHighCrest.rawPeakHeadroomDb
+    && quietHighCrest.targetGainDb <= quietHighCrest.effectiveLiftBudgetDb + 0.001
+    && quietHighCrest.targetGainDb - quietHighCrest.rawPeakHeadroomDb <= DEFAULT_LEVELER_PARAMS.liftLimiterBudgetDb + 0.001,
   JSON.stringify(quietHighCrest)
 );
 
@@ -184,10 +197,17 @@ const quietNoHeadroom = computeLevelerGainDb({
   peakDb: -3.2,
   settings: baseSettings
 });
-assert('quiet lift is blocked by peak headroom', quietNoHeadroom.targetGainDb <= 0 && quietNoHeadroom.liftDb === 0 && quietNoHeadroom.peakHeadroomDb < 0, JSON.stringify(quietNoHeadroom));
+assert(
+  'near-ceiling high-crest material becomes audible through bounded peak compression',
+  quietNoHeadroom.targetGainDb >= 11
+    && Math.abs((-42 + quietNoHeadroom.targetGainDb) - DEFAULT_LEVELER_PARAMS.liftTargetRmsDb) <= 2
+    && quietNoHeadroom.targetGainDb <= quietNoHeadroom.effectiveLiftBudgetDb + 0.001
+    && quietNoHeadroom.targetGainDb <= DEFAULT_LEVELER_PARAMS.liftLimiterBudgetDb,
+  JSON.stringify(quietNoHeadroom)
+);
 
 const peakOnly = computeLevelerGainDb({
-  rmsDb: DEFAULT_LEVELER_PARAMS.targetRmsDb - 4,
+  rmsDb: DEFAULT_LEVELER_PARAMS.targetRmsDb - 1,
   peakDb: -4,
   settings: baseSettings
 });
@@ -244,8 +264,9 @@ const lowPlayerVolumeNormalLiftCap = computePlayerVolumeBoundedMaxLiftDb({
 }, DEFAULT_LEVELER_PARAMS);
 assert('low player volume normal source has no lift headroom', closeToZero(lowPlayerVolumeNormalLiftCap), String(lowPlayerVolumeNormalLiftCap));
 
+const quarterVolumeDb = 20 * Math.log10(0.25);
 const lowPlayerVolumeQuietLiftCap = computePlayerVolumeBoundedMaxLiftDb({
-  rmsDb: -56,
+  rmsDb: -44 + quarterVolumeDb,
   playerVolumeCap: 0.25,
   respectPlayerVolume: true
 }, DEFAULT_LEVELER_PARAMS);
@@ -269,14 +290,17 @@ assert(
   computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: false }) === DEFAULT_LEVELER_PARAMS.limiterCeilingDb
 );
 
-const quarterVolumeDb = 20 * Math.log10(0.25);
+const headroomOnlyParams = {
+  ...DEFAULT_LEVELER_PARAMS,
+  liftLimiterBudgetDb: 0
+};
 const fullVolumeHighCrest = computeLevelerGainDb({
   rmsDb: -44,
   peakDb: -20,
   liftRmsDb: -44,
   liftPeakDb: -20,
   settings: baseSettings
-});
+}, headroomOnlyParams);
 const quarterVolumeHighCrest = computeLevelerGainDb({
   rmsDb: -44 + quarterVolumeDb,
   peakDb: -20 + quarterVolumeDb,
@@ -284,7 +308,7 @@ const quarterVolumeHighCrest = computeLevelerGainDb({
   liftPeakDb: -20 + quarterVolumeDb,
   settings: baseSettings
 }, {
-  ...DEFAULT_LEVELER_PARAMS,
+  ...headroomOnlyParams,
   maxLiftDb: lowPlayerVolumeQuietLiftCap,
   limiterCeilingDb: quarterVolumeLimiterCeiling
 });
@@ -295,7 +319,7 @@ const doubleCompensatedPeak = computeLevelerGainDb({
   liftPeakDb: -20,
   settings: baseSettings
 }, {
-  ...DEFAULT_LEVELER_PARAMS,
+  ...headroomOnlyParams,
   maxLiftDb: lowPlayerVolumeQuietLiftCap,
   limiterCeilingDb: quarterVolumeLimiterCeiling
 });

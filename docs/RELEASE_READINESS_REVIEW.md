@@ -61,6 +61,7 @@ The store verifier must confirm:
 - Chrome still requires a user gesture for a new tab capture.
 - Sample-peak limiting does not catch every inter-sample true peak.
 - Unknown/conflicting player-volume state can reduce quiet-lift availability.
+- Strong full-scale lift can expose noise or codec artifacts and can audibly compress high-crest peaks; controlled listening remains required.
 - Site-independent capture avoids media-element conflicts but cannot bypass Chrome-protected surfaces.
 - Listening quality is sensitive to source material; synthetic tests prove invariants, not universal preference.
 
@@ -69,7 +70,7 @@ The store verifier must confirm:
 Allowed statements:
 
 - processes authorized tab audio locally;
-- reduces loud sections and conservatively lifts quiet detail;
+- drives sustained loud and genuine quiet sections toward a common bounded target at full strength;
 - respects mute and player-volume state when reliable;
 - uses worklet-based loudness riding and look-ahead peak limiting;
 - supports the documented languages and tested site matrix.
