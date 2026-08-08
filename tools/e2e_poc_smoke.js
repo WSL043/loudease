@@ -650,7 +650,7 @@ async function main() {
           const matches = selectedValue !== Number(initialValue)
             && Number(output.textContent) === selectedValue
             && Number(saved?.cutStrength) === selectedValue
-            && saved?.siteScoped === true;
+            && saved?.siteScoped === false;
           stableMatches = matches ? stableMatches + 1 : 0;
           if (stableMatches >= 3) {
             break;
