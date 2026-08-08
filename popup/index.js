@@ -402,7 +402,7 @@ function save(next, options = {}) {
       });
       pendingSettingsError = '';
       if (revision === settingsRevision) {
-        settings = normalizeSettings(payload || snapshot);
+        settings = normalizeSettings({ ...snapshot, ...(payload || {}) });
         render();
         await pushSettingsToPage(settings);
         await refreshStatus();
@@ -434,7 +434,7 @@ async function persistSettings(next, options = {}, revision = settingsRevision) 
     });
     if (revision === settingsRevision) {
       pendingSettingsError = '';
-      settings = normalizeSettings(payload || next);
+      settings = normalizeSettings({ ...next, ...(payload || {}) });
       render();
     }
   } catch (_) {
