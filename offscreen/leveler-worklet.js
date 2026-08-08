@@ -169,7 +169,10 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       else if (this.respectPlayerVolume && cap < 0.98) maxLift = clamp((-35 + linearToDb(cap)) - momentaryDb, 0, 12);
       const ceilingDb = this.respectPlayerVolume && this.playerVolumeReliable ? -3 + Math.min(0, linearToDb(cap)) : -3;
       const peakDb = linearToDb(this.inputPeak);
-      const liftPeakDb = linearToDb(liftPeak) + compensationDb;
+      // Loudness is compensated to judge the source independently of the player's
+      // volume. Peak headroom stays in the captured/output domain because the
+      // limiter ceiling already includes that player-volume attenuation.
+      const liftPeakDb = linearToDb(liftPeak);
       quietDeficit = Math.max(0, -35 - (momentaryDb + compensationDb));
       const loudnessCut = Math.max(0, controlDb - (-29)) * (0.65 + 0.35 * cutScale);
       const peakCut = Math.max(0, peakDb - (-6));
