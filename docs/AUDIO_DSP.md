@@ -54,7 +54,7 @@ Upward gain is disabled until both energy and peak evidence indicate a real sign
 - open peak: `0.00035` linear;
 - close peak: half the open threshold.
 
-When the player volume is known and below unity, measurement is compensated before gate decisions so a quiet player setting is not mistaken for quiet source mastering.
+When the player volume is known and below unity, loudness measurement is compensated before gate and quietness decisions so a quiet player setting is not mistaken for quiet source mastering.
 
 ## Gain policy
 
@@ -124,11 +124,18 @@ When media state is fresh and conflict-free:
 - the limiter ceiling is lowered proportionally;
 - DSP never writes to `HTMLMediaElement.volume`.
 
+Player-volume handling deliberately uses two measurement domains:
+
+- **source classification domain** — loudness and signal-gate measurements may be compensated for a known low player volume so the source is judged independently of the user's volume setting;
+- **captured/output peak domain** — peak headroom remains in the captured PCM domain because the limiter ceiling already includes the player-volume reduction.
+
+Do not compensate the peak and also lower the limiter ceiling for the same player-volume reduction. That double-counts attenuation and can incorrectly block quiet lift on high-crest material. `tools/leveler_worklet_tests.js` and `tools/dsp_unit_tests.js` contain regressions for this invariant.
+
 When player-volume state is unknown or conflicting, upward lift is disabled unless the narrow tab-audible fallback is safe. Downward protection remains available.
 
 ## Fallback path
 
-If the unified worklet cannot load, the offscreen document falls back to a render-thread meter or analyser, main-thread gain control, and a dedicated limiter worklet or `DynamicsCompressorNode`. Diagnostics expose the fallback mode. The fallback exists for resilience; it is not the quality reference.
+If the unified worklet cannot load, the offscreen document falls back to a render-thread meter or analyser, main-thread gain control, and a dedicated limiter worklet or `DynamicsCompressorNode`. Diagnostics expose the fallback mode. The fallback exists for resilience; it is not the quality reference. The fallback and primary worklet must preserve the same source/output-domain rules even though their control loops are implemented separately.
 
 ## Verification
 
@@ -142,10 +149,13 @@ Automated coverage includes:
 - OfflineAudioContext graph checks in `tools/offline_audio_graph_tests.js`;
 - isolated Chrome E2E for quiet lift, loud cut, bursts, mute, player volume, source switching, persistence, and capture lifecycle.
 
+Algorithm changes that affect listening quality are additionally governed by [`DSP_EVALUATION.md`](DSP_EVALUATION.md). A more complex candidate is not accepted merely because it uses a newer standard, more signal features, or a more sophisticated model.
+
 ## Known DSP gaps
 
 - No oversampled true-peak estimation.
 - No standards-compliant integrated LUFS meter.
 - No speech/music classifier or source separation.
+- The primary worklet and fallback still contain duplicated control-policy implementation that can drift; equivalence is enforced by tests today, but a single generated/shared policy kernel is preferable long term.
 - Synthetic fixtures do not replace licensed real-program material and controlled listening tests.
 - Perceptual tuning still needs a larger, legally redistributable evaluation corpus.
