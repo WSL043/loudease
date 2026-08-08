@@ -16,6 +16,7 @@ const placeholders = (message = '') => (message.match(/\$\d+/g) || []).sort();
 
 const checks = [
   ['English is the static popup and monitor default', /<html lang="en" dir="ltr">/.test(popupHtml) && /<html lang="en" dir="ltr">/.test(monitorHtml) && !/[\u3400-\u9fff]/u.test(popupHtml)],
+  ['popup runtime copy has no hard-coded Han text outside locale catalogs', !/[\u3400-\u9fff]/u.test(popupJs)],
   ['popup has no visible preset or mode bar', !/presetBar|presetButton|data-preset/i.test(popupHtml)],
   ['popup has exactly two visible strength ranges', (popupHtml.match(/type="range"/g) || []).length === 2],
   ['popup omits URL shortcuts diagnostics and technical counters', !/current-page|shortcut|diagnostic|compactStats|sourceCount|audibleCount/i.test(popupHtml)],
@@ -28,12 +29,14 @@ const checks = [
   ['i18n helper uses Chrome messages and explicit English fallback', /chrome\?\.i18n/.test(helper) && /getMessage/.test(helper) && /fallback/.test(helper)],
   ['RTL direction and logical CSS are present', /activeLocale === 'ar'/.test(helper) && /dir =/.test(helper) && /inline-size|margin-inline|padding-inline/.test(popupCss)],
   ['popup status requires runtime evidence before claiming active', /captureActive \|\| \(active > 0 && processed > 0 && audible > 0\)/.test(popupJs) && /hasFreshSignal/.test(popupJs)],
+  ['popup has one canonical compact status renderer', (popupJs.match(/function renderStatus\(/g) || []).length === 1 && !/renderCompactStatus|renderStatus\s*=/.test(popupJs)],
   ['recovery actions are hidden by default and shown from failure branches', /id="captureButton"[^>]*hidden/.test(popupHtml) && /id="reloadButton"[^>]*hidden/.test(popupHtml) && /needsReload/.test(popupJs)],
   ['selected AI logo has separate light and dark production assets', /logo-ai-a-light\.png/.test(popupHtml) && /logo-ai-a-dark\.png/.test(popupHtml) && fs.existsSync(path.join(root, 'assets', 'logo-ai-a-light.png')) && fs.existsSync(path.join(root, 'assets', 'logo-ai-a-dark.png'))],
   ['selected UI theme controls the matching logo asset', [popupHtml, monitorHtml].every((html) => /class="brandLogo logoLight"/.test(html) && /class="brandLogo logoDark"/.test(html)) && [popupCss, monitorCss].every((css) => /data-theme="dark"[^\n]*\.logoLight/.test(css) && /data-theme="dark"[^\n]*\.logoDark/.test(css))],
-  ['popup visualizes live input and output levels from runtime evidence', /id="levelVisual"/.test(popupHtml) && /updateLevelVisual\(status\)/.test(popupJs) && /averageOutputDb/.test(popupJs)],
+  ['popup visualizes recent live input and output levels from runtime evidence', /id="levelVisual"/.test(popupHtml) && /updateLevelVisual\(status\)/.test(popupJs) && /averageOutputDb/.test(popupJs) && /inputLevelHistory/.test(popupJs) && /outputLevelHistory/.test(popupJs)],
   ['strength ranges keep value, thumb, and colored progress synchronized', /dial\.input\.style\.setProperty\('--strength'/.test(popupJs) && /--strength/.test(popupCss) && /linear-gradient\(var\(--range-direction\)/.test(popupCss)],
   ['preview save responses preserve the latest slider value', /payload\.type === 'WVB_SAVE_SETTINGS'/.test(popupJs) && /mockSettings = \{[\s\S]*?normalizeSettings/.test(popupJs)],
+  ['slider edits keep existing site rules but do not create implicit site overrides', /function strengthSaveOptions\(\)/.test(popupJs) && /siteScoped: settings\?\.siteScoped === true/.test(popupJs) && /schedulePersistSettings\(strengthSaveOptions\(\)\)/.test(popupJs) && /flushPersistSettings\(strengthSaveOptions\(\)\)/.test(popupJs)],
   ['settings button opens the extension options page', /id="settingsButton"/.test(popupHtml) && /runtime\?\.openOptionsPage/.test(popupJs)],
   ['popup theme button switches the shared light and dark preference', /id="themeButton"/.test(popupHtml) && /saveUiPreferences\(\{ theme: nextTheme \}\)/.test(popupJs) && /data-effective-theme/.test(popupCss)],
   ['popup active status and enable switch use theme semantic colors', /--success-text/.test(popupCss) && /\.statusBadge[^\n]*var\(--success-text\)/.test(popupCss) && /\.switchTrack[^\n]*var\(--switch-off\)/.test(popupCss) && /checked[^\n]*\.switchTrack::after[^\n]*var\(--switch-thumb-on\)/.test(popupCss) && /data-theme="dark"[^\n]*--success-text/.test(popupCss)],
