@@ -24,6 +24,7 @@ const checks = [
   ['popup strength edits stay site-scoped only for an existing override', /function strengthSaveOptions\(\)[\s\S]*?siteScoped: settings\?\.siteScoped === true/.test(popup) && /schedulePersistSettings\(strengthSaveOptions\(\)\)/.test(popup)],
   ['popup keeps the same explicit scope when the range gesture commits', /dial\.input\.addEventListener\('change',[\s\S]*?flushPersistSettings\(strengthSaveOptions\(\)\)/.test(popup)],
   ['popup does not create a site override merely by touching a slider', !/schedulePersistSettings\(\{ siteScoped: true \}\)/.test(popup) && !/flushPersistSettings\(\{ siteScoped: true \}\)/.test(popup)],
+  ['popup preserves scope metadata when save responses omit it', /normalizeSettings\(\{ \.\.\.snapshot, \.\.\.\(payload \|\| \{\}\) \}\)/.test(popup) && /normalizeSettings\(\{ \.\.\.next, \.\.\.\(payload \|\| \{\}\) \}\)/.test(popup)],
   ['popup serializes strength writes and ignores stale responses', /persistQueue = persistQueue/.test(popup) && /revision === settingsRevision/.test(popup)],
   ['popup keeps enabled and player safety global', /enabled: elements\.enabled\.checked \}, \{ globalOnly: true \}/.test(popup) && /respectPlayerVolume: elements\.respectPlayerVolume\.checked \}, \{ globalOnly: true \}/.test(popup)],
   ['bridge refreshes effective settings when global or site storage changes', /SITE_SETTINGS_KEY/.test(bridge) && /changes\[STORAGE_KEY\] \|\| changes\[SITE_SETTINGS_KEY\]/.test(bridge) && /syncSettings\(\)/.test(bridge)]
