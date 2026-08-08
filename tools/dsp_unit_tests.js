@@ -269,6 +269,44 @@ assert(
   computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: false }) === DEFAULT_LEVELER_PARAMS.limiterCeilingDb
 );
 
+const quarterVolumeDb = 20 * Math.log10(0.25);
+const fullVolumeHighCrest = computeLevelerGainDb({
+  rmsDb: -44,
+  peakDb: -20,
+  liftRmsDb: -44,
+  liftPeakDb: -20,
+  settings: baseSettings
+});
+const quarterVolumeHighCrest = computeLevelerGainDb({
+  rmsDb: -44 + quarterVolumeDb,
+  peakDb: -20 + quarterVolumeDb,
+  liftRmsDb: -44,
+  liftPeakDb: -20 + quarterVolumeDb,
+  settings: baseSettings
+}, {
+  ...DEFAULT_LEVELER_PARAMS,
+  maxLiftDb: lowPlayerVolumeQuietLiftCap,
+  limiterCeilingDb: quarterVolumeLimiterCeiling
+});
+const doubleCompensatedPeak = computeLevelerGainDb({
+  rmsDb: -44 + quarterVolumeDb,
+  peakDb: -20 + quarterVolumeDb,
+  liftRmsDb: -44,
+  liftPeakDb: -20,
+  settings: baseSettings
+}, {
+  ...DEFAULT_LEVELER_PARAMS,
+  maxLiftDb: lowPlayerVolumeQuietLiftCap,
+  limiterCeilingDb: quarterVolumeLimiterCeiling
+});
+assert(
+  'player-volume scaling preserves captured-domain peak headroom',
+  Math.abs(fullVolumeHighCrest.targetGainDb - quarterVolumeHighCrest.targetGainDb) < 0.01
+    && quarterVolumeHighCrest.targetGainDb > 8
+    && doubleCompensatedPeak.targetGainDb < quarterVolumeHighCrest.targetGainDb - 5,
+  JSON.stringify({ fullVolumeHighCrest, quarterVolumeHighCrest, doubleCompensatedPeak })
+);
+
 assert(
   'zero cut does not attenuate unlifted source peaks',
   closeToZero(computeProcessingLimiterCeilingDb({
