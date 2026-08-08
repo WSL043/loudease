@@ -19,6 +19,7 @@
 - Measurement is K-weighted and dual-window but is not a complete BS.1770 integrated LUFS implementation.
 - There is no speech/music classifier, source separation, denoising, or multiband compression.
 - Equal perceived loudness across all content is impossible without sacrificing dynamics and introducing artifacts.
+- Full-strength quiet lift can use up to `15 dB` of bounded peak compression, so high-crest music may sound intentionally denser and source noise may become more audible.
 - Synthetic fixtures do not prove universal listening preference.
 
 ## Compatibility

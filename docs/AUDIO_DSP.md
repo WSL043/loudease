@@ -5,14 +5,15 @@ This document describes the current `leveler-v3` algorithm in version `0.7.1`.
 ## Goals
 
 - Reduce sudden loud material before it becomes uncomfortable.
-- Lift genuinely quiet material conservatively without turning noise and silence into content.
-- Keep audible loud-to-quiet relationships instead of forcing every sample to one amplitude.
+- Move sustained loud and genuinely quiet material toward one common target at full strength.
+- Preserve short-scale waveform detail while reducing program-to-program and passage-to-passage level differences.
 - Respect mute and player-volume intent.
 - Avoid clipping, pumping, abrupt gain jumps, and stereo image movement.
 
 ## Non-goals
 
 - Exact broadcast loudness normalization across complete programs.
+- Perfect perceived equality across different spectra, voices, devices, and listening environments.
 - Speech/source separation or content classification.
 - A calibrated acoustic safety limit at the listener's ear.
 - Mastering, EQ, denoising, or multiband dynamics processing.
@@ -37,6 +38,7 @@ The normal graph runs in `offscreen/leveler-worklet.js` on the AudioWorklet rend
 The worklet accumulates 20 ms frames and maintains bounded history:
 
 - fast cut window: 5 frames, approximately 100 ms;
+- quiet-lift loudness window: 5 frames, approximately 100 ms, using the median frame energy;
 - momentary window: 20 frames, approximately 400 ms;
 - short-term window: 150 frames, approximately 3 s;
 - lift peak window: 10 frames, approximately 200 ms, using the 65th percentile.
@@ -63,21 +65,23 @@ Current defaults:
 | Parameter | Value |
 |---|---:|
 | Loud target | `-29 dB` weighted RMS approximation |
-| Quiet-lift target | `-35 dB` |
-| Maximum upward gain | `+12 dB` |
+| Quiet-lift target | `-29 dB` |
+| Maximum upward gain | `+34 dB` |
 | Maximum downward gain | `-30 dB` |
 | Limiter ceiling | `-3 dBFS` sample peak |
 | Peak guard | `-6 dBFS` |
+| Peak-compression allowance for lift | up to `15 dB` at full strength |
 
-Downward gain is derived from the loudness excess above the target and the **Reduce loud sounds** strength. Upward gain is derived from the quiet deficit and the **Lift quiet sounds** strength, then limited by:
+Downward gain is derived from the loudness excess above the target and the **Reduce loud sounds** strength. Upward gain uses the same target at full strength and is derived from the median energy of the five most recent 20 ms frames. The median prevents one isolated peak from making the whole 100 ms passage look loud. Once that faster window confirms a quiet passage, stale longer-window loudness is prevented from cancelling the recovery gain. Upward gain is then limited by:
 
 - robust peak headroom;
 - instantaneous peak headroom;
 - the player-volume-aware maximum lift;
 - the configured maximum lift;
+- a bounded allowance of up to `15 dB` for look-ahead peak compression at full strength;
 - signal-gate state.
 
-The limiter is a safety net, not additional gain budget. Sustained lift must fit below both the robust and instantaneous peak ceilings before it is requested.
+The first `headroom` portion of lift fits below both robust and instantaneous peak ceilings. At full strength, up to `15 dB` more may be requested so a brief high-crest peak does not keep an otherwise quiet passage inaudible. Lower slider values scale this allowance down. The look-ahead limiter absorbs that bounded excess; gain above this allowance is rejected. This deliberately trades more macro-dynamics at high settings for substantially closer loudness while keeping output below the ceiling.
 
 ## Gain stability
 
@@ -87,17 +91,17 @@ The processor uses separate time constants:
 |---|---:|
 | Apply protective cut | `12 ms` |
 | Release protective cut | `180 ms` |
-| Apply quiet lift | `350 ms` |
+| Apply quiet lift | `100 ms` |
 | Release quiet lift | `250 ms` |
 
 Additional stability controls:
 
 - target deadband: `0.8 dB`;
-- upward target hold: `200 ms`;
-- maximum upward gain increase: `1.4 dB` per 20 ms frame;
+- upward target hold: `80 ms`;
+- maximum upward gain increase: `3 dB` per 20 ms frame;
 - one linked gain value for all channels.
 
-These controls are designed to reduce pumping and prevent a brief quiet gap after a loud event from being amplified immediately.
+These controls keep changes continuous while allowing a confirmed quiet passage to recover within a few hundred milliseconds. Full strength is intentionally assertive; lower settings retain more original macro-dynamics.
 
 ## Look-ahead limiter
 
@@ -159,3 +163,4 @@ Algorithm changes that affect listening quality are additionally governed by [`D
 - The primary worklet and fallback still contain duplicated control-policy implementation that can drift; equivalence is enforced by tests today, but a single generated/shared policy kernel is preferable long term.
 - Synthetic fixtures do not replace licensed real-program material and controlled listening tests.
 - Perceptual tuning still needs a larger, legally redistributable evaluation corpus.
+- Strong lift can make source noise, codec damage, breaths, or room tone more audible and can invoke peak limiting on high-crest material.
