@@ -20,8 +20,10 @@ const checks = [
   ['settings reads use message or sender tab url', /settingsPayload\(String\(message\.tabUrl \|\| sender\.tab\?\.url \|\| ''\)\)/.test(background)],
   ['settings writes accept site scoped and global only flags', /siteScoped: message\.siteScoped === true/.test(background) && /globalOnly: message\.globalOnly === true/.test(background)],
   ['popup loads settings after active tab url is known', /await findActiveTab\(\);\s*const payload = await message\(\{ type: 'WVB_GET_SETTINGS', tabUrl: activeTabUrl \}\)/.test(popup)],
-  ['popup persists preset and strength as site scoped settings', /schedulePersistSettings\(\{ siteScoped: true \}\)/.test(popup) && /siteScoped: options\.siteScoped === true/.test(popup)],
-  ['popup keeps strength save site-scoped after the range change event', /dial\.input\.addEventListener\('change',[\s\S]*?flushPersistSettings\(\{ siteScoped: true \}\)/.test(popup)],
+  ['popup preserves site scope metadata from effective settings', /siteScoped: input\.siteScoped === true/.test(popup) && /siteKey: input\.siteKey \|\| ''/.test(popup)],
+  ['popup strength edits stay site-scoped only for an existing override', /function strengthSaveOptions\(\)[\s\S]*?siteScoped: settings\?\.siteScoped === true/.test(popup) && /schedulePersistSettings\(strengthSaveOptions\(\)\)/.test(popup)],
+  ['popup keeps the same explicit scope when the range gesture commits', /dial\.input\.addEventListener\('change',[\s\S]*?flushPersistSettings\(strengthSaveOptions\(\)\)/.test(popup)],
+  ['popup does not create a site override merely by touching a slider', !/schedulePersistSettings\(\{ siteScoped: true \}\)/.test(popup) && !/flushPersistSettings\(\{ siteScoped: true \}\)/.test(popup)],
   ['popup serializes strength writes and ignores stale responses', /persistQueue = persistQueue/.test(popup) && /revision === settingsRevision/.test(popup)],
   ['popup keeps enabled and player safety global', /enabled: elements\.enabled\.checked \}, \{ globalOnly: true \}/.test(popup) && /respectPlayerVolume: elements\.respectPlayerVolume\.checked \}, \{ globalOnly: true \}/.test(popup)],
   ['bridge refreshes effective settings when global or site storage changes', /SITE_SETTINGS_KEY/.test(bridge) && /changes\[STORAGE_KEY\] \|\| changes\[SITE_SETTINGS_KEY\]/.test(bridge) && /syncSettings\(\)/.test(bridge)]
