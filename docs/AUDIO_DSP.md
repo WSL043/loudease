@@ -83,6 +83,8 @@ Downward gain is derived from the loudness excess above the target and the **Red
 
 The first `headroom` portion of lift fits below both robust and instantaneous peak ceilings. At full strength, up to `15 dB` more may be requested so a brief high-crest peak does not keep an otherwise quiet passage inaudible. Lower slider values scale this allowance down. The look-ahead limiter absorbs that bounded excess; gain above this allowance is rejected. This deliberately trades more macro-dynamics at high settings for substantially closer loudness while keeping output below the ceiling.
 
+When quiet lift is active and the measured output remains below its player-volume-aware target, the leveler may compensate for limiter attenuation that it has actually observed. The assist is half of the smaller of the output deficit and measured limiter reduction. It does not activate for ordinary quiet material without limiting, and it cannot exceed the existing maximum-lift or limiter-budget boundaries. The half-strength feedback is deliberate damping: full feedback improved the synthetic target error but caused a hard-clip guard sample in the high-crest regression and was rejected.
+
 ## Gain stability
 
 The processor uses separate time constants:
@@ -114,6 +116,7 @@ The limiter reports:
 - limited sample count;
 - hard-clipped sample count;
 - maximum overshoot.
+- realized-loudness assist requested from measured limiter loss.
 
 Hard clipping remains a final invariant guard. Tests require normal fixtures and clustered peaks to reach the configured ceiling without using that guard.
 

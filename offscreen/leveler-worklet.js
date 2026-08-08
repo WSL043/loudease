@@ -18,6 +18,7 @@ const TARGET_DEADBAND_DB = 0.8;
 const TARGET_HOLD_SECONDS = 0.08;
 const LIFT_LOUDNESS_PERCENTILE = 0.5;
 const LIFT_PEAK_PERCENTILE = 0.65;
+const REALIZED_LIFT_ASSIST_RATIO = 0.5;
 
 function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
 function dbToLinear(value) { return Math.pow(10, value / 20); }
@@ -164,6 +165,8 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     const controlDb = Math.max(0.8 * momentaryDb + 0.2 * shortTermDb, energyToDb(this.meanLast(this.energyHistory, 5)));
     const liftControlDb = energyToDb(this.percentileLast(this.energyHistory, 5, LIFT_LOUDNESS_PERCENTILE));
     const liftPeak = this.percentileLast(this.peakHistory, 10, LIFT_PEAK_PERCENTILE) || this.inputPeak;
+    const outputMomentaryDb = energyToDb(this.meanLast(this.outputEnergyHistory, 20));
+    const outputShortTermDb = energyToDb(this.meanLast(this.outputEnergyHistory, 150));
     const compensationDb = this.playerVolumeReliable && this.playerVolumeCap > 0.001 && this.playerVolumeCap < 0.98 ? -linearToDb(this.playerVolumeCap) : 0;
     const gateDb = energyToDb(energy) + compensationDb;
     const gatePeak = this.inputPeak * dbToLinear(compensationDb);
@@ -174,6 +177,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     let rawPeakHeadroom = 0;
     let effectiveLiftBudget = 0;
     let quietDeficit = 0;
+    let realizedLiftAssistDb = 0;
     let requestedLift = 0;
     const cutScale = this.cutStrength / 100;
     const liftScale = this.liftStrength / 100;
@@ -199,7 +203,14 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       peakHeadroom = ceilingDb - liftPeakDb - 2;
       rawPeakHeadroom = ceilingDb - peakDb - 0.5;
       effectiveLiftBudget = Math.min(peakHeadroom, rawPeakHeadroom) + (LIFT_LIMITER_BUDGET_DB * liftScale);
-      requestedLift = quietDeficit * liftScale;
+      const outputTargetDb = LIFT_TARGET_RMS_DB + (this.playerVolumeReliable && this.respectPlayerVolume
+        ? Math.min(0, linearToDb(cap))
+        : 0);
+      const limiterReductionDb = Math.max(0, -linearToDb(this.limiterGain));
+      realizedLiftAssistDb = this.historyCount >= 20 && this.currentGainDb > 0
+        ? Math.min(Math.max(0, outputTargetDb - outputMomentaryDb), limiterReductionDb) * REALIZED_LIFT_ASSIST_RATIO
+        : 0;
+      requestedLift = (quietDeficit + realizedLiftAssistDb) * liftScale;
       const lift = clamp(Math.min(requestedLift, effectiveLiftBudget), 0, maxLift * liftScale);
       candidate = clamp(Math.min(lift - reduction, effectiveLiftBudget), -30 * cutScale, maxLift * liftScale);
     }
@@ -214,9 +225,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.signalTickCount += 1;
     }
     this.targetGainDb = this.stableTargetGainDb;
-    const outputMomentaryDb = energyToDb(this.meanLast(this.outputEnergyHistory, 20));
-    const outputShortTermDb = energyToDb(this.meanLast(this.outputEnergyHistory, 150));
-    this.port.postMessage({ type: 'state', sequence: this.sequence++, lastInputDb: energyToDb(energy), momentaryInputDb: momentaryDb, shortTermInputDb: shortTermDb, controlInputDb: controlDb, liftControlInputDb: liftControlDb, lastPeak: this.inputPeak, liftPeak, lastOutputDb: energyToDb(outputEnergy), outputMomentaryDb, outputShortTermDb, outputControlDb: 0.8 * outputMomentaryDb + 0.2 * outputShortTermDb, lastOutputPeak: this.outputPeak, currentGainDb: this.currentGainDb, currentLiftDb: Math.max(0, this.currentGainDb), currentReductionDb: Math.max(0, -this.currentGainDb), currentLimiterReductionDb: Math.max(0, -linearToDb(this.limiterGain)), targetGainDb: this.targetGainDb, targetLiftDb: Math.max(0, this.targetGainDb), targetReductionDb: Math.max(0, -this.targetGainDb), effectiveMaxLiftDb: maxLift, playerVolumeLiftCeilingDb: LIFT_TARGET_RMS_DB + (this.playerVolumeReliable ? Math.min(0, linearToDb(this.playerVolumeCap)) : 0), effectiveLimiterCeilingDb: this.ceilingDb(), peakHeadroomDb: peakHeadroom, rawPeakHeadroomDb: rawPeakHeadroom, liftLimiterBudgetDb: LIFT_LIMITER_BUDGET_DB * liftScale, effectiveLiftBudgetDb: effectiveLiftBudget, quietDeficitDb: quietDeficit, requestedLiftDb: requestedLift, signalActive: this.signalActive, signalTickCount: this.signalTickCount, silentTickCount: this.silentTickCount, limiterTickCount: this.limiterTickCount, targetHoldCount: this.targetHoldCount, workletInputPeak: this.inputPeak, workletOutputPeak: this.outputPeak, limitedSamples: this.limitedSamples, hardClippedSamples: this.hardClippedSamples, maxHardClipOvershoot: this.maxHardClipOvershoot });
+    this.port.postMessage({ type: 'state', sequence: this.sequence++, lastInputDb: energyToDb(energy), momentaryInputDb: momentaryDb, shortTermInputDb: shortTermDb, controlInputDb: controlDb, liftControlInputDb: liftControlDb, lastPeak: this.inputPeak, liftPeak, lastOutputDb: energyToDb(outputEnergy), outputMomentaryDb, outputShortTermDb, outputControlDb: 0.8 * outputMomentaryDb + 0.2 * outputShortTermDb, lastOutputPeak: this.outputPeak, currentGainDb: this.currentGainDb, currentLiftDb: Math.max(0, this.currentGainDb), currentReductionDb: Math.max(0, -this.currentGainDb), currentLimiterReductionDb: Math.max(0, -linearToDb(this.limiterGain)), targetGainDb: this.targetGainDb, targetLiftDb: Math.max(0, this.targetGainDb), targetReductionDb: Math.max(0, -this.targetGainDb), effectiveMaxLiftDb: maxLift, playerVolumeLiftCeilingDb: LIFT_TARGET_RMS_DB + (this.playerVolumeReliable ? Math.min(0, linearToDb(this.playerVolumeCap)) : 0), effectiveLimiterCeilingDb: this.ceilingDb(), peakHeadroomDb: peakHeadroom, rawPeakHeadroomDb: rawPeakHeadroom, liftLimiterBudgetDb: LIFT_LIMITER_BUDGET_DB * liftScale, effectiveLiftBudgetDb: effectiveLiftBudget, quietDeficitDb: quietDeficit, realizedLiftAssistDb, requestedLiftDb: requestedLift, signalActive: this.signalActive, signalTickCount: this.signalTickCount, silentTickCount: this.silentTickCount, limiterTickCount: this.limiterTickCount, targetHoldCount: this.targetHoldCount, workletInputPeak: this.inputPeak, workletOutputPeak: this.outputPeak, limitedSamples: this.limitedSamples, hardClippedSamples: this.hardClippedSamples, maxHardClipOvershoot: this.maxHardClipOvershoot });
     this.frameSamples = 0; this.inputEnergySum = 0; this.inputPeak = 0; this.outputEnergySum = 0; this.outputPeak = 0; this.limitedSamples = 0; this.hardClippedSamples = 0; this.maxHardClipOvershoot = 0;
   }
 
