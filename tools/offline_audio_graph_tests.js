@@ -364,7 +364,8 @@ async function main() {
     assert('offline graph reported pass', output?.passed === true, JSON.stringify(output, null, 2));
     assert('OfflineAudioContext rendered full buffer', output?.checks?.graphRendered === true, JSON.stringify(output?.checks || {}));
     assert('quiet voice lifted in Web Audio graph', output?.checks?.quietVoiceLifted === true, JSON.stringify(output?.metrics?.quietVoice || {}));
-    assert('loud tone reduced in Web Audio graph', output?.checks?.loudToneReduced === true, JSON.stringify(output?.metrics?.loudTone || {}));
+    assert('loud tone settles at the common target in Web Audio graph', output?.checks?.loudToneReduced === true, JSON.stringify(output?.settledMetrics?.loudTone || {}));
+    assert('quiet and loud programs converge in Web Audio graph', output?.checks?.programLevelsConverge === true, `gapDb=${output?.quietLoudGapDb}`);
     assert('burst controlled in Web Audio graph', output?.checks?.burstControlled === true, JSON.stringify(output?.metrics?.burst || {}));
     assert('output does not clip in Web Audio graph', output?.checks?.outputNotClipped === true, `peak=${output?.outputPeak}`);
     assert('graph uses OfflineAudioContext source gain worklet limiter destination', output?.graph?.context === 'OfflineAudioContext' && output?.graph?.gain === 'GainNode' && output?.graph?.limiter === 'AudioWorkletNode', JSON.stringify(output?.graph || {}));

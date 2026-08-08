@@ -14,7 +14,7 @@ Balances loud and quiet web audio locally while respecting mute and player volum
 
 **Single purpose**
 
-Make audio in user-authorized browser tabs more comfortable by reducing sudden loud sections and conservatively lifting quiet detail while respecting mute and the player's current volume.
+Make audio in user-authorized browser tabs more comfortable by reducing sudden loud sections and applying bounded, strength-controlled lift to genuine quiet passages while respecting mute and the player's current volume.
 
 **Category**
 
@@ -24,12 +24,12 @@ Accessibility
 
 LoudEase makes uneven web audio easier to listen to.
 
-Open the extension on a tab to authorize local audio balancing. LoudEase then analyzes that tab's audio in real time, reduces sudden loud sections, and gently lifts quiet detail. It keeps the original sound hierarchy instead of forcing every moment to the same level.
+Open the extension on a tab to authorize local audio balancing. LoudEase then analyzes that tab's audio in real time, reduces sudden loud sections, and lifts genuine quiet passages according to the selected strength. Lower settings preserve more original dynamics; full strength targets closer program-level consistency.
 
 What it does:
 
 - reduces sudden loud sections with a fast safety path;
-- lifts quiet detail conservatively, with headroom protection;
+- lifts genuine quiet passages with a bounded, strength-scaled peak-compression budget;
 - respects page mute and the player's current volume;
 - keeps authorized tabs balanced when you switch to another tab;
 - works with ordinary video, music, live streams, and other tab audio;

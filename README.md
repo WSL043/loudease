@@ -10,7 +10,7 @@
 <p align="center"><strong>Smooth the jumps. Keep the detail. Stay in control.</strong></p>
 
 <p align="center">
-  LoudEase makes web audio more comfortable by calming sudden loudness and carefully lifting quiet detail.<br>
+  LoudEase makes web audio more comfortable by calming sudden loudness and bringing genuine quiet passages closer.<br>
   Player volume and mute always remain authoritative.
 </p>
 
@@ -44,9 +44,9 @@ Web audio rarely agrees on one comfortable level. Dialogue disappears, effects j
 
 | Calm sudden loudness | Recover quiet detail | Respect your controls |
 |---|---|---|
-| Fast gain reduction and a look-ahead limiter catch uncomfortable jumps and short peaks. | Quiet lift is restrained by signal confidence, available headroom, and the selected strength. | Mute and zero player volume are hard boundaries. The UI only says **active** when fresh runtime evidence exists. |
+| Fast gain reduction and a look-ahead limiter catch uncomfortable jumps and short peaks. | At full strength, genuine quiet passages move toward the same bounded target; lower settings retain more original dynamics. | Mute and zero player volume are hard boundaries. The UI only says **active** when fresh runtime evidence exists. |
 
-LoudEase is not a volume booster, an equalizer, or a calibrated hearing-protection device. It narrows disruptive level differences while preserving useful dynamics.
+LoudEase is not a simple volume booster, an equalizer, or a calibrated hearing-protection device. It narrows disruptive level differences with a strength-scaled, bounded peak-compression budget.
 
 ## How it works
 
@@ -54,7 +54,7 @@ LoudEase is not a volume booster, an equalizer, or a calibrated hearing-protecti
   <img src="docs/processing-flow.png" width="960" alt="Uneven input is measured, balanced, and peak limited into a narrower output range while retaining variation">
 </p>
 
-The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted measurements guide separate loud-cut and quiet-lift policies; a look-ahead limiter protects peak headroom. No raw audio is uploaded.
+The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted measurements guide separate loud-cut and quiet-lift policies; robust quiet detection prevents isolated peaks from suppressing an otherwise quiet passage, and a look-ahead limiter keeps the result bounded. No raw audio is uploaded.
 
 For implementation details, assumptions, and current gaps, read [Audio DSP](docs/AUDIO_DSP.md), [Architecture](docs/ARCHITECTURE.md), and [Known limitations](docs/KNOWN_LIMITATIONS.md).
 

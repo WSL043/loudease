@@ -60,7 +60,7 @@ node .\tools\current_runtime_audit.js
 node .\tools\dsp_unit_tests.js
 ```
 
-覆盖：关闭、0 强度、大声压低、小声提升、峰值余量不足不提升、峰值保护、强度缩放。
+覆盖：关闭、0 强度、大声压低、强力小声提升、大小声目标收敛、高峰均方根素材的受控 limiter 预算、峰值保护、播放器音量边界和强度缩放。
 
 输入样本：
 

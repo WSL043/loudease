@@ -4,7 +4,7 @@ Use this as the source of truth when completing the Chrome Web Store Privacy pra
 
 ## Single purpose
 
-LoudEase balances audio in browser tabs explicitly authorized by the user. It reduces sudden loud sections, conservatively lifts quiet detail, and enforces mute and player-volume boundaries.
+LoudEase balances audio in browser tabs explicitly authorized by the user. It reduces sudden loud sections, applies bounded strength-controlled lift to genuine quiet passages, and enforces mute and player-volume boundaries.
 
 ## Permission justifications
 

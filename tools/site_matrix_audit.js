@@ -156,11 +156,8 @@ function liftDiagnosis(tab) {
   if (tab.quietDeficitDb <= 0.5) {
     return 'input-not-below-target';
   }
-  if (tab.requestedLiftDb > 0.5 && tab.peakHeadroomDb <= 0.5) {
-    return 'blocked-by-lift-peak-headroom';
-  }
-  if (tab.requestedLiftDb > 0.5 && tab.rawPeakHeadroomDb <= 0.5) {
-    return 'blocked-by-raw-peak-safety';
+  if (tab.requestedLiftDb > 0.5 && tab.effectiveLiftBudgetDb <= 0.5) {
+    return 'blocked-by-bounded-lift-budget';
   }
   if (tab.targetGainDb <= 0.5 && tab.requestedLiftDb > 0.5) {
     return 'blocked-by-safety-cut';
@@ -218,6 +215,8 @@ function summarizeTab(tab) {
     quietDeficitDb: finiteNumber(tab?.quietDeficitDb),
     peakHeadroomDb: finiteNumber(tab?.peakHeadroomDb),
     rawPeakHeadroomDb: finiteNumber(tab?.rawPeakHeadroomDb),
+    liftLimiterBudgetDb: finiteNumber(tab?.liftLimiterBudgetDb),
+    effectiveLiftBudgetDb: finiteNumber(tab?.effectiveLiftBudgetDb),
     playerMuted: Boolean(tab?.playerMuted),
     playerVolumeCap: finiteNumber(tab?.playerVolumeCap, 1),
     playerActiveMediaCount: finiteNumber(tab?.playerActiveMediaCount),
