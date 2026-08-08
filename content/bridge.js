@@ -10,6 +10,7 @@
   const SITE_SETTINGS_KEY = 'webVolumeBalancer.siteSettings';
   const STATUS_INTERVAL_MS = 1500;
   const MUTATION_DEBOUNCE_MS = 350;
+  const FULL_RESCAN_INTERVAL_MS = 15000;
   const MAX_TEXT = 240;
   const MAX_SCAN_NODES = 1800;
   const MAX_MEDIA_ITEMS = 64;
@@ -32,7 +33,8 @@
   let statusTimer = null;
   let storageChangeListener = null;
   let runtimeMessageListener = null;
-  const observedMedia = new WeakSet();
+  let lastFullScanAt = 0;
+  const observedRoots = new WeakSet();
   const mediaListeners = new Map();
 
   function stillCurrent() {
@@ -201,10 +203,9 @@
   }
 
   function bindMedia(media) {
-    if (!media || observedMedia.has(media)) {
+    if (!media || mediaListeners.has(media) || mediaListeners.size >= MAX_MEDIA_ITEMS) {
       return;
     }
-    observedMedia.add(media);
     const eventNames = [];
     for (const eventName of MEDIA_EVENTS) {
       media.addEventListener(eventName, reportStatus, { passive: true });
@@ -222,38 +223,67 @@
         media.removeEventListener(eventName, reportStatus);
       }
       mediaListeners.delete(media);
-      observedMedia.delete(media);
     }
   }
 
-  function collectMedia(root, output, seen, budget) {
-    if (!root || output.length >= MAX_MEDIA_ITEMS || budget.count >= MAX_SCAN_NODES) {
+  function observeRoot(root) {
+    if (!observer || !root || observedRoots.has(root)) {
+      return;
+    }
+    try {
+      observer.observe(root, { childList: true, subtree: true });
+      observedRoots.add(root);
+    } catch (_) {}
+  }
+
+  function discoverMedia(root, budget = { count: 0 }) {
+    if (!root || mediaListeners.size >= MAX_MEDIA_ITEMS || budget.count >= MAX_SCAN_NODES) {
+      return;
+    }
+
+    const visit = (element) => {
+      if (!element || budget.count >= MAX_SCAN_NODES || mediaListeners.size >= MAX_MEDIA_ITEMS) {
+        return false;
+      }
+      budget.count += 1;
+      if (element.localName === 'video' || element.localName === 'audio') {
+        bindMedia(element);
+      }
+      if (element.shadowRoot) {
+        observeRoot(element.shadowRoot);
+        discoverMedia(element.shadowRoot, budget);
+      }
+      return budget.count < MAX_SCAN_NODES && mediaListeners.size < MAX_MEDIA_ITEMS;
+    };
+
+    if (root.nodeType === Node.ELEMENT_NODE && !visit(root)) {
       return;
     }
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
     let element = walker.nextNode();
     while (element) {
-      budget.count += 1;
-      if (budget.count >= MAX_SCAN_NODES || output.length >= MAX_MEDIA_ITEMS) {
+      if (!visit(element)) {
         return;
-      }
-      if ((element.localName === 'video' || element.localName === 'audio') && !seen.has(element)) {
-        seen.add(element);
-        output.push(element);
-      }
-      if (element.shadowRoot) {
-        collectMedia(element.shadowRoot, output, seen, budget);
       }
       element = walker.nextNode();
     }
   }
 
-  function scanMedia() {
+  function fullRescanMedia() {
     pruneMediaListeners();
-    const media = [];
-    collectMedia(document, media, new Set(), { count: 0 });
-    media.forEach(bindMedia);
-    return media;
+    discoverMedia(document, { count: 0 });
+    lastFullScanAt = Date.now();
+  }
+
+  function currentMedia() {
+    pruneMediaListeners();
+    return Array.from(mediaListeners.keys()).slice(0, MAX_MEDIA_ITEMS);
+  }
+
+  function ensurePeriodicDiscovery() {
+    if (Date.now() - lastFullScanAt >= FULL_RESCAN_INTERVAL_MS) {
+      fullRescanMedia();
+    }
   }
 
   async function sendRuntime(message) {
@@ -268,7 +298,7 @@
   }
 
   function buildStatus() {
-    const media = scanMedia();
+    const media = currentMedia();
     const audible = media.filter(isAudible);
     const state = playerState(media);
     return {
@@ -312,6 +342,7 @@
       cleanup();
       return;
     }
+    ensurePeriodicDiscovery();
     sendRuntime({ type: 'WVB_FRAME_STATUS', status: buildStatus() }).catch(() => {});
   }
 
@@ -331,24 +362,40 @@
     }
   }
 
+  function nodeMayAffectMedia(node) {
+    return Boolean(node?.nodeType === Node.ELEMENT_NODE && (
+      node.localName === 'video'
+      || node.localName === 'audio'
+      || node.shadowRoot
+      || node.querySelector?.('video,audio')
+    ));
+  }
+
   function startObserver() {
     if (observer || !document.documentElement) {
       return;
     }
     observer = new MutationObserver((records) => {
-      const touchesMedia = records.some((record) => Array.from(record.addedNodes)
-        .concat(Array.from(record.removedNodes))
-        .some((node) => node?.nodeType === Node.ELEMENT_NODE && (
-          node.localName === 'video'
-          || node.localName === 'audio'
-          || node.shadowRoot
-          || node.querySelector?.('video,audio')
-        )));
+      let touchesMedia = false;
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node?.nodeType === Node.ELEMENT_NODE) {
+            const before = mediaListeners.size;
+            discoverMedia(node, { count: 0 });
+            touchesMedia ||= mediaListeners.size !== before || nodeMayAffectMedia(node);
+          }
+        }
+        for (const node of record.removedNodes) {
+          touchesMedia ||= nodeMayAffectMedia(node);
+        }
+      }
       if (touchesMedia) {
+        pruneMediaListeners();
         scheduleStatus();
       }
     });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    observeRoot(document.documentElement);
+    fullRescanMedia();
   }
 
   function cleanup() {
@@ -401,6 +448,7 @@
       reportStatus();
     }
     if (message?.type === 'WVB_COLLECT_STATUS') {
+      ensurePeriodicDiscovery();
       const status = buildStatus();
       sendRuntime({ type: 'WVB_FRAME_STATUS', status })
         .finally(() => sendResponse({ ok: true, status }));
