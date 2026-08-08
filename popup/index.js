@@ -33,7 +33,6 @@ const { get: t, apply: applyI18n, initialize: initializeI18n } = globalThis.WebV
 const { STORAGE_KEY: UI_PREFERENCES_KEY, read: readUiPreferences, save: saveUiPreferences, applyTheme } = globalThis.WebVolumeBalancerUiPreferences;
 
 let settings = null;
-let saving = false;
 let activeTabId = null;
 let activeTabUrl = '';
 let persistTimer = null;
@@ -54,6 +53,9 @@ const e2eTabId = Number(query.get('e2eTabId'));
 const e2eTabUrl = query.get('e2eTabUrl') || '';
 const DEFAULT_STRENGTH = 100;
 const CAPTURE_STREAM_ID_TIMEOUT_MS = 5000;
+const LEVEL_HISTORY_LENGTH = 7;
+const inputLevelHistory = Array(LEVEL_HISTORY_LENGTH).fill(0);
+const outputLevelHistory = Array(LEVEL_HISTORY_LENGTH).fill(0);
 const {
   finite: finiteNumber,
   clamp,
@@ -136,6 +138,10 @@ function countText(value) {
   return String(Math.max(0, Math.round(value)));
 }
 
+function strengthSaveOptions() {
+  return { siteScoped: settings?.siteScoped === true };
+}
+
 function effectiveTheme(theme = currentUiPreferences.theme) {
   if (theme === 'dark' || theme === 'light') {
     return theme;
@@ -166,9 +172,6 @@ async function toggleTheme() {
   }
 }
 
-const INPUT_LEVEL_SHAPE = Object.freeze([0.32, 0.72, 1, 0.5, 0.84, 0.4, 0.68]);
-const OUTPUT_LEVEL_SHAPE = Object.freeze([0.72, 0.86, 0.76, 0.9, 0.74, 0.82, 0.7]);
-
 function levelScale(db) {
   if (!Number.isFinite(Number(db))) {
     return 0;
@@ -176,9 +179,17 @@ function levelScale(db) {
   return clamp((Number(db) + 60) / 54, 0, 1);
 }
 
-function setLevelBars(bars, shape, level) {
+function pushLevelHistory(history, level) {
+  history.push(clamp(level, 0, 1));
+  if (history.length > LEVEL_HISTORY_LENGTH) {
+    history.shift();
+  }
+}
+
+function setLevelBars(bars, history) {
   for (let index = 0; index < bars.length; index += 1) {
-    const height = 5 + (33 * Math.max(0.08, level) * shape[index % shape.length]);
+    const level = history[index] || 0;
+    const height = 5 + (33 * Math.max(0.08, level));
     bars[index].style.setProperty('--h', `${height.toFixed(1)}px`);
   }
 }
@@ -192,9 +203,11 @@ function updateLevelVisual(status) {
   const signalTicks = finiteNumber(status.signalTickCount);
   const signalAge = status.lastSignalAgeMs == null ? null : finiteNumber(status.lastSignalAgeMs);
   const active = signalTicks > 0 && signalAge != null && signalAge < 2500;
+  pushLevelHistory(inputLevelHistory, active ? levelScale(inputDb) : 0);
+  pushLevelHistory(outputLevelHistory, active ? levelScale(outputDb) : 0);
   elements.levelVisual.dataset.active = active ? 'true' : 'false';
-  setLevelBars(elements.inputWaveBars, INPUT_LEVEL_SHAPE, active ? levelScale(inputDb) : 0);
-  setLevelBars(elements.outputWaveBars, OUTPUT_LEVEL_SHAPE, active ? levelScale(outputDb) : 0);
+  setLevelBars(elements.inputWaveBars, inputLevelHistory);
+  setLevelBars(elements.outputWaveBars, outputLevelHistory);
 }
 
 function setStrength(key, value, { live = true, persist = true } = {}) {
@@ -212,7 +225,7 @@ function setStrength(key, value, { live = true, persist = true } = {}) {
     pushSettingsToPage(settings);
   }
   if (persist) {
-    schedulePersistSettings({ siteScoped: true });
+    schedulePersistSettings(strengthSaveOptions());
   }
 }
 
@@ -227,7 +240,7 @@ function bindStrengthControl(dial) {
   });
 
   dial.input.addEventListener('change', () => {
-    flushPersistSettings({ siteScoped: true });
+    flushPersistSettings(strengthSaveOptions());
     strengthGestureActive = false;
   });
 
@@ -275,7 +288,6 @@ function setReloadVisible(visible) {
 }
 
 function setCaptureVisible(visible, active = false) {
-  elements.captureButton.hidden = !visible;
   elements.captureButton.hidden = !visible || active;
   elements.captureButton.textContent = t('recoverCapture', undefined, 'Reconnect tab audio');
 }
@@ -290,7 +302,9 @@ function setReadouts(status) {
 
   elements.sourceValue.textContent = connected > 0 ? countText(connected) : '--';
   elements.audibleValue.textContent = media > 0 ? countText(audible) : '--';
-  elements.protectValue.textContent = settings?.respectPlayerVolume !== false ? '开' : '关';
+  elements.protectValue.textContent = settings?.respectPlayerVolume !== false
+    ? t('yes', undefined, 'Yes')
+    : t('no', undefined, 'No');
 }
 
 function displayEffectForStatus(status, reductionDb, liftDb) {
@@ -319,7 +333,6 @@ function setStateBusy() {
   setEffect({ value: '--', caption: 'dB', amount: 0 });
   setNotices([]);
   setReloadVisible(false);
-  elements.healthLabel.textContent = '写入设置';
 }
 
 function render() {
@@ -374,7 +387,6 @@ function save(next, options = {}) {
   settingsRevision += 1;
   const revision = settingsRevision;
   const snapshot = normalizeSettings(settings);
-  saving = true;
   render();
   setStateBusy();
   const operation = async () => {
@@ -403,9 +415,6 @@ function save(next, options = {}) {
       }
     } finally {
       pendingWriteCount = Math.max(0, pendingWriteCount - 1);
-      if (revision === settingsRevision) {
-        saving = false;
-      }
     }
   };
   saveQueue = saveQueue.then(operation, operation);
@@ -518,7 +527,7 @@ async function reloadCurrentPage() {
     return;
   }
   elements.reloadButton.disabled = true;
-  elements.healthLabel.textContent = '正在强制刷新';
+  elements.healthLabel.textContent = t('recoverReload', undefined, 'Reload page');
   try {
     const response = await message({ type: 'WVB_FORCE_RELOAD_TAB', tabId: activeTabId });
     if (response?.ok) {
@@ -648,7 +657,7 @@ function getTabCaptureStreamId(tabId) {
   return new Promise((resolve, reject) => {
     const api = globalThis.chrome?.tabCapture?.getMediaStreamId;
     if (!api) {
-      reject(new Error('当前 Chrome 不支持整页音频接管'));
+      reject(new Error(t('captureFailed', undefined, 'Tab audio connection failed')));
       return;
     }
     let settled = false;
@@ -805,238 +814,6 @@ function renderStatus(status) {
   const media = finiteNumber(status.mediaCount);
   const audible = finiteNumber(status.audibleCount);
   const active = finiteNumber(status.activeProcessorCount);
-  const limited = finiteNumber(status.limitedCount);
-  const autoplayBlocked = finiteNumber(status.autoplayBlockedCount);
-  const analysisSilent = finiteNumber(status.analysisSilentCount);
-  const frames = finiteNumber(status.respondingFrames);
-  let reduction = percentValue(settings?.cutStrength) > 0 ? Math.max(0, finiteNumber(status.averageReductionDb)) : 0;
-  let lift = percentValue(settings?.liftStrength) > 0 ? Math.max(0, finiteNumber(status.averageLiftDb)) : 0;
-  const displayedEffect = displayEffectForStatus(status, reduction, lift);
-  reduction = displayedEffect.kind === 'reduction' ? displayedEffect.amount : 0;
-  lift = displayedEffect.kind === 'lift' ? displayedEffect.amount : 0;
-  const averageInputDb = status.averageInputDb == null ? null : finiteNumber(status.averageInputDb);
-  const captureActive = Boolean(status.captureActive);
-  const captureAvailable = status.captureAvailable !== false;
-  const captureState = String(status.captureState || '');
-  const captureError = String(status.captureError || '');
-  const playerMuted = Boolean(status.playerMuted) || finiteNumber(status.playerVolumeCap, 1) <= 0;
-  const lastSignalAgeMs = status.lastSignalAgeMs == null ? null : finiteNumber(status.lastSignalAgeMs);
-  const signalTicks = finiteNumber(status.signalTickCount);
-  const hasFreshSignal = signalTicks > 0 && lastSignalAgeMs != null && lastSignalAgeMs < 2500;
-  const failedErrors = Array.isArray(status.failedErrors) ? status.failedErrors.filter(Boolean) : [];
-  const sourceAlreadyConnected = failedErrors.some((error) => /already connected previously|different MediaElementSourceNode/i.test(String(error)));
-  const notices = [];
-
-  setReadouts(status);
-  setStrengthControlsEnabled(true);
-  setReloadVisible(false);
-  setCaptureVisible(false, captureActive);
-
-  if (limited > 0) {
-    notices.push({ tone: 'warning', text: `受限 ${Math.round(limited)}` });
-  }
-  if (failedErrors.length > 0) {
-    notices.push({ tone: 'danger', text: '错误' });
-  }
-
-  if (!enabled) {
-    setHeadline({ state: 'off', label: '关闭', title: '已暂停', sub: '原声通过' });
-    setEffect({ value: '关闭', caption: '未处理', amount: 0 });
-    setNotices(notices);
-    elements.healthLabel.textContent = '点开关恢复';
-    return;
-  }
-
-  if (status.unsupported) {
-    setHeadline({ state: 'warning', label: '不可用', title: '不能接入', sub: '页面受限' });
-    setEffect({ value: '--', caption: '受限', amount: 0 });
-    setNotices([{ tone: 'warning', text: '浏览器限制' }, ...notices]);
-    elements.healthLabel.textContent = '换普通网页';
-    return;
-  }
-
-  if (captureState === 'error' || captureError) {
-    setHeadline({ state: 'danger', label: '\u5931\u8d25', title: '\u6574\u9875\u63a5\u7ba1\u5931\u8d25', sub: 'Chrome \u6ca1\u6709\u63a5\u5230\u6807\u7b7e\u97f3\u9891' });
-    setEffect({ value: '--', caption: '\u9519\u8bef', amount: 0 });
-    setNotices([{ tone: 'danger', text: '\u63a5\u7ba1\u5931\u8d25' }, ...notices]);
-    setCaptureVisible(captureAvailable, false);
-    elements.healthLabel.textContent = captureError || '\u6ca1\u6709\u63a5\u5230\u6574\u9875\u97f3\u9891';
-    return;
-  }
-
-  if (captureActive) {
-    if (playerMuted) {
-      setHeadline({ state: 'watching', label: '静音', title: '播放器静音', sub: '不会输出声音' });
-      setEffect({ value: '0', caption: '音量', amount: 0 });
-      setCaptureVisible(true, true);
-      setNotices(notices);
-      elements.healthLabel.textContent = '尊重播放器音量';
-      return;
-    }
-    if (!hasFreshSignal) {
-      setHeadline({ state: 'watching', label: '整页', title: '等待波形', sub: '已连接，未检测到声音' });
-      setEffect({ value: '--', caption: '无输入', amount: 0 });
-      setCaptureVisible(true, true);
-      setNotices(notices);
-      elements.healthLabel.textContent = '等待当前视频发声';
-      return;
-    }
-    if (audible > 0 && displayedEffect.kind === 'lift') {
-      setHeadline({ state: 'working', label: '\u6574\u9875', title: '\u63d0\u5347\u4e2d', sub: `${countText(audible)} \u4e2a\u58f0\u97f3` });
-      setEffect({ value: `+${displayedEffect.amount.toFixed(1)}`, caption: 'dB', amount: displayedEffect.amount });
-    } else if (audible > 0 && displayedEffect.kind === 'reduction') {
-      setHeadline({ state: 'working', label: '\u6574\u9875', title: '\u538b\u4f4e\u4e2d', sub: `${countText(audible)} \u4e2a\u58f0\u97f3` });
-      setEffect({ value: `-${displayedEffect.amount.toFixed(1)}`, caption: 'dB', amount: displayedEffect.amount });
-    } else {
-      setHeadline({ state: 'working', label: '\u6574\u9875', title: '\u5df2\u63a5\u7ba1', sub: averageInputDb == null ? '\u5904\u7406\u6807\u7b7e\u97f3\u9891' : `\u8f93\u5165 ${averageInputDb.toFixed(1)} dB` });
-      setEffect({ value: '0', caption: 'dB', amount: 0.2 });
-    }
-    setCaptureVisible(true, true);
-    setNotices(notices);
-    elements.healthLabel.textContent = '\u6574\u9875\u97f3\u9891\u94fe\u8def\u4e2d';
-    return;
-  }
-
-  if (sourceAlreadyConnected || status.needsPageReload) {
-    setHeadline({ state: 'warning', label: '受限', title: active > 0 ? '已接管' : '当前元素受限', sub: active > 0 ? `${countText(active)} 个声音` : '刷新页面或等新元素' });
-    setEffect({ value: active > 0 ? '旧核' : '--', caption: active > 0 ? '运行' : '受限', amount: active > 0 ? 1.2 : 0 });
-    setNotices([{ tone: 'warning', text: '旧连接' }, ...notices]);
-    setReloadVisible(true);
-    elements.healthLabel.textContent = '当前 video 已被占用';
-    return;
-  }
-
-  if (status.staleEngine) {
-    if (status.extensionReloadRequired || status.mixedRuntime) {
-      setHeadline({ state: 'warning', label: '\u9700\u5237\u65b0', title: '\u6269\u5c55\u7248\u672c\u6df7\u7528', sub: '\u5237\u65b0\u6269\u5c55\uff0c\u4e0d\u8981\u5237\u65b0\u89c6\u9891\u9875' });
-      setEffect({ value: '--', caption: '\u5f85\u5237\u65b0', amount: 0 });
-      setNotices([{ tone: 'warning', text: '\u6269\u5c55\u65e7\u540e\u53f0' }, ...notices]);
-      setCaptureVisible(captureAvailable, captureActive);
-      setReloadVisible(false);
-      elements.healthLabel.textContent = 'chrome://extensions \u91cc\u70b9\u8fd9\u4e2a\u6269\u5c55\u7684\u5237\u65b0';
-      return;
-    }
-    setHeadline({ state: 'warning', label: '旧内核', title: active > 0 ? '降级运行' : '等待接管', sub: active > 0 ? `${countText(active)} 个声音` : '不刷新当前页' });
-    setEffect({ value: active > 0 ? '旧核' : '--', caption: active > 0 ? '运行' : '待机', amount: active > 0 ? 1.2 : 0 });
-    setNotices([{ tone: 'warning', text: '旧版本' }, ...notices]);
-    setCaptureVisible(captureAvailable, captureActive);
-    setReloadVisible(false);
-    elements.healthLabel.textContent = '不会自动刷新';
-    return;
-  }
-
-  if (failedErrors.length > 0 && processed === 0) {
-    setHeadline({ state: 'danger', label: '失败', title: '未接管', sub: '音频被占用' });
-    setEffect({ value: '--', caption: '错误', amount: 0 });
-    setNotices(notices);
-    setReloadVisible(false);
-    elements.healthLabel.textContent = failedErrors[0];
-    return;
-  }
-
-  if (audible > 0 && active === 0 && autoplayBlocked > 0) {
-    setHeadline({ state: 'warning', label: '待操作', title: '未接管', sub: '点一下页面' });
-    setEffect({ value: '--', caption: '待接管', amount: 0 });
-    setNotices([{ tone: 'warning', text: '浏览器限制' }, ...notices]);
-    elements.healthLabel.textContent = '页面点击后接管';
-    return;
-  }
-
-  if (audible > 0 && active === 0) {
-    setHeadline({ state: 'warning', label: '未接入', title: '当前声音未接入', sub: `${countText(audible)} 个声音` });
-    setEffect({ value: '--', caption: '未接入', amount: 0 });
-    setNotices(notices.length > 0 ? notices : [{ tone: 'warning', text: processed > 0 ? '切换中' : '等待接管' }]);
-    setCaptureVisible(captureAvailable, false);
-    elements.healthLabel.textContent = processed > 0 ? '已接管的不是当前声音' : '未进入音频链路';
-    return;
-  }
-
-  if (autoplayBlocked > 0 && processed === 0) {
-    setHeadline({ state: 'warning', label: '等待', title: '先播放', sub: '需要页面操作' });
-    setEffect({ value: '--', caption: '等待', amount: 0 });
-    setNotices([{ tone: 'warning', text: '自动播放' }, ...notices]);
-    elements.healthLabel.textContent = '点播放后接管';
-    return;
-  }
-
-  if (active > 0 || processed > 0) {
-    if (captureActive) {
-      if (audible > 0 && reduction > 0.15) {
-        setHeadline({ state: 'working', label: '整页', title: '压低中', sub: `${countText(audible)} 个声音` });
-        setEffect({ value: `-${reduction.toFixed(1)}`, caption: 'dB', amount: reduction });
-      } else if (audible > 0 && lift > 0.15) {
-        setHeadline({ state: 'working', label: '整页', title: '提升中', sub: `${countText(audible)} 个声音` });
-        setEffect({ value: `+${lift.toFixed(1)}`, caption: 'dB', amount: lift });
-      } else {
-        setHeadline({ state: 'working', label: '整页', title: '已接管', sub: averageInputDb == null ? '处理标签音频' : `输入 ${averageInputDb.toFixed(1)} dB` });
-        setEffect({ value: '0', caption: 'dB', amount: 0.2 });
-      }
-      setCaptureVisible(true, true);
-      setNotices(notices);
-      elements.healthLabel.textContent = '整页音频链路中';
-      return;
-    }
-    if (audible > 0 && active > 0 && analysisSilent >= active && reduction <= 0.15 && lift <= 0.15) {
-      setHeadline({ state: 'warning', label: '未处理', title: '无波形', sub: `${countText(audible)} 个声音` });
-      setEffect({ value: '--', caption: '无输入', amount: 0 });
-      setNotices(notices.length > 0 ? notices : [{ tone: 'warning', text: '普通接管无输入' }, { tone: 'warning', text: '可用整页接管' }]);
-      setCaptureVisible(captureAvailable, false);
-      elements.healthLabel.textContent = '普通链路读不到波形';
-      return;
-    }
-    if (audible > 0 && reduction > 0.15) {
-      setHeadline({ state: 'working', label: '生效中', title: '压低中', sub: `${countText(audible)} 个声音` });
-      setEffect({ value: `-${reduction.toFixed(1)}`, caption: 'dB', amount: reduction });
-    } else if (audible > 0 && lift > 0.15) {
-      setHeadline({ state: 'working', label: '生效中', title: '提升中', sub: `${countText(audible)} 个声音` });
-      setEffect({ value: `+${lift.toFixed(1)}`, caption: 'dB', amount: lift });
-    } else if (audible > 0) {
-      setHeadline({ state: 'working', label: '已接管', title: '未调整', sub: averageInputDb == null ? `${countText(audible)} 个声音` : `输入 ${averageInputDb.toFixed(1)} dB` });
-      setEffect({ value: '0', caption: 'dB', amount: 0.2 });
-    } else {
-      setHeadline({ state: 'watching', label: '已接管', title: '待声音', sub: `${countText(processed)} 个音源` });
-      setEffect({ value: '--', caption: '静音', amount: 0 });
-    }
-    setNotices(notices);
-    elements.healthLabel.textContent = audible > 0 ? '未超过当前处理阈值' : '等待播放';
-    return;
-  }
-
-  if (media > 0) {
-    setHeadline({ state: 'watching', label: '待播放', title: '检测到媒体', sub: `${countText(media)} 个媒体` });
-    setEffect({ value: '--', caption: '未发声', amount: 0 });
-    setCaptureVisible(captureAvailable, false);
-    setNotices(notices);
-    elements.healthLabel.textContent = '可先整页接管';
-    return;
-  }
-
-  if (status.injection?.error && !status.injection?.skipped) {
-    setHeadline({ state: 'danger', label: '失败', title: '拒绝接入', sub: '脚本受限' });
-    setEffect({ value: '--', caption: '错误', amount: 0 });
-    setNotices([{ tone: 'danger', text: '接入失败' }, ...notices]);
-    elements.healthLabel.textContent = status.injection.error;
-    return;
-  }
-
-  setHeadline({
-    state: frames > 0 ? 'watching' : 'warning',
-    label: frames > 0 ? '监听中' : '未接入',
-    title: frames > 0 ? '无声音' : '页面未回传',
-    sub: frames > 0 ? '打开音频' : '可尝试整页接管'
-  });
-  setEffect({ value: '--', caption: '待机', amount: 0 });
-  setCaptureVisible(captureAvailable, false);
-  setNotices(notices);
-  elements.healthLabel.textContent = frames > 0 ? '等待声音' : '等待页面回传';
-}
-
-function renderCompactStatus(status) {
-  const enabled = settings?.enabled !== false;
-  const processed = finiteNumber(status.processedCount);
-  const media = finiteNumber(status.mediaCount);
-  const audible = finiteNumber(status.audibleCount);
-  const active = finiteNumber(status.activeProcessorCount);
   const frames = finiteNumber(status.respondingFrames);
   const captureActive = Boolean(status.captureActive);
   const captureAvailable = status.captureAvailable !== false;
@@ -1115,11 +892,10 @@ function renderCompactStatus(status) {
   setEffect({ value: '--', caption: 'dB', amount: 0 });
 }
 
-renderStatus = renderCompactStatus;
 bind();
 window.addEventListener('pagehide', () => {
   strengthGestureActive = false;
-  flushPersistSettings({ siteScoped: true });
+  flushPersistSettings(strengthSaveOptions());
   globalThis.chrome?.storage?.onChanged?.removeListener(handleStorageChanged);
 }, { once: true });
 load().catch((error) => {
