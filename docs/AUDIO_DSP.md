@@ -138,6 +138,8 @@ Player-volume handling deliberately uses two measurement domains:
 
 Do not compensate the peak and also lower the limiter ceiling for the same player-volume reduction. That double-counts attenuation and can incorrectly block quiet lift on high-crest material. `tools/leveler_worklet_tests.js` and `tools/dsp_unit_tests.js` contain regressions for this invariant.
 
+The startup output gate remains closed until the first measured control frame is available. A low-crest loud 20 ms frame immediately invalidates an older quiet-window classification. If an already lifted signal would cross `-9 dBFS`, or a new post-silence onset crosses `-18 dBFS`, a short 40 ms transition guard keeps the limiter at the stricter `-9 dBFS` ceiling while the protective gain catches up. High-crest isolated detail continues through the bounded limiter path instead of being misclassified as a whole-program loudness jump.
+
 When player-volume state is unknown or conflicting, upward lift is disabled unless the narrow tab-audible fallback is safe. Downward protection remains available.
 
 ## Fallback path

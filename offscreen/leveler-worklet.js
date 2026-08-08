@@ -8,8 +8,9 @@ const TARGET_RMS_DB = -29;
 const LIFT_TARGET_RMS_DB = -29;
 const MAX_LIFT_DB = 34;
 const LIFT_LIMITER_BUDGET_DB = 15;
+const LIFT_SAFETY_CEILING_DB = -9;
 const QUIET_TRANSITION_CUT_MARGIN_DB = 3;
-const CUT_ATTACK_SECONDS = 0.012;
+const CUT_ATTACK_SECONDS = 0.003;
 const CUT_RELEASE_SECONDS = 0.18;
 const LIFT_ATTACK_SECONDS = 0.10;
 const LIFT_RELEASE_SECONDS = 0.25;
@@ -18,6 +19,9 @@ const TARGET_DEADBAND_DB = 0.8;
 const TARGET_HOLD_SECONDS = 0.08;
 const LIFT_LOUDNESS_PERCENTILE = 0.5;
 const LIFT_PEAK_PERCENTILE = 0.65;
+const LIFT_ONSET_MAX_CREST_DB = 18;
+const ONSET_PROTECTION_TRIGGER_DB = -18;
+const TRANSITION_PROTECTION_SECONDS = 0.04;
 const REALIZED_LIFT_ASSIST_RATIO = 0.5;
 
 function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
@@ -56,6 +60,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.allowUnknownVolumeLift = false;
     this.muteGain = this.targetMuteGain = 0;
     this.limiterGain = 1;
+    this.transitionProtectionSamples = 0;
     this.limitedSamples = 0;
     this.hardClippedSamples = 0;
     this.maxHardClipOvershoot = 0;
@@ -162,8 +167,13 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.historyCount = Math.min(HISTORY_SIZE, this.historyCount + 1);
     const momentaryDb = energyToDb(this.meanLast(this.energyHistory, 20));
     const shortTermDb = energyToDb(this.meanLast(this.energyHistory, 150));
-    const controlDb = Math.max(0.8 * momentaryDb + 0.2 * shortTermDb, energyToDb(this.meanLast(this.energyHistory, 5)));
-    const liftControlDb = energyToDb(this.percentileLast(this.energyHistory, 5, LIFT_LOUDNESS_PERCENTILE));
+    const instantDb = energyToDb(energy);
+    const controlDb = Math.max(0.8 * momentaryDb + 0.2 * shortTermDb, instantDb);
+    const robustLiftDb = energyToDb(this.percentileLast(this.energyHistory, 5, LIFT_LOUDNESS_PERCENTILE));
+    const instantCrestDb = linearToDb(this.inputPeak) - instantDb;
+    const liftControlDb = instantCrestDb <= LIFT_ONSET_MAX_CREST_DB
+      ? Math.max(robustLiftDb, instantDb)
+      : robustLiftDb;
     const liftPeak = this.percentileLast(this.peakHistory, 10, LIFT_PEAK_PERCENTILE) || this.inputPeak;
     const outputMomentaryDb = energyToDb(this.meanLast(this.outputEnergyHistory, 20));
     const outputShortTermDb = energyToDb(this.meanLast(this.outputEnergyHistory, 150));
@@ -230,7 +240,9 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
   }
 
   ceilingDb() {
-    const base = this.currentGainDb > 0.01 ? -3 : -3 * (this.cutStrength / 100);
+    const base = this.transitionProtectionSamples > 0
+      ? LIFT_SAFETY_CEILING_DB
+      : (this.currentGainDb > 0.01 ? -3 : -3 * (this.cutStrength / 100));
     return this.respectPlayerVolume && this.playerVolumeReliable ? base + Math.min(0, linearToDb(this.playerVolumeCap)) : base;
   }
 
@@ -263,6 +275,14 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         this.inputEnergySum += weighted * weighted / output.length;
         this.inputPeak = Math.max(this.inputPeak, Math.abs(sample));
       }
+      const liftedTransition = this.currentGainDb > 0.01 && futurePeak > dbToLinear(LIFT_SAFETY_CEILING_DB);
+      const newSignalOnset = !this.signalActive && futurePeak > dbToLinear(ONSET_PROTECTION_TRIGGER_DB);
+      if (liftedTransition || newSignalOnset) {
+        this.transitionProtectionSamples = Math.max(
+          this.transitionProtectionSamples,
+          Math.round(sampleRate * TRANSITION_PROTECTION_SECONDS)
+        );
+      }
       const ceiling = dbToLinear(this.ceilingDb());
       const required = futurePeak > ceiling ? ceiling / Math.max(futurePeak, 1e-12) : 1;
       if (required < this.limiterGain) { this.limiterGain = required; this.limitedSamples += 1; this.limiterTickCount += 1; }
@@ -277,13 +297,14 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       }
       for (let channel = 0; channel < output.length; channel += 1) {
         let sample = this.delay[channel][readIndex] * this.limiterGain * this.muteGain;
-        if (sample > ceiling) { this.maxHardClipOvershoot = Math.max(this.maxHardClipOvershoot, sample - ceiling); sample = ceiling; this.hardClippedSamples += 1; }
-        else if (sample < -ceiling) { this.maxHardClipOvershoot = Math.max(this.maxHardClipOvershoot, -sample - ceiling); sample = -ceiling; this.hardClippedSamples += 1; }
+        if (sample > ceiling) { const overshoot = sample - ceiling; this.maxHardClipOvershoot = Math.max(this.maxHardClipOvershoot, overshoot); sample = ceiling; if (overshoot > 1e-7) this.hardClippedSamples += 1; }
+        else if (sample < -ceiling) { const overshoot = -sample - ceiling; this.maxHardClipOvershoot = Math.max(this.maxHardClipOvershoot, overshoot); sample = -ceiling; if (overshoot > 1e-7) this.hardClippedSamples += 1; }
         output[channel][frame] = sample;
         this.outputEnergySum += sample * sample / output.length;
         this.outputPeak = Math.max(this.outputPeak, Math.abs(sample));
       }
       this.delayIndex = readIndex;
+      this.transitionProtectionSamples = Math.max(0, this.transitionProtectionSamples - 1);
       this.frameSamples += 1;
       if (this.frameSamples >= FRAME_SAMPLES) this.finishFrame();
     }

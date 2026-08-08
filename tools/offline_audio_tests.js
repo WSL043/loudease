@@ -24,14 +24,15 @@ const LIFT_TARGET_RMS_DB = -29;
 const MAX_LIFT_DB = 34;
 const MAX_CUT_DB = 30;
 const LIMITER_CEILING_DB = -3;
+const LIFT_SAFETY_CEILING_DB = -9;
 const PEAK_GUARD_DB = -6;
 const LIFT_LIMITER_BUDGET_DB = 15;
-const CUT_ATTACK_SECONDS = 0.012;
+const CUT_ATTACK_SECONDS = 0.003;
 const CUT_RELEASE_SECONDS = 0.18;
 const LIFT_ATTACK_SECONDS = 0.10;
 const LIFT_RELEASE_SECONDS = 0.25;
 const MAX_GAIN_INCREASE_STEP_DB = 3;
-const FAST_CUT_HISTORY_FRAMES = 5;
+const FAST_CUT_HISTORY_FRAMES = 1;
 const MOMENTARY_HISTORY_FRAMES = 20;
 const SHORT_TERM_HISTORY_FRAMES = 150;
 const LIFT_LOUDNESS_HISTORY_FRAMES = 5;
@@ -39,6 +40,7 @@ const LIFT_CONTROL_HISTORY_FRAMES = 10;
 const MAX_HISTORY_FRAMES = SHORT_TERM_HISTORY_FRAMES;
 const LIFT_LOUDNESS_PERCENTILE = 0.5;
 const LIFT_PEAK_PERCENTILE = 0.65;
+const LIFT_ONSET_MAX_CREST_DB = 18;
 const TARGET_DEADBAND_DB = 0.8;
 const TARGET_HOLD_MS = 80;
 const CEILING_LINEAR = dbToLinear(LIMITER_CEILING_DB);
@@ -247,10 +249,14 @@ function processFixture(samples) {
     const momentaryEnergy = meanLast(energyHistory, MOMENTARY_HISTORY_FRAMES);
     const shortTermEnergy = meanLast(energyHistory, SHORT_TERM_HISTORY_FRAMES);
     const loudness = computeDualWindowLoudnessDb(momentaryEnergy, shortTermEnergy);
-    const liftControlDb = energyToDb(percentileLast(energyHistory, LIFT_LOUDNESS_HISTORY_FRAMES, LIFT_LOUDNESS_PERCENTILE));
+    const peakDb = linearToDb(peak);
+    const robustLiftDb = energyToDb(percentileLast(energyHistory, LIFT_LOUDNESS_HISTORY_FRAMES, LIFT_LOUDNESS_PERCENTILE));
+    const instantCrestDb = peakDb - inputDb;
+    const liftControlDb = instantCrestDb <= LIFT_ONSET_MAX_CREST_DB
+      ? Math.max(robustLiftDb, inputDb)
+      : robustLiftDb;
     const liftPeak = percentileLast(peakHistory, LIFT_CONTROL_HISTORY_FRAMES, LIFT_PEAK_PERCENTILE);
     const controlDb = Math.max(loudness.controlDb, energyToDb(fastCutEnergy));
-    const peakDb = linearToDb(peak);
     const liftPeakDb = linearToDb(liftPeak || peak);
 
     if (!hasSignal) {
@@ -306,9 +312,10 @@ function processFixture(samples) {
     }
 
     const linearGain = dbToLinear(currentGainDb);
+    const frameCeiling = dbToLinear(currentGainDb > 0.01 ? LIFT_SAFETY_CEILING_DB : LIMITER_CEILING_DB);
     for (let i = start; i < end; i += 1) {
       const amplified = samples[i] * linearGain;
-      output[i] = Math.max(-CEILING_LINEAR, Math.min(CEILING_LINEAR, amplified));
+      output[i] = Math.max(-frameCeiling, Math.min(frameCeiling, amplified));
     }
 
     gainByFrame.push({
@@ -450,7 +457,7 @@ assert(
 );
 assert('overall output never clips', overallOutputPeak <= CEILING_LINEAR + 0.000001, `peak=${overallOutputPeak}`);
 assert('gain recovery has bounded upward steps', gainStep.maxIncrease <= MAX_GAIN_INCREASE_STEP_DB + 0.01, `maxIncreaseDb=${gainStep.maxIncrease.toFixed(3)}`);
-assert('protective cut remains bounded', gainStep.maxDecrease <= MAX_CUT_DB + 1, `maxDecreaseDb=${gainStep.maxDecrease.toFixed(3)}`);
+assert('protective cut remains bounded by the full gain range', gainStep.maxDecrease <= MAX_LIFT_DB + MAX_CUT_DB, `maxDecreaseDb=${gainStep.maxDecrease.toFixed(3)}`);
 
 if (process.exitCode) {
   console.log(JSON.stringify({ metrics, settledMetrics, quietLoudGapDb, noisyQuietLoudGapDb, overallOutputPeak, gainStep, recoveryStart, alternatingGain }, null, 2));

@@ -35,6 +35,7 @@
     maxLiftDb: 34,
     maxCutDb: 30,
     limiterCeilingDb: -3,
+    liftLimiterCeilingDb: -9,
     peakGuardDb: -6,
     liftHeadroomReserveDb: 2,
     liftLimiterBudgetDb: 15,
@@ -301,9 +302,13 @@
   function computeProcessingLimiterCeilingDb(input = {}, params = DEFAULT_LEVELER_PARAMS) {
     const normalized = normalizeSettings(input.settings || input);
     const fullCeilingDb = finite(params.limiterCeilingDb, DEFAULT_LEVELER_PARAMS.limiterCeilingDb);
+    const liftCeilingDb = Math.min(fullCeilingDb, finite(
+      params.liftLimiterCeilingDb,
+      DEFAULT_LEVELER_PARAMS.liftLimiterCeilingDb
+    ));
     const liftSafetyActive = input.liftSafetyActive === true;
     const scaledCeilingDb = liftSafetyActive
-      ? fullCeilingDb
+      ? liftCeilingDb
       : fullCeilingDb * strengthScale(normalized.cutStrength);
     return computePlayerVolumeLimiterCeilingDb({
       playerVolumeCap: input.playerVolumeCap,
