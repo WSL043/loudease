@@ -489,8 +489,10 @@ class CaptureSession {
     const volumeDb = volumeStateReliable && volumeCap > 0.001 && volumeCap < 0.98 ? linearToDb(volumeCap) : 0;
     const volumeCompensationDb = -volumeDb;
     const limiterCeilingDb = this.playerVolumeLimiterCeilingDb();
+    // Compensate loudness to classify the source, but keep peak headroom in
+    // the captured/output domain because the limiter ceiling already carries
+    // the player-volume attenuation.
     const liftRmsDb = liftWindowRmsDb + volumeCompensationDb;
-    const adjustedLiftPeakDb = liftPeakDb + volumeCompensationDb;
     const effectiveMaxLiftDb = canLiftWithCurrentVolumeState ? computePlayerVolumeBoundedMaxLiftDb({
       rmsDb: liftWindowRmsDb,
       playerVolumeCap: volumeCap,
@@ -503,7 +505,7 @@ class CaptureSession {
       rmsDb,
       peakDb,
       liftRmsDb,
-      liftPeakDb: adjustedLiftPeakDb,
+      liftPeakDb,
       settings: this.settings
     }, {
       targetRmsDb: TARGET_RMS_DB,
