@@ -47,6 +47,25 @@ function render(processor, seconds, amplitude, startSample = 0) {
   return { peak, rms: Math.sqrt(energy / Math.max(1, samples)), samples: blocks * BLOCK_SIZE };
 }
 
+function renderImpulseTrain(processor, seconds, peakAmplitude, startSample = 0) {
+  const blocks = Math.ceil(seconds * SAMPLE_RATE / BLOCK_SIZE);
+  const frameSamples = Math.round(SAMPLE_RATE * 0.02);
+  let peak = 0;
+  let energy = 0;
+  let samples = 0;
+  for (let block = 0; block < blocks; block += 1) {
+    const input = new Float32Array(BLOCK_SIZE);
+    const output = new Float32Array(BLOCK_SIZE);
+    for (let i = 0; i < BLOCK_SIZE; i += 1) {
+      const absoluteSample = startSample + block * BLOCK_SIZE + i;
+      input[i] = absoluteSample % frameSamples === 0 ? peakAmplitude : 0;
+    }
+    processor.process([[input]], [[output]]);
+    if (block > 2) for (const value of output) { peak = Math.max(peak, Math.abs(value)); energy += value * value; samples += 1; }
+  }
+  return { peak, rms: Math.sqrt(energy / Math.max(1, samples)), samples: blocks * BLOCK_SIZE };
+}
+
 function latest(processor) { return processor.messages.filter((message) => message.type === 'state').at(-1) || {}; }
 
 const unconfigured = new ProcessorClass();
@@ -75,6 +94,15 @@ const quiet = new ProcessorClass();
 configure(quiet);
 render(quiet, 1.2, 0.008);
 assert('quiet material lifts when peak headroom exists', latest(quiet).currentGainDb > 2, JSON.stringify(latest(quiet)));
+
+const lowPlayerVolumeQuiet = new ProcessorClass();
+configure(lowPlayerVolumeQuiet, {}, { playerVolumeCap: 0.25, playerVolumeReliable: true });
+renderImpulseTrain(lowPlayerVolumeQuiet, 1.6, Math.pow(10, -30 / 20));
+assert(
+  'low player volume preserves captured-domain peak headroom for high-crest quiet material',
+  latest(lowPlayerVolumeQuiet).currentGainDb > 4,
+  JSON.stringify(latest(lowPlayerVolumeQuiet))
+);
 
 const noHeadroom = new ProcessorClass();
 configure(noHeadroom);
