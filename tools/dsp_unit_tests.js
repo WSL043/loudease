@@ -386,13 +386,13 @@ assert(
 );
 
 assert(
-  'active quiet lift uses the full safety ceiling',
+  'active quiet lift uses the stricter transition safety ceiling',
   Math.abs(computeProcessingLimiterCeilingDb({
     settings: { ...baseSettings, cutStrength: 0, liftStrength: 100 },
     liftSafetyActive: true,
     playerVolumeCap: 1,
     respectPlayerVolume: true
-  }) - DEFAULT_LEVELER_PARAMS.limiterCeilingDb) < 0.001
+  }) - DEFAULT_LEVELER_PARAMS.liftLimiterCeilingDb) < 0.001
 );
 
 if (process.exitCode) {
