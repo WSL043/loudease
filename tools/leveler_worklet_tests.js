@@ -38,7 +38,7 @@ function render(processor, seconds, amplitude, startSample = 0) {
   ), startSample);
 }
 
-function renderGenerated(processor, seconds, generator, startSample = 0) {
+function renderGenerated(processor, seconds, generator, startSample = 0, warmupBlocks = 2) {
   const blocks = Math.ceil(seconds * SAMPLE_RATE / BLOCK_SIZE);
   let peak = 0;
   let energy = 0;
@@ -48,7 +48,7 @@ function renderGenerated(processor, seconds, generator, startSample = 0) {
     const output = new Float32Array(BLOCK_SIZE);
     for (let i = 0; i < BLOCK_SIZE; i += 1) input[i] = generator(startSample + block * BLOCK_SIZE + i);
     processor.process([[input]], [[output]]);
-    if (block > 2) for (const value of output) { peak = Math.max(peak, Math.abs(value)); energy += value * value; samples += 1; }
+    if (block > warmupBlocks) for (const value of output) { peak = Math.max(peak, Math.abs(value)); energy += value * value; samples += 1; }
   }
   return { peak, rms: Math.sqrt(energy / Math.max(1, samples)), samples: blocks * BLOCK_SIZE };
 }
@@ -166,6 +166,38 @@ assert(
 );
 assert('high-crest lift remains below the ceiling', highCrestOut.peak <= Math.pow(10, -3 / 20) + 1e-6, String(highCrestOut.peak));
 assert('high-crest lift uses lookahead limiting without hard clipping', highCrestHardClips === 0, String(highCrestHardClips));
+
+const liftedOnset = new ProcessorClass();
+configure(liftedOnset);
+const liftedOnsetQuiet = render(liftedOnset, 1.2, 0.008);
+const liftedOnsetLoud = renderGenerated(liftedOnset, 0.04, (sampleIndex) => (
+  0.35 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
+), liftedOnsetQuiet.samples, -1);
+assert(
+  'loud onset after quiet lift is caught before the first audible block',
+  liftedOnsetLoud.peak <= Math.pow(10, -9 / 20) + 1e-6,
+  JSON.stringify({ peak: liftedOnsetLoud.peak, state: latest(liftedOnset) })
+);
+liftedOnset.transitionProtectionSamples = 0;
+liftedOnset.cutStrength = 0;
+liftedOnset.currentGainDb = 1;
+assert(
+  'ordinary lift keeps its -3 dBFS ceiling when cut strength is zero',
+  Math.abs(liftedOnset.ceilingDb() - (-3)) < 1e-9,
+  String(liftedOnset.ceilingDb())
+);
+
+const silentOnset = new ProcessorClass();
+configure(silentOnset);
+const silentOnsetLead = render(silentOnset, 0.2, 0);
+const silentOnsetLoud = renderGenerated(silentOnset, 0.04, (sampleIndex) => (
+  0.8 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
+), silentOnsetLead.samples, -1);
+assert(
+  'loud onset after silence is caught before the first audible block',
+  silentOnsetLoud.peak <= Math.pow(10, -9 / 20) + 1e-6,
+  JSON.stringify({ peak: silentOnsetLoud.peak, state: latest(silentOnset) })
+);
 
 const limited = new ProcessorClass();
 configure(limited);

@@ -31,7 +31,7 @@ const maxGainIncreaseStepDb = numberConst('MAX_GAIN_INCREASE_STEP_DB');
 const checks = [
   ['legacy page loudness engine is absent', !fs.existsSync(path.join(root, 'content', 'engine.js'))],
   ['offscreen momentary window is 400ms', Number.isFinite(meterIntervalMs) && Number.isFinite(momentaryHistoryFrames) && meterIntervalMs * momentaryHistoryFrames === 400],
-  ['offscreen protective cut window is 100ms', Number.isFinite(meterIntervalMs) && Number.isFinite(fastCutHistoryFrames) && meterIntervalMs * fastCutHistoryFrames === 100],
+  ['offscreen protective cut window is 20ms', Number.isFinite(meterIntervalMs) && Number.isFinite(fastCutHistoryFrames) && meterIntervalMs * fastCutHistoryFrames === 20],
   ['offscreen short-term window is 3 seconds', Number.isFinite(meterIntervalMs) && Number.isFinite(shortTermHistoryFrames) && meterIntervalMs * shortTermHistoryFrames === 3000],
   ['offscreen robust lift peak percentile exists', Number.isFinite(liftPeakPercentile) && liftPeakPercentile > 0.5 && liftPeakPercentile < 1],
   ['full cut range is bounded but useful', Number.isFinite(maxCutDb) && maxCutDb >= 30],

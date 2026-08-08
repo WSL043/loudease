@@ -26,15 +26,16 @@ const SIGNAL_PEAK_FLOOR = 0.00035;
 const MAX_LIFT_DB = 34;
 const MAX_CUT_DB = 30;
 const LIMITER_CEILING_DB = -3;
+const LIFT_SAFETY_CEILING_DB = -9;
 const LIMITER_LOOKAHEAD_MS = 5;
 const PEAK_GUARD_DB = -6;
 const LIFT_LIMITER_BUDGET_DB = 15;
-const CUT_ATTACK_SECONDS = 0.012;
+const CUT_ATTACK_SECONDS = 0.003;
 const CUT_RELEASE_SECONDS = 0.18;
 const LIFT_ATTACK_SECONDS = 0.10;
 const LIFT_RELEASE_SECONDS = 0.25;
 const MAX_GAIN_INCREASE_STEP_DB = 3;
-const FAST_CUT_HISTORY_FRAMES = 5;
+const FAST_CUT_HISTORY_FRAMES = 1;
 const MOMENTARY_HISTORY_FRAMES = 20;
 const SHORT_TERM_HISTORY_FRAMES = 150;
 const LIFT_LOUDNESS_HISTORY_FRAMES = 5;
@@ -42,6 +43,7 @@ const LIFT_CONTROL_HISTORY_FRAMES = 10;
 const MAX_HISTORY_FRAMES = SHORT_TERM_HISTORY_FRAMES;
 const LIFT_LOUDNESS_PERCENTILE = 0.5;
 const LIFT_PEAK_PERCENTILE = 0.65;
+const LIFT_ONSET_MAX_CREST_DB = 18;
 const TARGET_DEADBAND_DB = 0.8;
 const TARGET_HOLD_MS = 80;
 
@@ -373,6 +375,8 @@ class CaptureSession {
     const weighted = this.weightedAnalyser && this.weightedSamples
       ? readEnergy(this.weightedAnalyser, this.weightedSamples)
       : raw;
+    this.meterSequence += 1;
+    this.lastMeterFrameAt = Date.now();
     this.processMeasurement(weighted.energy, raw.peak);
     this.meterTimer = setTimeout(() => this.measure(), METER_INTERVAL_MS);
   }
@@ -386,7 +390,11 @@ class CaptureSession {
     const shortTermEnergy = meanLast(this.energyHistory, SHORT_TERM_HISTORY_FRAMES);
     const loudness = computeDualWindowLoudnessDb(momentaryEnergy, shortTermEnergy);
     const controlInputDb = Math.max(loudness.controlDb, energyToDb(fastCutEnergy));
-    const liftControlInputDb = energyToDb(percentileLast(this.energyHistory, LIFT_LOUDNESS_HISTORY_FRAMES, LIFT_LOUDNESS_PERCENTILE));
+    const robustLiftInputDb = energyToDb(percentileLast(this.energyHistory, LIFT_LOUDNESS_HISTORY_FRAMES, LIFT_LOUDNESS_PERCENTILE));
+    const instantCrestDb = linearToDb(peak) - instantInputDb;
+    const liftControlInputDb = instantCrestDb <= LIFT_ONSET_MAX_CREST_DB
+      ? Math.max(robustLiftInputDb, instantInputDb)
+      : robustLiftInputDb;
     const liftPeak = percentileLast(this.peakHistory, LIFT_CONTROL_HISTORY_FRAMES, LIFT_PEAK_PERCENTILE);
     const output = measuredOutput || (this.outputAnalyser && this.outputSamples
       ? readEnergy(this.outputAnalyser, this.outputSamples)
@@ -435,6 +443,7 @@ class CaptureSession {
     if (this.currentLimiterReductionDb > 0.2) {
       this.limiterTickCount += 1;
     }
+    this.openStartupGateIfReady();
   }
 
   hasSignal(energy, peak) {
@@ -659,7 +668,8 @@ class CaptureSession {
       playerVolumeCap: this.playerVolumeCap,
       respectPlayerVolume: true
     }, {
-      limiterCeilingDb: LIMITER_CEILING_DB
+      limiterCeilingDb: LIMITER_CEILING_DB,
+      liftLimiterCeilingDb: LIFT_SAFETY_CEILING_DB
     });
   }
 
@@ -757,6 +767,7 @@ class CaptureSession {
     this.workletLimitedSamples += Math.max(0, Math.floor(finite(message.limitedSamples, 0)));
     this.workletHardClippedSamples += Math.max(0, Math.floor(finite(message.hardClippedSamples, 0)));
     this.workletMaxHardClipOvershoot = Math.max(this.workletMaxHardClipOvershoot, Math.max(0, finite(message.maxHardClipOvershoot, 0)));
+    this.openStartupGateIfReady();
   }
 
   openStartupGateIfReady() {
@@ -764,6 +775,9 @@ class CaptureSession {
       return;
     }
     if (this.levelerMode === 'worklet' && this.levelerConfiguredSequence <= 0) {
+      return;
+    }
+    if (this.meterSequence < 0) {
       return;
     }
     const now = this.context?.currentTime || 0;
