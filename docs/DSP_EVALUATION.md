@@ -181,3 +181,11 @@ A DSP candidate may enter the normal path only when:
 5. the result generalizes beyond the exact sample that motivated the change.
 
 A failed candidate is a successful experiment if it narrows the design space. Keep the evidence; do not keep the complexity.
+
+## Accepted experiment: realized-loudness assist
+
+`tools/dsp_candidate_compare.js` runs the production AudioWorklet twice from the same source: once with realized-loudness assistance disabled as the baseline and once with it enabled as the candidate.
+
+The accepted fixture combines a low-energy tonal bed with sparse high peaks. In the deterministic 48 kHz comparison, ordinary loud and quiet steady-state output changed by less than `0.05 dB`. For limiter-bound quiet material, the gap to the normal loud reference fell from approximately `2.37 dB` to `1.53 dB`, an improvement of approximately `0.84 dB`. Both paths remained at or below the `-3 dBFS` sample ceiling with zero hard-clipped samples.
+
+Full-strength feedback was rejected because it produced a hard-clip guard sample in the existing high-crest worklet regression. The retained candidate uses a feedback ratio of `0.5` and remains inside the existing `+34 dB` maximum lift and `15 dB` limiter allowance. This is deterministic fixture evidence, not a universal listening-preference claim.

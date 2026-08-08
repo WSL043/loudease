@@ -192,6 +192,40 @@ assert(
   JSON.stringify(quietHighCrest)
 );
 
+const limiterBoundQuiet = computeLevelerGainDb({
+  rmsDb: -42,
+  peakDb: -8,
+  liftPeakDb: -24,
+  outputRmsDb: -35,
+  outputTargetRmsDb: DEFAULT_LEVELER_PARAMS.liftTargetRmsDb,
+  limiterReductionDb: 4,
+  settings: baseSettings
+});
+assert(
+  'measured limiter loss assists quiet lift within the existing budget',
+  limiterBoundQuiet.realizedLiftAssistDb === 2
+    && limiterBoundQuiet.requestedLiftDb === 15
+    && limiterBoundQuiet.targetGainDb > quietHighCrest.targetGainDb
+    && limiterBoundQuiet.targetGainDb <= limiterBoundQuiet.effectiveLiftBudgetDb,
+  JSON.stringify({ quietHighCrest, limiterBoundQuiet })
+);
+
+const unLimitedQuiet = computeLevelerGainDb({
+  rmsDb: -42,
+  peakDb: -8,
+  liftPeakDb: -24,
+  outputRmsDb: -35,
+  outputTargetRmsDb: DEFAULT_LEVELER_PARAMS.liftTargetRmsDb,
+  limiterReductionDb: 0,
+  settings: baseSettings
+});
+assert(
+  'quiet lift does not use output assist without measured limiting',
+  unLimitedQuiet.realizedLiftAssistDb === 0
+    && unLimitedQuiet.targetGainDb === quietHighCrest.targetGainDb,
+  JSON.stringify({ quietHighCrest, unLimitedQuiet })
+);
+
 const quietNoHeadroom = computeLevelerGainDb({
   rmsDb: -42,
   peakDb: -3.2,

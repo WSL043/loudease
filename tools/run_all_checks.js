@@ -47,6 +47,7 @@ const syntaxTargets = [
   'tools/e2e_stability_smoke.js',
   'tools/e2e_long_run_smoke.js',
   'tools/dsp_unit_tests.js',
+  'tools/dsp_candidate_compare.js',
   'tools/offline_audio_tests.js',
   'tools/offline_audio_graph_tests.js'
 ];
@@ -79,6 +80,7 @@ const scriptTargets = [
   ['tools/site_matrix_audit.js', '--self-test'],
   ['tools/live_matrix_watch.js', '--self-test'],
   'tools/dsp_unit_tests.js',
+  'tools/dsp_candidate_compare.js',
   'tools/offline_audio_tests.js',
   'tools/offline_audio_graph_tests.js'
 ];

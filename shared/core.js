@@ -39,6 +39,7 @@
     liftHeadroomReserveDb: 2,
     liftLimiterBudgetDb: 15,
     quietTransitionCutMarginDb: 3,
+    realizedLiftAssistRatio: 0.5,
     quietLiftBiasDb: 0
   });
 
@@ -166,6 +167,7 @@
         liftLimiterBudgetDb: 0,
         effectiveLiftBudgetDb: 0,
         quietDeficitDb: 0,
+        realizedLiftAssistDb: 0,
         loudnessCutDb: 0,
         peakCutDb: 0
       };
@@ -186,6 +188,7 @@
         liftLimiterBudgetDb: 0,
         effectiveLiftBudgetDb: 0,
         quietDeficitDb: 0,
+        realizedLiftAssistDb: 0,
         loudnessCutDb: 0,
         peakCutDb: 0
       };
@@ -211,6 +214,16 @@
     const quietLiftBiasDb = finite(params.quietLiftBiasDb, DEFAULT_LEVELER_PARAMS.quietLiftBiasDb) * liftScale;
 
     const quietDeficitDb = Math.max(0, liftTargetRmsDb - liftRmsDb);
+    const outputRmsDb = input.outputRmsDb == null ? NaN : Number(input.outputRmsDb);
+    const outputTargetRmsDb = finite(input.outputTargetRmsDb, liftTargetRmsDb);
+    const limiterReductionDb = Math.max(0, finite(input.limiterReductionDb, 0));
+    const realizedLiftAssistRatio = clamp(finite(
+      params.realizedLiftAssistRatio,
+      DEFAULT_LEVELER_PARAMS.realizedLiftAssistRatio
+    ), 0, 1);
+    const realizedLiftAssistDb = quietDeficitDb > 0 && Number.isFinite(outputRmsDb)
+      ? Math.min(Math.max(0, outputTargetRmsDb - outputRmsDb), limiterReductionDb) * realizedLiftAssistRatio
+      : 0;
     // Once the faster lift window confirms a quiet passage, stale long-window
     // loudness must not keep cancelling the requested recovery gain.
     const loudnessControlDb = quietDeficitDb > 0
@@ -230,7 +243,7 @@
     const effectiveLiftBudgetDb = effectiveLiftHeadroomDb + liftLimiterBudgetDb;
     const liftFullness = 1;
     const requestedLiftDb = quietDeficitDb > 0
-      ? (quietDeficitDb * liftScale * liftFullness) + quietLiftBiasDb
+      ? ((quietDeficitDb + realizedLiftAssistDb) * liftScale * liftFullness) + quietLiftBiasDb
       : 0;
     const liftDb = clamp(Math.min(requestedLiftDb, effectiveLiftBudgetDb), 0, maxLiftDb);
     const targetGainDb = clamp(Math.min(liftDb - reductionDb, effectiveLiftBudgetDb), -maxCutDb, maxLiftDb);
@@ -245,6 +258,7 @@
       liftLimiterBudgetDb,
       effectiveLiftBudgetDb,
       quietDeficitDb,
+      realizedLiftAssistDb,
       requestedLiftDb,
       loudnessControlDb,
       loudnessCutDb,
