@@ -15,6 +15,7 @@ const checks = [
   ['worklet owns loudness gain and limiting', /finishFrame\(\)/.test(worklet) && /targetGainDb/.test(worklet) && /limiterGain/.test(worklet)],
   ['worklet uses robust quiet-window loudness', /LIFT_LOUDNESS_PERCENTILE = 0\.5/.test(worklet) && /percentileLast\(this\.energyHistory, 5, LIFT_LOUDNESS_PERCENTILE\)/.test(worklet)],
   ['worklet strong lift stays explicitly bounded', /MAX_LIFT_DB = 34/.test(worklet) && /LIFT_LIMITER_BUDGET_DB = 15/.test(worklet) && /effectiveLiftBudget/.test(worklet)],
+  ['worklet assists only measured limiter-bound quiet output', /REALIZED_LIFT_ASSIST_RATIO = 0\.5/.test(worklet) && /realizedLiftAssistDb/.test(worklet) && /limiterReductionDb/.test(worklet)],
   ['diagnostics are returned by the worklet', /type: 'state'/.test(worklet) && /handleLevelerMessage/.test(offscreen)]
 ];
 let failed = false;

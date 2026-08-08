@@ -212,6 +212,7 @@ class CaptureSession {
     this.effectiveLimiterCeilingDb = LIMITER_CEILING_DB;
     this.peakHeadroomDb = 0;
     this.quietDeficitDb = 0;
+    this.realizedLiftAssistDb = 0;
     this.requestedLiftDb = 0;
     this.rawPeakHeadroomDb = 0;
     this.liftLimiterBudgetDb = LIFT_LIMITER_BUDGET_DB;
@@ -407,6 +408,9 @@ class CaptureSession {
     this.outputShortTermDb = outputLoudness.shortTermDb;
     this.outputControlDb = outputLoudness.controlDb;
     this.lastOutputPeak = output.peak;
+    if (this.limiterMode === 'compressor') {
+      this.currentLimiterReductionDb = this.limiter ? Math.abs(Math.min(0, finite(this.limiter.reduction, 0))) : 0;
+    }
     if (this.hasSignal(energy, peak)) {
       this.lastSignalAt = Date.now();
       this.signalTickCount += 1;
@@ -421,14 +425,12 @@ class CaptureSession {
       this.effectiveMaxLiftDb = MAX_LIFT_DB;
       this.peakHeadroomDb = 0;
       this.quietDeficitDb = 0;
+      this.realizedLiftAssistDb = 0;
       this.requestedLiftDb = 0;
       this.rawPeakHeadroomDb = 0;
       this.liftLimiterBudgetDb = LIFT_LIMITER_BUDGET_DB;
       this.effectiveLiftBudgetDb = 0;
       this.smoothGain(0, this.currentGainDb < 0 ? CUT_RELEASE_SECONDS : LIFT_RELEASE_SECONDS);
-    }
-    if (this.limiterMode === 'compressor') {
-      this.currentLimiterReductionDb = this.limiter ? Math.abs(Math.min(0, finite(this.limiter.reduction, 0))) : 0;
     }
     if (this.currentLimiterReductionDb > 0.2) {
       this.limiterTickCount += 1;
@@ -514,6 +516,11 @@ class CaptureSession {
       peakDb,
       liftRmsDb,
       liftPeakDb,
+      outputRmsDb: this.outputEnergyHistory.length >= MOMENTARY_HISTORY_FRAMES && this.currentGainDb > 0
+        ? this.outputMomentaryDb
+        : null,
+      outputTargetRmsDb: DEFAULT_LEVELER_PARAMS.liftTargetRmsDb + volumeDb,
+      limiterReductionDb: this.currentLimiterReductionDb,
       settings: this.settings
     }, {
       targetRmsDb: TARGET_RMS_DB,
@@ -547,6 +554,7 @@ class CaptureSession {
     this.effectiveLimiterCeilingDb = this.processingLimiterCeilingDb();
     this.peakHeadroomDb = gain.peakHeadroomDb;
     this.quietDeficitDb = gain.quietDeficitDb;
+    this.realizedLiftAssistDb = gain.realizedLiftAssistDb;
     this.requestedLiftDb = gain.requestedLiftDb;
     this.rawPeakHeadroomDb = gain.rawPeakHeadroomDb;
     this.liftLimiterBudgetDb = gain.liftLimiterBudgetDb;
@@ -611,6 +619,7 @@ class CaptureSession {
     this.playerVolumeLiftCeilingDb = DEFAULT_LEVELER_PARAMS.liftTargetRmsDb;
     this.peakHeadroomDb = 0;
     this.quietDeficitDb = 0;
+    this.realizedLiftAssistDb = 0;
     this.requestedLiftDb = 0;
     this.rawPeakHeadroomDb = 0;
     this.liftLimiterBudgetDb = LIFT_LIMITER_BUDGET_DB;
@@ -731,7 +740,7 @@ class CaptureSession {
       return;
     }
     if (message.type !== 'state' || this.destroyed) return;
-    const fields = ['lastInputDb', 'momentaryInputDb', 'shortTermInputDb', 'controlInputDb', 'liftControlInputDb', 'lastPeak', 'liftPeak', 'lastOutputDb', 'outputMomentaryDb', 'outputShortTermDb', 'outputControlDb', 'lastOutputPeak', 'currentGainDb', 'currentLiftDb', 'currentReductionDb', 'currentLimiterReductionDb', 'targetGainDb', 'targetLiftDb', 'targetReductionDb', 'effectiveMaxLiftDb', 'playerVolumeLiftCeilingDb', 'effectiveLimiterCeilingDb', 'peakHeadroomDb', 'rawPeakHeadroomDb', 'liftLimiterBudgetDb', 'effectiveLiftBudgetDb', 'quietDeficitDb', 'requestedLiftDb'];
+    const fields = ['lastInputDb', 'momentaryInputDb', 'shortTermInputDb', 'controlInputDb', 'liftControlInputDb', 'lastPeak', 'liftPeak', 'lastOutputDb', 'outputMomentaryDb', 'outputShortTermDb', 'outputControlDb', 'lastOutputPeak', 'currentGainDb', 'currentLiftDb', 'currentReductionDb', 'currentLimiterReductionDb', 'targetGainDb', 'targetLiftDb', 'targetReductionDb', 'effectiveMaxLiftDb', 'playerVolumeLiftCeilingDb', 'effectiveLimiterCeilingDb', 'peakHeadroomDb', 'rawPeakHeadroomDb', 'liftLimiterBudgetDb', 'effectiveLiftBudgetDb', 'quietDeficitDb', 'realizedLiftAssistDb', 'requestedLiftDb'];
     for (const field of fields) {
       if (Number.isFinite(Number(message[field]))) this[field] = Number(message[field]);
     }
@@ -947,6 +956,7 @@ class CaptureSession {
       liftLimiterBudgetDb: this.liftLimiterBudgetDb,
       effectiveLiftBudgetDb: this.effectiveLiftBudgetDb,
       quietDeficitDb: this.quietDeficitDb,
+      realizedLiftAssistDb: this.realizedLiftAssistDb,
       requestedLiftDb: this.requestedLiftDb,
       playerVolumeCap: this.playerVolumeCap,
       playerMaxVolumeCap: this.playerMaxVolumeCap,
@@ -1070,6 +1080,7 @@ class CaptureSession {
         liftLimiterBudgetDb: this.liftLimiterBudgetDb,
         effectiveLiftBudgetDb: 0,
         quietDeficitDb: 0,
+        realizedLiftAssistDb: 0,
         requestedLiftDb: 0,
         playerVolumeCap: this.playerVolumeCap,
         playerVolumeKnown: this.playerVolumeKnown,
@@ -1155,6 +1166,7 @@ async function startCapture({ tabId, streamId, nextSettings, mediaState }) {
     liftLimiterBudgetDb: LIFT_LIMITER_BUDGET_DB,
     effectiveLiftBudgetDb: 0,
     quietDeficitDb: 0,
+    realizedLiftAssistDb: 0,
     requestedLiftDb: 0,
     playerVolumeCap: 1,
     playerMuted: false,
@@ -1253,6 +1265,7 @@ async function startCapture({ tabId, streamId, nextSettings, mediaState }) {
       liftLimiterBudgetDb: LIFT_LIMITER_BUDGET_DB,
       effectiveLiftBudgetDb: 0,
       quietDeficitDb: 0,
+      realizedLiftAssistDb: 0,
       requestedLiftDb: 0,
       playerVolumeCap: 1,
       playerMuted: false,

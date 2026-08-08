@@ -25,7 +25,7 @@
     "package:store": "node tools/build_extension.js store --zip && node tools/assert_release_build.js --verify-only",
     "test:release": "node tools/assert_release_build.js",
     "test": "node tools/run_all_checks.js",
-    "test:dsp": "node tools/dsp_unit_tests.js && node tools/offline_audio_tests.js && node tools/offline_audio_graph_tests.js",
+    "test:dsp": "node tools/dsp_unit_tests.js && node tools/dsp_candidate_compare.js && node tools/offline_audio_tests.js && node tools/offline_audio_graph_tests.js",
     "test:slider": "node tools/e2e_slider_persistence.js",
     "audit": "node tools/acceptance_audit.js --json",
     "audit:runtime": "node tools/current_runtime_audit.js --json"
