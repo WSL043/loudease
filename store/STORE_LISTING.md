@@ -36,7 +36,9 @@ What it does:
 - processes PCM audio locally with Web Audio and AudioWorklet;
 - includes no advertising, analytics, or remote executable code.
 
-Chrome requires a user gesture before a new tab can be captured. Open LoudEase once on each new tab you want to balance. Authorization remains attached to that tab across normal navigation until capture stops or the tab closes.
+Chrome requires a user gesture before a new tab can be captured. Open LoudEase once on each new tab you want to balance. LoudEase keeps processing while Chrome keeps that tab-capture session live, and the popup shows when reconnection is needed.
+
+To respect in-player mute and volume and recover an authorized session after navigation, a lightweight local observer handles the page URL plus media playback, mute, and volume state only in audible, recognized-media, captured, or explicitly opened HTTP(S) tabs. Merely being active is not enough. It does not read page text, forms, cookies, or credentials. Browsing and audio data are not sent to the developer.
 
 Audio quality varies with source material and listening equipment. LoudEase is a listening-comfort tool, not hearing protection or a medical device.
 

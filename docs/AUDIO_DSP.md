@@ -31,13 +31,13 @@ captured PCM
   -> output
 ```
 
-The normal graph runs in `offscreen/leveler-worklet.js` on the AudioWorklet render thread. The offscreen main thread sends settings and receives low-rate state messages; it does not drive the normal 20 ms control loop.
+The normal graph runs in `offscreen/leveler-worklet.js` on the AudioWorklet render thread. The offscreen main thread sends settings and receives an immediate first-frame state followed by approximately 10 Hz diagnostic updates; it does not drive the normal 20 ms control loop. Peak and limiter counters accumulate between updates, while DSP control remains sample-rate/20 ms-frame local to the worklet.
 
 ## Measurement
 
 The worklet accumulates 20 ms frames and maintains bounded history:
 
-- fast cut window: 5 frames, approximately 100 ms;
+- fast cut window: the current 20 ms frame;
 - quiet-lift loudness window: 5 frames, approximately 100 ms, using the median frame energy;
 - momentary window: 20 frames, approximately 400 ms;
 - short-term window: 150 frames, approximately 3 s;
@@ -91,7 +91,7 @@ The processor uses separate time constants:
 
 | Transition | Time constant |
 |---|---:|
-| Apply protective cut | `12 ms` |
+| Apply protective cut | `3 ms` |
 | Release protective cut | `180 ms` |
 | Apply quiet lift | `100 ms` |
 | Release quiet lift | `250 ms` |
@@ -138,7 +138,7 @@ Player-volume handling deliberately uses two measurement domains:
 
 Do not compensate the peak and also lower the limiter ceiling for the same player-volume reduction. That double-counts attenuation and can incorrectly block quiet lift on high-crest material. `tools/leveler_worklet_tests.js` and `tools/dsp_unit_tests.js` contain regressions for this invariant.
 
-The startup output gate remains closed until the first measured control frame is available. A low-crest loud 20 ms frame immediately invalidates an older quiet-window classification. If an already lifted signal would cross `-9 dBFS`, or a new post-silence onset crosses `-18 dBFS`, a short 40 ms transition guard keeps the limiter at the stricter `-9 dBFS` ceiling while the protective gain catches up. High-crest isolated detail continues through the bounded limiter path instead of being misclassified as a whole-program loudness jump.
+The startup output gate remains closed until the first measured control frame is available. A low-crest loud 20 ms frame immediately invalidates an older quiet-window classification. A short transition guard activates when an already lifted signal would cross `-9 dBFS`, a post-silence onset crosses `-18 dBFS`, or an active programme crosses `-18 dBFS` after jumping at least `6 dB` above the preceding 20 ms input peak. The guard tightens the limiter ceiling for at least 40 ms while the protective gain catches up. Its ceiling scales with **Reduce loud sounds**, from `-9 dBFS` at zero strength to `-24 dBFS` at full strength. This keeps the first audible frame close to the eventual programme level instead of merely preventing clipping, while avoiding a permanent low ceiling on steady high-crest material.
 
 When player-volume state is unknown or conflicting, upward lift is disabled unless the narrow tab-audible fallback is safe. Downward protection remains available.
 

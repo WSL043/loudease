@@ -186,6 +186,14 @@ A failed candidate is a successful experiment if it narrows the design space. Ke
 
 `tools/dsp_candidate_compare.js` runs the production AudioWorklet twice from the same source: once with realized-loudness assistance disabled as the baseline and once with it enabled as the candidate.
 
-The accepted fixture combines a low-energy tonal bed with sparse high peaks. In the deterministic 48 kHz comparison, ordinary loud and quiet steady-state output changed by less than `0.05 dB`. For limiter-bound quiet material, the gap to the normal loud reference fell from approximately `2.37 dB` to `1.53 dB`, an improvement of approximately `0.84 dB`. Both paths remained at or below the `-3 dBFS` sample ceiling with zero hard-clipped samples.
+The accepted fixture combines a low-energy tonal bed with sparse high peaks. In the deterministic 48 kHz comparison, ordinary loud and quiet steady-state output changed by less than `0.05 dB`. For limiter-bound quiet material, the gap to the normal loud reference falls from approximately `3.05 dB` to `1.87 dB`, an improvement of approximately `1.19 dB`. Both paths remain at or below the `-3 dBFS` sample ceiling with zero hard-clipped samples.
 
 Full-strength feedback was rejected because it produced a hard-clip guard sample in the existing high-crest worklet regression. The retained candidate uses a feedback ratio of `0.5` and remains inside the existing `+34 dB` maximum lift and `15 dB` limiter allowance. This is deterministic fixture evidence, not a universal listening-preference claim.
+
+## Accepted experiment: strength-scaled onset protection
+
+The previous 40 ms transition guard prevented clipping but stopped at `-9 dBFS` regardless of the loud-cut setting. In the deterministic 48 kHz quiet-to-loud fixture, that left the first 20 ms at approximately `-13.15 dB` RMS even though the same loud tone settles near `-29 dB`. The same leak also existed when an already active normal-level signal jumped to loud material because the original guard only recognized silence and positive-gain transitions.
+
+The accepted candidate keeps the existing 5 ms look-ahead and 20 ms control frame, but scales an additional `15 dB` of temporary limiter protection with **Reduce loud sounds**. At full strength the transition ceiling is `-24 dBFS`; the fixture's first 20 ms falls to approximately `-27.75 dB` RMS and the first 40 ms to approximately `-29.33 dB` RMS. The peak improvement is `15 dB`. A repeated high-crest quiet fixture changed by less than `0.4 dB` in steady-state output and retained zero hard-clipped samples. At zero loud-cut strength, the prior `-9 dBFS` safety ceiling is retained.
+
+The active-programme path uses the preceding 20 ms input peak as its reference and requires both an absolute `-18 dBFS` crossing and a relative jump of at least `6 dB`. `tools/dsp_candidate_compare.js` reproduces quiet-to-loud and normal-to-loud transitions through both the old and accepted paths from the same production worklet source so this boundary cannot silently regress.

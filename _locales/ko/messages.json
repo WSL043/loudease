@@ -348,7 +348,7 @@
   "sitesTab": { "message": "사이트 규칙" },
   "diagnosticsTab": { "message": "지원 및 진단" },
   "captureGestureTitle": { "message": "새 탭은 한 번 클릭 필요" },
-  "captureGestureHelp": { "message": "Chrome 제한으로 새 탭을 조정하기 전에 확장 프로그램을 한 번 열어야 합니다." },
+  "captureGestureHelp": { "message": "Chrome 제한으로 새 탭을 조정하기 전에 한 번 클릭해야 합니다. 가벼운 로컬 관찰기는 페이지 URL과 미디어 재생, 음소거, 볼륨 상태를 사용하며 탐색 및 오디오 데이터는 개발자에게 전송되지 않습니다." },
   "generalHelp": { "message": "확장 프로그램의 기본 모양과 동작을 설정합니다." },
   "appearanceHeading": { "message": "모양" },
   "languageLabel": { "message": "언어" },

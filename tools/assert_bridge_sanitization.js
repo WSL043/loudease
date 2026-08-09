@@ -3,12 +3,13 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const bridge = fs.readFileSync(path.join(root, 'content', 'bridge.js'), 'utf8');
+const background = fs.readFileSync(path.join(root, 'background.js'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
 
 const manifestText = JSON.stringify(manifest);
 const checks = [
   ['manifest no longer injects content engine', !manifestText.includes('content/engine.js') && !manifestText.includes('shared/core.js')],
-  ['bridge runs as isolated content script', manifestText.includes('content/bridge.js') && !manifestText.includes('"world":"MAIN"')],
+  ['bridge is injected on demand in the isolated world instead of every page', !manifestText.includes('content/bridge.js') && /files: \['content\/bridge\.js'\]/.test(background) && !/world:\s*['"]MAIN['"]/.test(background)],
   ['bridge reinjection invalidates stale listeners', /const bridgeToken = `\$\{Date\.now\(\)\}:/.test(bridge) && /__WEB_VOLUME_BALANCER_BRIDGE_TOKEN__/.test(bridge) && /function stillCurrent\(\)/.test(bridge) && /stillCurrent\(\)/.test(bridge)],
   ['bridge reinjection actively cleans old listeners', /__WEB_VOLUME_BALANCER_BRIDGE_CLEANUP__/.test(bridge) && /mediaListeners\.clear\(\)/.test(bridge) && /removeEventListener\(eventName, reportStatus\)/.test(bridge) && /onChanged\?\.removeListener/.test(bridge) && /onMessage\?\.removeListener/.test(bridge) && /removeEventListener\('visibilitychange', reportStatus\)/.test(bridge)],
   ['bridge prunes detached media listeners', /function pruneMediaListeners\(\)/.test(bridge) && /media\.isConnected/.test(bridge) && /mediaListeners\.delete\(media\)/.test(bridge)],
@@ -25,6 +26,7 @@ const checks = [
   ['bridge uses the background settings diagnostic schema', /settingsPreset: currentSettings\.preset/.test(bridge) && /settingsCutStrength: currentSettings\.cutStrength/.test(bridge) && /settingsLiftStrength: currentSettings\.liftStrength/.test(bridge) && /settingsEnabled: currentSettings\.enabled/.test(bridge) && /settingsRespectPlayerVolume: currentSettings\.respectPlayerVolume/.test(bridge)],
   ['bridge does not accept page postMessage status', !/window\.addEventListener\('message'/.test(bridge) && !/WEB_VOLUME_BALANCER_ENGINE/.test(bridge)],
   ['bridge sends frame status only from own registry state', /sendRuntime\(\{ type: 'WVB_FRAME_STATUS', status: buildStatus\(\) \}\)/.test(bridge)],
+  ['bridge avoids a periodic all-page status heartbeat', !/STATUS_INTERVAL_MS|statusTimer|setInterval\s*\(\s*reportStatus/.test(bridge)],
   ['bridge never sends runtime manifest version into page engine settings', !/postMessage/.test(bridge) && !/engineSettings/.test(bridge)]
 ];
 

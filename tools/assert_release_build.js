@@ -58,6 +58,7 @@ function verify() {
     if (/\.(?:js|mjs)$/i.test(name)) {
       for (const match of text.matchAll(/(?:import\s+(?:[^"']+?\s+from\s+)?|import\s*\()["']([^"']+)["']/g)) assertReference(name, match[1]);
       for (const match of text.matchAll(/(?:importScripts|addModule|createDocument)\s*\(\s*["']([^"']+)["']/g)) assertReference(name, match[1]);
+      for (const match of text.matchAll(/files\s*:\s*\[\s*["']([^"']+)["']/g)) assertReference(name, match[1]);
     }
   }
   console.log(`OK   verified ${files.length} store runtime files`);

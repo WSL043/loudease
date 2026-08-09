@@ -348,7 +348,7 @@
   "sitesTab": { "message": "Reglas de sitios" },
   "diagnosticsTab": { "message": "Soporte y diagnóstico" },
   "captureGestureTitle": { "message": "Un clic para cada pestaña nueva" },
-  "captureGestureHelp": { "message": "Chrome exige abrir la extensión una vez antes de equilibrar una pestaña nueva." },
+  "captureGestureHelp": { "message": "Chrome exige un clic antes de equilibrar una pestaña nueva. Un observador local ligero usa la URL de la página y el estado de reproducción, silencio y volumen del contenido multimedia; no se envían datos de navegación ni audio al desarrollador." },
   "generalHelp": { "message": "Elige la apariencia y el comportamiento predeterminados de la extensión." },
   "appearanceHeading": { "message": "Apariencia" },
   "languageLabel": { "message": "Idioma" },

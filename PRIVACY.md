@@ -6,7 +6,7 @@ LoudEase processes audio locally. Audio samples are not uploaded, sold, used for
 
 The extension uses the minimum information needed to connect and control tab audio:
 
-- the active tab identifier and URL, used to authorize capture and select per-site settings;
+- identifiers and URLs for active, audible, recognized-media, or user-authorized HTTP(S) tabs, used locally for observer recovery, capture ownership, and per-site settings; the lightweight observer is injected only for audible, recognized-media, captured, or explicitly opened tabs, and audio capture still starts only after the user invokes LoudEase for a tab;
 - whether a page contains audio/video elements and whether they are playing;
 - player mute and volume state, used to respect the player's current intent;
 - extension enabled state, two strength values, and per-site settings;

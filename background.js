@@ -153,9 +153,22 @@ function pruneTabHints() {
   }
 }
 
-async function refreshTabHints() {
+async function refreshTabHints(options = {}) {
   try {
-    const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+    const url = ['http://*/*', 'https://*/*'];
+    const batches = options.includeAll === true
+      ? [await chrome.tabs.query({ url })]
+      : await Promise.all([
+        chrome.tabs.query({ url, active: true }),
+        chrome.tabs.query({ url, audible: true })
+      ]);
+    const byId = new Map();
+    for (const tab of batches.flat()) {
+      if (Number.isInteger(tab?.id)) {
+        byId.set(tab.id, tab);
+      }
+    }
+    const tabs = [...byId.values()];
     tabs.forEach(rememberTabHint);
     pruneTabHints();
     return tabs;
@@ -171,7 +184,7 @@ async function ensureTabInjectedIfUseful(tab, options = {}) {
   if (!hint || !supportedPage(hint.url)) {
     return { ok: false, skipped: true, error: 'unsupported-page' };
   }
-  if (!hint.mediaTarget && !hint.audible && !hint.active) {
+  if (!hint.mediaTarget && !hint.audible && !captureStatuses.get(hint.tabId)?.active) {
     return { ok: false, skipped: true, error: 'not-media-or-active' };
   }
   return await ensureInjected(hint.tabId, hint.url, { ...options, force: true });
@@ -589,7 +602,13 @@ async function refreshActiveCaptureMediaStates() {
       continue;
     }
     const hint = tabHints.get(tabId) || null;
-    await collectFrameStatusNow(tabId, hint?.url || '');
+    const status = await collectFrameStatusNow(tabId, hint?.url || '');
+    if (!status) {
+      const tabUrl = hint?.url || await tabUrlForCaptureSettings(tabId);
+      if (supportedPage(tabUrl)) {
+        await ensureInjected(tabId, tabUrl);
+      }
+    }
   }
 }
 
@@ -1050,14 +1069,18 @@ function diagnosticsSnapshot() {
   };
 }
 
-async function ensureOffscreenDocument() {
-  cancelOffscreenIdleClose();
+async function offscreenDocumentExists() {
   const url = chrome.runtime.getURL('offscreen/index.html');
   const contexts = await chrome.runtime.getContexts({
     contextTypes: ['OFFSCREEN_DOCUMENT'],
     documentUrls: [url]
   });
-  if (contexts.length > 0) {
+  return contexts.length > 0;
+}
+
+async function ensureOffscreenDocument() {
+  cancelOffscreenIdleClose();
+  if (await offscreenDocumentExists()) {
     return;
   }
   await chrome.offscreen.createDocument({
@@ -1088,12 +1111,8 @@ function scheduleOffscreenIdleClose() {
       return;
     }
     try {
-      const url = chrome.runtime.getURL('offscreen/index.html');
-      const contexts = await chrome.runtime.getContexts({
-        contextTypes: ['OFFSCREEN_DOCUMENT'],
-        documentUrls: [url]
-      });
-      if (generation !== offscreenCloseGeneration || contexts.length === 0) {
+      const exists = await offscreenDocumentExists();
+      if (generation !== offscreenCloseGeneration || !exists) {
         return;
       }
       await chrome.offscreen.closeDocument();
@@ -1311,6 +1330,18 @@ async function stopTabCapture(tabId) {
   if (!Number.isInteger(tabId)) {
     return { ok: false, error: 'invalid tabId' };
   }
+  if (!offscreenPort && offscreenRequests.size === 0) {
+    try {
+      if (!await offscreenDocumentExists()) {
+        captureStatuses.delete(tabId);
+        captureSettingsResyncAt.delete(tabId);
+        addEvent('capture:already-stopped', { tabId });
+        return { ok: true, alreadyStopped: true };
+      }
+    } catch (error) {
+      addEvent('capture:offscreen-check-error', { tabId, error: String(error?.message || error) });
+    }
+  }
   let response;
   try {
     response = await sendOffscreenMessage({ type: 'WVB_OFFSCREEN_STOP_CAPTURE', tabId });
@@ -1347,7 +1378,7 @@ async function pushLocalDiagnostics() {
   }
   lastLocalDiagnosticsAt = now;
   try {
-    await refreshTabHints();
+    await refreshTabHints({ includeAll: true });
     const response = await fetch(LOCAL_DIAGNOSTICS_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

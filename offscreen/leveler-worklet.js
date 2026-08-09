@@ -1,5 +1,6 @@
 const FRAME_MS = 20;
 const FRAME_SAMPLES = Math.max(1, Math.round(sampleRate * FRAME_MS / 1000));
+const STATE_REPORT_INTERVAL_FRAMES = 5;
 const HISTORY_SIZE = 150;
 const LOOKAHEAD_SAMPLES = Math.max(1, Math.round(sampleRate * 0.005));
 const DELAY_LENGTH = LOOKAHEAD_SAMPLES + 1;
@@ -10,6 +11,7 @@ const MAX_LIFT_DB = 34;
 const LIFT_LIMITER_BUDGET_DB = 15;
 const LIFT_SAFETY_CEILING_DB = -9;
 const QUIET_TRANSITION_CUT_MARGIN_DB = 3;
+const TRANSITION_PROTECTION_DEPTH_DB = 15;
 const CUT_ATTACK_SECONDS = 0.003;
 const CUT_RELEASE_SECONDS = 0.18;
 const LIFT_ATTACK_SECONDS = 0.10;
@@ -21,6 +23,7 @@ const LIFT_LOUDNESS_PERCENTILE = 0.5;
 const LIFT_PEAK_PERCENTILE = 0.65;
 const LIFT_ONSET_MAX_CREST_DB = 18;
 const ONSET_PROTECTION_TRIGGER_DB = -18;
+const PROGRAMME_JUMP_TRIGGER_DB = 6;
 const TRANSITION_PROTECTION_SECONDS = 0.04;
 const REALIZED_LIFT_ASSIST_RATIO = 0.5;
 
@@ -43,9 +46,11 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.frameSamples = 0;
     this.inputEnergySum = 0;
     this.inputPeak = 0;
+    this.previousInputFramePeak = 0;
     this.outputEnergySum = 0;
     this.outputPeak = 0;
     this.sequence = 0;
+    this.controlFrameSequence = 0;
     this.currentGainDb = 0;
     this.targetGainDb = 0;
     this.stableTargetGainDb = 0;
@@ -64,6 +69,11 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.limitedSamples = 0;
     this.hardClippedSamples = 0;
     this.maxHardClipOvershoot = 0;
+    this.reportInputPeak = 0;
+    this.reportOutputPeak = 0;
+    this.reportLimitedSamples = 0;
+    this.reportHardClippedSamples = 0;
+    this.reportMaxHardClipOvershoot = 0;
     this.signalTickCount = 0;
     this.silentTickCount = 0;
     this.limiterTickCount = 0;
@@ -235,13 +245,31 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.signalTickCount += 1;
     }
     this.targetGainDb = this.stableTargetGainDb;
-    this.port.postMessage({ type: 'state', sequence: this.sequence++, lastInputDb: energyToDb(energy), momentaryInputDb: momentaryDb, shortTermInputDb: shortTermDb, controlInputDb: controlDb, liftControlInputDb: liftControlDb, lastPeak: this.inputPeak, liftPeak, lastOutputDb: energyToDb(outputEnergy), outputMomentaryDb, outputShortTermDb, outputControlDb: 0.8 * outputMomentaryDb + 0.2 * outputShortTermDb, lastOutputPeak: this.outputPeak, currentGainDb: this.currentGainDb, currentLiftDb: Math.max(0, this.currentGainDb), currentReductionDb: Math.max(0, -this.currentGainDb), currentLimiterReductionDb: Math.max(0, -linearToDb(this.limiterGain)), targetGainDb: this.targetGainDb, targetLiftDb: Math.max(0, this.targetGainDb), targetReductionDb: Math.max(0, -this.targetGainDb), effectiveMaxLiftDb: maxLift, playerVolumeLiftCeilingDb: LIFT_TARGET_RMS_DB + (this.playerVolumeReliable ? Math.min(0, linearToDb(this.playerVolumeCap)) : 0), effectiveLimiterCeilingDb: this.ceilingDb(), peakHeadroomDb: peakHeadroom, rawPeakHeadroomDb: rawPeakHeadroom, liftLimiterBudgetDb: LIFT_LIMITER_BUDGET_DB * liftScale, effectiveLiftBudgetDb: effectiveLiftBudget, quietDeficitDb: quietDeficit, realizedLiftAssistDb, requestedLiftDb: requestedLift, signalActive: this.signalActive, signalTickCount: this.signalTickCount, silentTickCount: this.silentTickCount, limiterTickCount: this.limiterTickCount, targetHoldCount: this.targetHoldCount, workletInputPeak: this.inputPeak, workletOutputPeak: this.outputPeak, limitedSamples: this.limitedSamples, hardClippedSamples: this.hardClippedSamples, maxHardClipOvershoot: this.maxHardClipOvershoot });
+    this.reportInputPeak = Math.max(this.reportInputPeak, this.inputPeak);
+    this.reportOutputPeak = Math.max(this.reportOutputPeak, this.outputPeak);
+    this.reportLimitedSamples += this.limitedSamples;
+    this.reportHardClippedSamples += this.hardClippedSamples;
+    this.reportMaxHardClipOvershoot = Math.max(this.reportMaxHardClipOvershoot, this.maxHardClipOvershoot);
+    this.controlFrameSequence += 1;
+    const shouldReport = this.controlFrameSequence === 1
+      || (this.controlFrameSequence - 1) % STATE_REPORT_INTERVAL_FRAMES === 0;
+    if (shouldReport) {
+      this.port.postMessage({ type: 'state', sequence: this.sequence++, lastInputDb: energyToDb(energy), momentaryInputDb: momentaryDb, shortTermInputDb: shortTermDb, controlInputDb: controlDb, liftControlInputDb: liftControlDb, lastPeak: this.inputPeak, liftPeak, lastOutputDb: energyToDb(outputEnergy), outputMomentaryDb, outputShortTermDb, outputControlDb: 0.8 * outputMomentaryDb + 0.2 * outputShortTermDb, lastOutputPeak: this.outputPeak, currentGainDb: this.currentGainDb, currentLiftDb: Math.max(0, this.currentGainDb), currentReductionDb: Math.max(0, -this.currentGainDb), currentLimiterReductionDb: Math.max(0, -linearToDb(this.limiterGain)), targetGainDb: this.targetGainDb, targetLiftDb: Math.max(0, this.targetGainDb), targetReductionDb: Math.max(0, -this.targetGainDb), effectiveMaxLiftDb: maxLift, playerVolumeLiftCeilingDb: LIFT_TARGET_RMS_DB + (this.playerVolumeReliable ? Math.min(0, linearToDb(this.playerVolumeCap)) : 0), effectiveLimiterCeilingDb: this.ceilingDb(), peakHeadroomDb: peakHeadroom, rawPeakHeadroomDb: rawPeakHeadroom, liftLimiterBudgetDb: LIFT_LIMITER_BUDGET_DB * liftScale, effectiveLiftBudgetDb: effectiveLiftBudget, quietDeficitDb: quietDeficit, realizedLiftAssistDb, requestedLiftDb: requestedLift, signalActive: this.signalActive, signalTickCount: this.signalTickCount, silentTickCount: this.silentTickCount, limiterTickCount: this.limiterTickCount, targetHoldCount: this.targetHoldCount, workletInputPeak: this.reportInputPeak, workletOutputPeak: this.reportOutputPeak, limitedSamples: this.reportLimitedSamples, hardClippedSamples: this.reportHardClippedSamples, maxHardClipOvershoot: this.reportMaxHardClipOvershoot });
+      this.reportInputPeak = 0;
+      this.reportOutputPeak = 0;
+      this.reportLimitedSamples = 0;
+      this.reportHardClippedSamples = 0;
+      this.reportMaxHardClipOvershoot = 0;
+    }
+    this.previousInputFramePeak = this.inputPeak;
     this.frameSamples = 0; this.inputEnergySum = 0; this.inputPeak = 0; this.outputEnergySum = 0; this.outputPeak = 0; this.limitedSamples = 0; this.hardClippedSamples = 0; this.maxHardClipOvershoot = 0;
   }
 
   ceilingDb() {
+    const transitionCeilingDb = LIFT_SAFETY_CEILING_DB
+      - (TRANSITION_PROTECTION_DEPTH_DB * (this.cutStrength / 100));
     const base = this.transitionProtectionSamples > 0
-      ? LIFT_SAFETY_CEILING_DB
+      ? transitionCeilingDb
       : (this.currentGainDb > 0.01 ? -3 : -3 * (this.cutStrength / 100));
     return this.respectPlayerVolume && this.playerVolumeReliable ? base + Math.min(0, linearToDb(this.playerVolumeCap)) : base;
   }
@@ -266,18 +294,24 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.currentGainDb += Math.min(gainDelta, MAX_GAIN_INCREASE_STEP_DB / FRAME_SAMPLES);
       const levelGain = dbToLinear(this.currentGainDb) * this.enabled + (1 - this.enabled);
       let futurePeak = 0;
+      let rawInputPeak = 0;
       for (let channel = 0; channel < output.length; channel += 1) {
         const source = input[channel] || input[0];
         const sample = source ? source[frame] || 0 : 0;
         this.delay[channel][this.delayIndex] = sample * levelGain;
         futurePeak = Math.max(futurePeak, Math.abs(sample * levelGain));
+        rawInputPeak = Math.max(rawInputPeak, Math.abs(sample));
         const weighted = this.weightedSample(sample, Math.min(channel, 1));
         this.inputEnergySum += weighted * weighted / output.length;
         this.inputPeak = Math.max(this.inputPeak, Math.abs(sample));
       }
       const liftedTransition = this.currentGainDb > 0.01 && futurePeak > dbToLinear(LIFT_SAFETY_CEILING_DB);
       const newSignalOnset = !this.signalActive && futurePeak > dbToLinear(ONSET_PROTECTION_TRIGGER_DB);
-      if (liftedTransition || newSignalOnset) {
+      const activeProgrammeJump = this.signalActive
+        && this.cutStrength > 0.01
+        && rawInputPeak > dbToLinear(ONSET_PROTECTION_TRIGGER_DB)
+        && rawInputPeak > this.previousInputFramePeak * dbToLinear(PROGRAMME_JUMP_TRIGGER_DB);
+      if (liftedTransition || newSignalOnset || activeProgrammeJump) {
         this.transitionProtectionSamples = Math.max(
           this.transitionProtectionSamples,
           Math.round(sampleRate * TRANSITION_PROTECTION_SECONDS)
