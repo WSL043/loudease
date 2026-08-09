@@ -47,3 +47,4 @@ ok(background.includes('const effectiveVolumeKnown = captureVolumeKnown || media
 ok(background.includes('const lastProgrammeKeys = new Map();') && background.includes('lastProgrammeKeys.get(tabId)'), 'paused media retains the last active programme key instead of aggregating idle frame identities');
 ok(audit.includes('knownMediaDiagnosticTab'), 'runtime audit searches all diagnostic tabs for media targets');
 ok(audit.includes('live\\.(douyin|bilibili)'), 'runtime audit recognizes live Douyin and live Bilibili hosts');
+ok(audit.includes("['leveler-worklet', 'worklet', 'analyser-fallback']"), 'runtime audit accepts the primary v4 leveler meter mode');

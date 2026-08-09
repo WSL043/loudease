@@ -172,7 +172,7 @@ function summarizeTab(tab) {
     && tab?.captureState === 'processing'
     && tab?.capturePipelineMode === 'programme-leveler-v4'
     && tab?.captureContextState === 'running'
-    && (tab?.meterMode === 'worklet' || tab?.meterMode === 'analyser-fallback')
+    && ['leveler-worklet', 'worklet', 'analyser-fallback'].includes(tab?.meterMode)
     && tab?.meterFrameAgeMs != null
     && finiteNumber(tab?.meterFrameAgeMs) < 1000
     && finiteNumber(tab?.captureAudioTrackCount) > 0;
@@ -365,7 +365,7 @@ function selfTest() {
         capturePipelineMode: 'programme-leveler-v4',
         captureContextState: 'running',
         captureAudioTrackCount: 1,
-        meterMode: 'worklet',
+        meterMode: 'leveler-worklet',
         meterFrameAgeMs: 5,
         currentReductionDb: 6.5,
         frames: [{ url: 'https://live.douyin.com/123', mediaCount: 1 }]
@@ -391,7 +391,7 @@ function selfTest() {
         capturePipelineMode: 'programme-leveler-v4',
         captureContextState: 'running',
         captureAudioTrackCount: 1,
-        meterMode: 'worklet',
+        meterMode: 'leveler-worklet',
         meterFrameAgeMs: 5,
         frames: []
       }
