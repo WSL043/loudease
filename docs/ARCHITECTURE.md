@@ -11,7 +11,7 @@ The production audio path is:
 ```text
 tabCapture MediaStream
   -> offscreen AudioContext
-  -> unified leveler-v3 AudioWorklet
+  -> unified programme-leveler-v4 AudioWorklet
   -> player-volume boundary
   -> analyser used for output diagnostics
   -> local AudioDestinationNode
@@ -36,7 +36,7 @@ The old page-level `createMediaElementSource()` engine is no longer part of the 
 
 The offscreen document is the source of truth for active audio sessions. Each authorized tab has one `CaptureSession` containing the stream, `AudioContext`, worklet node, player-volume gain, output analyser, state counters, and cleanup listeners.
 
-`offscreen/leveler-worklet.js` is the normal processing path. It performs continuous measurement, loudness control, gain smoothing, mute/player-volume enforcement, and sample-peak look-ahead limiting on the audio render thread.
+`offscreen/leveler-worklet.js` is the normal processing path. It performs continuous measurement, gated programme estimation, the single programme-centred gain law, linked gain smoothing, mute/player-volume enforcement, and sample-peak look-ahead limiting on the audio render thread. `shared/programme-leveler-policy.js` is loaded into both the AudioWorklet scope and fallback page so the control law has one source of truth.
 
 If the unified worklet cannot load, `offscreen/index.js` falls back to the older meter/controller/limiter graph. The fallback is intentionally conservative and is reported in diagnostics.
 
@@ -47,6 +47,7 @@ The background injects the isolated content script on demand into ordinary HTTP(
 - media element count and playback state;
 - mute and volume observations;
 - conflicting or unknown player-volume state;
+- a local fingerprint used to reset programme measurement when page or media identity changes;
 - lifecycle and frame freshness.
 
 It does not patch `HTMLMediaElement.play`, does not call `createMediaElementSource`, and does not process PCM audio.
@@ -59,7 +60,7 @@ The popup is both the authorization surface and the compact status UI. Opening i
 The two strength controls are independent:
 
 - **Reduce loud sounds** maps to downward loudness control and peak protection.
-- **Lift quiet sounds** maps to signal-gated upward gain toward the common target, with a `+34 dB` cap, up to `15 dB` of bounded full-strength peak-compression allowance, and player-volume constraints.
+- **Lift quiet sounds** maps to confidence-gated upward programme and within-programme correction, with a `+25 dB` cap, up to `10 dB` of bounded limiter allowance, and player-volume constraints.
 
 ### Monitor and options (`monitor/`)
 
@@ -72,7 +73,7 @@ The options page contains advanced settings, diagnostics export, and the develop
 3. The service worker asks the offscreen document to consume the ID immediately.
 4. The offscreen document creates a `CaptureSession` and resumes its `AudioContext` under the user gesture.
 5. Status flows from the worklet to the offscreen session, then to the service worker and popup.
-6. Navigation in the same captured tab can continue without rebuilding a media-element graph.
+6. Navigation in the same captured tab can continue without rebuilding the graph; a changed programme fingerprint resets cumulative loudness state and inherited gain.
 7. Closing the tab, stopping capture, disabling the extension, or losing the stream stops tracks, disconnects nodes, removes listeners, and closes the context.
 
 ## Multi-tab behavior
@@ -119,6 +120,7 @@ offscreen/limiter-worklet.js  fallback look-ahead limiter
 offscreen/meter-worklet.js    fallback render-thread meter
 popup/                        authorization, status, and two user controls
 monitor/                      options and diagnostics
-shared/core.js                pure settings and DSP policy helpers
+shared/core.js                settings, measurement, and player-boundary helpers
+shared/programme-leveler-policy.js  shared gated estimator and gain law
 tools/                        build, static, DSP, E2E, and release checks
 ```

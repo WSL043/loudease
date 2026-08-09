@@ -32,8 +32,12 @@
   let storageChangeListener = null;
   let runtimeMessageListener = null;
   let lastFullScanAt = 0;
+  let lastProgrammeHref = String(location.href);
+  let lastProgrammeKey = '';
+  let nextSourceObjectId = 1;
   const observedRoots = new WeakSet();
   const mediaListeners = new Map();
+  const sourceObjectIds = new WeakMap();
 
   function stillCurrent() {
     return window.__WEB_VOLUME_BALANCER_BRIDGE_TOKEN__ === bridgeToken;
@@ -112,6 +116,43 @@
     } catch (_) {
       return '';
     }
+  }
+
+  function stableFingerprint(value) {
+    const input = String(value || '');
+    let hash = 0x811c9dc5;
+    for (let index = 0; index < input.length; index += 1) {
+      hash ^= input.charCodeAt(index);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    return (hash >>> 0).toString(16).padStart(8, '0');
+  }
+
+  function programmeSourceIdentity(media) {
+    if (media?.srcObject && (typeof media.srcObject === 'object' || typeof media.srcObject === 'function')) {
+      if (!sourceObjectIds.has(media.srcObject)) {
+        sourceObjectIds.set(media.srcObject, nextSourceObjectId);
+        nextSourceObjectId += 1;
+      }
+      return `srcObject:${sourceObjectIds.get(media.srcObject)}`;
+    }
+    return String(media?.currentSrc || media?.src || mediaSourceKind(media));
+  }
+
+  function programmeKey(media) {
+    const activeSources = media
+      .filter(isActiveMedia)
+      .map(programmeSourceIdentity)
+      .sort();
+    const href = String(location.href);
+    if (activeSources.length > 0) {
+      lastProgrammeHref = href;
+      lastProgrammeKey = stableFingerprint(`${href}\n${activeSources.join('\n')}`);
+    } else if (!lastProgrammeKey || href !== lastProgrammeHref) {
+      lastProgrammeHref = href;
+      lastProgrammeKey = stableFingerprint(href);
+    }
+    return lastProgrammeKey;
   }
 
   function mediaDetail(media, index) {
@@ -319,6 +360,7 @@
       playerMinVolumeCap: state.playerMinVolumeCap,
       playerVolumeKnown: state.playerVolumeKnown,
       playerVolumeConflict: state.playerVolumeConflict,
+      programmeKey: programmeKey(media),
       averageTargetPercent: 50,
       settingsPreset: currentSettings.preset,
       settingsCutStrength: currentSettings.cutStrength,

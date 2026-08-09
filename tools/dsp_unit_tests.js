@@ -1,400 +1,113 @@
-const path = require('path');
-
-require(path.resolve(__dirname, '..', 'shared', 'core.js'));
-
+require('../shared/core.js');
 const {
-  computeDualWindowLoudnessDb,
-  computeSignalGateActive,
-  computeLevelerGainDb,
-  computePlayerVolumeBoundedMaxLiftDb,
-  computePlayerVolumeLimiterCeilingDb,
-  computeProcessingLimiterCeilingDb,
-  DEFAULT_LEVELER_PARAMS,
+  DEFAULT_SETTINGS,
   K_WEIGHTING_PARAMS,
-  stabilizeGainTarget,
+  computePlayerVolumeLimiterCeilingDb,
+  computeSignalGateActive,
   normalizeSettings
 } = globalThis.WebVolumeBalancerCore;
+const {
+  DEFAULT_PARAMS,
+  ProgrammeLoudnessEstimator,
+  computeTargetGainDb,
+  computeTransitionCeilingDb,
+  dbToEnergy
+} = require('../shared/programme-leveler-policy.js');
 
 function assert(name, condition, details = '') {
-  if (!condition) {
+  if (condition) console.log(`OK   ${name}`);
+  else {
     console.error(`FAIL ${name}${details ? `: ${details}` : ''}`);
     process.exitCode = 1;
-    return;
   }
-  console.log(`OK   ${name}`);
 }
 
-function closeToZero(value) {
-  return Math.abs(Number(value) || 0) < 0.000001;
+function close(actual, expected, tolerance = 0.01) {
+  return Math.abs(actual - expected) <= tolerance;
 }
 
-function complexMagnitudeDb(coefficients, frequencyHz, sampleRate = 48000) {
-  const omega = (2 * Math.PI * frequencyHz) / sampleRate;
-  const cos1 = Math.cos(omega);
-  const sin1 = Math.sin(omega);
-  const cos2 = Math.cos(2 * omega);
-  const sin2 = Math.sin(2 * omega);
-  const numeratorReal = coefficients.b0 + (coefficients.b1 * cos1) + (coefficients.b2 * cos2);
-  const numeratorImag = -((coefficients.b1 * sin1) + (coefficients.b2 * sin2));
-  const denominatorReal = 1 + (coefficients.a1 * cos1) + (coefficients.a2 * cos2);
-  const denominatorImag = -((coefficients.a1 * sin1) + (coefficients.a2 * sin2));
-  const numeratorPower = (numeratorReal * numeratorReal) + (numeratorImag * numeratorImag);
-  const denominatorPower = (denominatorReal * denominatorReal) + (denominatorImag * denominatorImag);
-  return 10 * Math.log10(Math.max(Number.MIN_VALUE, numeratorPower / denominatorPower));
+assert('settings preserve known preset', normalizeSettings({ preset: 'night' }).preset === 'night');
+assert('settings classify unknown preset as custom', normalizeSettings({ preset: 'mystery' }).preset === 'custom');
+assert('default settings retain independent full-strength controls', DEFAULT_SETTINGS.cutStrength === 100 && DEFAULT_SETTINGS.liftStrength === 100);
+assert('K-weighting constants remain the BS.1770 biquad approximation', K_WEIGHTING_PARAMS.shelfGainDb > 3.9 && K_WEIGHTING_PARAMS.highpassFrequencyHz > 38);
+
+const gateOpen = computeSignalGateActive({ wasActive: false, energyDb: -60, peak: 0.001 });
+const gateCloseHeld = computeSignalGateActive({ wasActive: true, energyDb: -65, peak: 0.0003 });
+const gateClosed = computeSignalGateActive({ wasActive: true, energyDb: -72, peak: 0.0001 });
+assert('signal gate uses hysteresis around the noise floor', gateOpen && gateCloseHeld && !gateClosed);
+
+const estimator = new ProgrammeLoudnessEstimator();
+estimator.addBlock(dbToEnergy(-80));
+assert('absolute gate rejects sub-floor blocks', estimator.snapshot().acceptedBlocks === 0);
+for (let index = 0; index < 9; index += 1) estimator.addBlock(dbToEnergy(-24));
+assert(
+  'programme confidence ramps from measured blocks and reaches one',
+  estimator.snapshot().acceptedBlocks === 9 && estimator.snapshot().confidence === 1,
+  JSON.stringify(estimator.snapshot())
+);
+assert('steady programme estimate is accurate', close(estimator.snapshot().programmeDb, -24, 0.05), JSON.stringify(estimator.snapshot()));
+
+const gated = new ProgrammeLoudnessEstimator();
+for (let index = 0; index < 20; index += 1) gated.addBlock(dbToEnergy(-20));
+for (let index = 0; index < 5; index += 1) gated.addBlock(dbToEnergy(-40));
+assert(
+  'relative gate keeps very quiet tails from redefining the programme centre',
+  gated.snapshot().programmeDb > -20.5,
+  JSON.stringify(gated.snapshot())
+);
+for (let index = 0; index < 20; index += 1) gated.addBlock(dbToEnergy(-30));
+assert(
+  'cumulative programme state does not chase the latest window',
+  gated.snapshot().programmeDb > -25 && gated.snapshot().programmeDb < -19,
+  JSON.stringify(gated.snapshot())
+);
+gated.reset();
+assert('explicit boundary reset clears accumulated programme state', gated.snapshot().acceptedBlocks === 0 && gated.snapshot().programmeDb === null);
+
+function gain(input) {
+  return computeTargetGainDb({
+    enabled: true,
+    signalActive: true,
+    cutStrength: 100,
+    liftStrength: 100,
+    programmeDb: DEFAULT_PARAMS.programmeTargetDb,
+    confidence: 1,
+    momentaryDb: DEFAULT_PARAMS.programmeTargetDb,
+    fastDb: DEFAULT_PARAMS.programmeTargetDb,
+    peakDb: -12,
+    limiterCeilingDb: -3,
+    canLift: true,
+    ...input
+  });
 }
 
-function highpassCoefficients(frequencyHz, q, sampleRate = 48000) {
-  const omega = (2 * Math.PI * frequencyHz) / sampleRate;
-  const cosine = Math.cos(omega);
-  const alpha = Math.sin(omega) / (2 * q);
-  const a0 = 1 + alpha;
-  return {
-    b0: ((1 + cosine) / 2) / a0,
-    b1: (-(1 + cosine)) / a0,
-    b2: ((1 + cosine) / 2) / a0,
-    a1: (-2 * cosine) / a0,
-    a2: (1 - alpha) / a0
-  };
-}
+assert('disabled policy returns unity', gain({ enabled: false }).targetGainDb === 0);
+assert('zero strength returns unity', gain({ cutStrength: 0, liftStrength: 0 }).targetGainDb === 0);
+assert('programme at target stays at unity', close(gain({}).targetGainDb, 0));
+const loud = gain({ programmeDb: -12, momentaryDb: -12, fastDb: -12, peakDb: -6 });
+assert('loud programme receives downward correction', loud.targetGainDb < -5.5 && loud.targetGainDb > -7, JSON.stringify(loud));
+const quiet = gain({ programmeDb: -35, momentaryDb: -35, fastDb: -35, peakDb: -24 });
+assert('quiet programme receives strong upward correction', quiet.targetGainDb > 13 && quiet.targetGainDb < 16, JSON.stringify(quiet));
+const loudMoment = gain({ programmeDb: -20, momentaryDb: -12, fastDb: -12, peakDb: -6 });
+const quietMoment = gain({ programmeDb: -20, momentaryDb: -28, fastDb: -28, peakDb: -18 });
+assert('within-programme loud moments are compressed around the centre', loudMoment.dynamicsCorrectionDb < -4, JSON.stringify(loudMoment));
+assert('within-programme quiet moments are lifted without becoming a second target', quietMoment.dynamicsCorrectionDb > 4 && quietMoment.dynamicsCorrectionDb < 6, JSON.stringify(quietMoment));
+const coldLoud = gain({ programmeDb: null, confidence: 0, momentaryDb: -10, fastDb: -10, peakDb: -5 });
+const coldQuiet = gain({ programmeDb: null, confidence: 0, momentaryDb: -35, fastDb: -35, peakDb: -24 });
+assert('cold-start fast cut acts before programme confidence', coldLoud.targetGainDb <= -6, JSON.stringify(coldLoud));
+assert('cold-start upward gain waits for programme confidence', coldQuiet.targetGainDb === 0, JSON.stringify(coldQuiet));
+const peakBound = gain({ programmeDb: -45, momentaryDb: -45, fastDb: -45, peakDb: -4 });
+assert('upward gain is bounded by captured peak budget', peakBound.targetGainDb <= 10.51 && peakBound.liftBudgetDb <= 10.51, JSON.stringify(peakBound));
+assert('lift slider zero leaves only downward policy', gain({ programmeDb: -35, momentaryDb: -35, fastDb: -35, liftStrength: 0 }).targetGainDb === 0);
+assert('cut slider zero leaves loud programme unattenuated', gain({ programmeDb: -12, momentaryDb: -12, fastDb: -12, peakDb: -6, cutStrength: 0 }).targetGainDb === 0);
 
-function highShelfCoefficients(frequencyHz, gainDb, sampleRate = 48000) {
-  const amplitude = 10 ** (gainDb / 40);
-  const omega = (2 * Math.PI * frequencyHz) / sampleRate;
-  const cosine = Math.cos(omega);
-  const alpha = (Math.sin(omega) / 2) * Math.sqrt(2);
-  const rootTerm = 2 * Math.sqrt(amplitude) * alpha;
-  const a0 = (amplitude + 1) - ((amplitude - 1) * cosine) + rootTerm;
-  return {
-    b0: (amplitude * ((amplitude + 1) + ((amplitude - 1) * cosine) + rootTerm)) / a0,
-    b1: (-2 * amplitude * ((amplitude - 1) + ((amplitude + 1) * cosine))) / a0,
-    b2: (amplitude * ((amplitude + 1) + ((amplitude - 1) * cosine) - rootTerm)) / a0,
-    a1: (2 * ((amplitude - 1) - ((amplitude + 1) * cosine))) / a0,
-    a2: ((amplitude + 1) - ((amplitude - 1) * cosine) - rootTerm) / a0
-  };
-}
+assert('adaptive transition defaults to target plus six dB crest', close(computeTransitionCeilingDb({ baseCeilingDb: -3, cutStrength: 100 }), -13));
+assert('learned quiet output peak tightens the transition ceiling', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 100 }), -17));
+assert('transition protection follows cut strength', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 50 }), -10));
+assert('zero cut keeps the ordinary limiter ceiling', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 0 }), -3));
 
-function kWeightingResponseDb(frequencyHz) {
-  return complexMagnitudeDb(highpassCoefficients(
-    K_WEIGHTING_PARAMS.highpassFrequencyHz,
-    K_WEIGHTING_PARAMS.highpassQ
-  ), frequencyHz) + complexMagnitudeDb(highShelfCoefficients(
-    K_WEIGHTING_PARAMS.shelfFrequencyHz,
-    K_WEIGHTING_PARAMS.shelfGainDb
-  ), frequencyHz);
-}
+assert('player volume scales the sample limiter ceiling', close(computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: true }, { limiterCeilingDb: -3 }), -15.041, 0.01));
+assert('disabling player-volume safety keeps the base ceiling', computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: false }, { limiterCeilingDb: -3 }) === -3);
+assert('policy bounds are intentionally smaller than the legacy controller', DEFAULT_PARAMS.maxLiftDb === 25 && DEFAULT_PARAMS.maxCutDb === 24 && DEFAULT_PARAMS.liftLimiterBudgetDb === 10);
 
-const baseSettings = {
-  enabled: true,
-  respectPlayerVolume: true,
-  preset: 'standard',
-  cutStrength: 100,
-  liftStrength: 100
-};
-
-const dualWindow = computeDualWindowLoudnessDb(10 ** (-20 / 10), 10 ** (-32 / 10));
-assert(
-  'dual-window control follows current loudness without forgetting recent context',
-  dualWindow.momentaryDb > dualWindow.controlDb
-    && dualWindow.controlDb > dualWindow.shortTermDb
-    && dualWindow.liftDb === dualWindow.momentaryDb,
-  JSON.stringify(dualWindow)
-);
-
-const fastCut = stabilizeGainTarget({ currentTargetDb: 4, candidateTargetDb: -8, elapsedMs: 0 });
-assert('stronger attenuation bypasses target hold', fastCut.changed && fastCut.targetGainDb === -8, JSON.stringify(fastCut));
-
-const heldLift = stabilizeGainTarget({ currentTargetDb: -4, candidateTargetDb: 3, elapsedMs: 60 });
-assert('upward gain waits through the hold window', heldLift.held && heldLift.targetGainDb === -4, JSON.stringify(heldLift));
-
-const releasedLift = stabilizeGainTarget({ currentTargetDb: -4, candidateTargetDb: 3, elapsedMs: 140 });
-assert('upward gain proceeds after the hold window', releasedLift.changed && releasedLift.targetGainDb === 3, JSON.stringify(releasedLift));
-
-const deadband = stabilizeGainTarget({ currentTargetDb: -4, candidateTargetDb: -3.5, elapsedMs: 500 });
-assert('small gain changes stay inside the deadband', deadband.held && deadband.targetGainDb === -4, JSON.stringify(deadband));
-
-const signalGateOpened = computeSignalGateActive({ wasActive: false, energyDb: -61, peak: 0.0005 });
-const signalGateHeld = computeSignalGateActive({ wasActive: signalGateOpened, energyDb: -65, peak: 0.00025 });
-const signalGateClosed = computeSignalGateActive({ wasActive: signalGateHeld, energyDb: -70, peak: 0.0001 });
-assert('signal gate uses hysteresis around the noise floor', signalGateOpened && signalGateHeld && !signalGateClosed);
-
-const response30Hz = kWeightingResponseDb(30);
-const response1000Hz = kWeightingResponseDb(1000);
-const response8000Hz = kWeightingResponseDb(8000);
-assert(
-  'K-weighting approximation attenuates sub-bass relative to speech band',
-  response30Hz < response1000Hz - 5,
-  JSON.stringify({ response30Hz, response1000Hz })
-);
-assert(
-  'K-weighting approximation applies the high-frequency shelf',
-  response8000Hz > response1000Hz + 2,
-  JSON.stringify({ response8000Hz, response1000Hz })
-);
-
-const presetSettings = normalizeSettings({ preset: 'voice', cutStrength: 65, liftStrength: 85 });
-assert('settings preserve known preset', presetSettings.preset === 'voice' && presetSettings.cutStrength === 65 && presetSettings.liftStrength === 85);
-
-const invalidPresetSettings = normalizeSettings({ preset: 'unknown' });
-assert('settings classify unknown preset as custom', invalidPresetSettings.preset === 'custom');
-
-const disabled = computeLevelerGainDb({
-  rmsDb: -20,
-  peakDb: -5,
-  settings: { ...baseSettings, enabled: false }
-});
-assert('disabled returns unity gain', closeToZero(disabled.targetGainDb) && closeToZero(disabled.reductionDb) && closeToZero(disabled.liftDb));
-
-const zeroStrength = computeLevelerGainDb({
-  rmsDb: -20,
-  peakDb: -5,
-  settings: { ...baseSettings, cutStrength: 0, liftStrength: 0 }
-});
-assert('zero strength returns unity gain', closeToZero(zeroStrength.targetGainDb) && closeToZero(zeroStrength.reductionDb) && closeToZero(zeroStrength.liftDb));
-
-const loud = computeLevelerGainDb({
-  rmsDb: -24,
-  peakDb: -6,
-  settings: baseSettings
-});
-assert('loud input is reduced', loud.targetGainDb < 0 && loud.reductionDb > 0 && closeToZero(loud.liftDb), JSON.stringify(loud));
-
-const quiet = computeLevelerGainDb({
-  rmsDb: -42,
-  peakDb: -24,
-  settings: baseSettings
-});
-assert('quiet input is lifted when headroom exists', quiet.targetGainDb > 0 && quiet.liftDb > 0 && closeToZero(quiet.reductionDb), JSON.stringify(quiet));
-
-const veryQuiet = computeLevelerGainDb({
-  rmsDb: -50,
-  peakDb: -36,
-  settings: baseSettings
-});
-assert(
-  'full lift strength moves very quiet material toward the common target',
-  veryQuiet.targetGainDb >= 20 && veryQuiet.targetGainDb <= DEFAULT_LEVELER_PARAMS.maxLiftDb,
-  JSON.stringify(veryQuiet)
-);
-
-const quietHighCrest = computeLevelerGainDb({
-  rmsDb: -42,
-  peakDb: -8,
-  liftPeakDb: -24,
-  settings: baseSettings
-});
-assert(
-  'full-strength quiet high-crest speech converges despite brief peaks',
-  quietHighCrest.targetGainDb >= 12.5
-    && quietHighCrest.targetGainDb <= DEFAULT_LEVELER_PARAMS.maxLiftDb
-    && quietHighCrest.targetGainDb > quietHighCrest.rawPeakHeadroomDb
-    && quietHighCrest.targetGainDb <= quietHighCrest.effectiveLiftBudgetDb + 0.001
-    && quietHighCrest.targetGainDb - quietHighCrest.rawPeakHeadroomDb <= DEFAULT_LEVELER_PARAMS.liftLimiterBudgetDb + 0.001,
-  JSON.stringify(quietHighCrest)
-);
-
-const limiterBoundQuiet = computeLevelerGainDb({
-  rmsDb: -42,
-  peakDb: -8,
-  liftPeakDb: -24,
-  outputRmsDb: -35,
-  outputTargetRmsDb: DEFAULT_LEVELER_PARAMS.liftTargetRmsDb,
-  limiterReductionDb: 4,
-  settings: baseSettings
-});
-assert(
-  'measured limiter loss assists quiet lift within the existing budget',
-  limiterBoundQuiet.realizedLiftAssistDb === 2
-    && limiterBoundQuiet.requestedLiftDb === 15
-    && limiterBoundQuiet.targetGainDb > quietHighCrest.targetGainDb
-    && limiterBoundQuiet.targetGainDb <= limiterBoundQuiet.effectiveLiftBudgetDb,
-  JSON.stringify({ quietHighCrest, limiterBoundQuiet })
-);
-
-const unLimitedQuiet = computeLevelerGainDb({
-  rmsDb: -42,
-  peakDb: -8,
-  liftPeakDb: -24,
-  outputRmsDb: -35,
-  outputTargetRmsDb: DEFAULT_LEVELER_PARAMS.liftTargetRmsDb,
-  limiterReductionDb: 0,
-  settings: baseSettings
-});
-assert(
-  'quiet lift does not use output assist without measured limiting',
-  unLimitedQuiet.realizedLiftAssistDb === 0
-    && unLimitedQuiet.targetGainDb === quietHighCrest.targetGainDb,
-  JSON.stringify({ quietHighCrest, unLimitedQuiet })
-);
-
-const quietNoHeadroom = computeLevelerGainDb({
-  rmsDb: -42,
-  peakDb: -3.2,
-  settings: baseSettings
-});
-assert(
-  'near-ceiling high-crest material becomes audible through bounded peak compression',
-  quietNoHeadroom.targetGainDb >= 11
-    && Math.abs((-42 + quietNoHeadroom.targetGainDb) - DEFAULT_LEVELER_PARAMS.liftTargetRmsDb) <= 2
-    && quietNoHeadroom.targetGainDb <= quietNoHeadroom.effectiveLiftBudgetDb + 0.001
-    && quietNoHeadroom.targetGainDb <= DEFAULT_LEVELER_PARAMS.liftLimiterBudgetDb,
-  JSON.stringify(quietNoHeadroom)
-);
-
-const peakOnly = computeLevelerGainDb({
-  rmsDb: DEFAULT_LEVELER_PARAMS.targetRmsDb - 1,
-  peakDb: -4,
-  settings: baseSettings
-});
-assert('peak guard reduces transient even when rms is quiet', peakOnly.targetGainDb < 0 && peakOnly.peakCutDb > 0 && peakOnly.reductionDb > 0, JSON.stringify(peakOnly));
-
-const halfCut = computeLevelerGainDb({
-  rmsDb: -16,
-  peakDb: -5,
-  settings: { ...baseSettings, cutStrength: 50, liftStrength: 100 }
-});
-const fullCut = computeLevelerGainDb({
-  rmsDb: -16,
-  peakDb: -5,
-  settings: baseSettings
-});
-assert('cut strength scales reduction', fullCut.reductionDb > halfCut.reductionDb && halfCut.reductionDb > 0, JSON.stringify({ halfCut, fullCut }));
-
-const noLift = computeLevelerGainDb({
-  rmsDb: -42,
-  peakDb: -24,
-  settings: { ...baseSettings, cutStrength: 100, liftStrength: 0 }
-});
-assert('lift strength zero disables quiet lift', closeToZero(noLift.targetGainDb) && closeToZero(noLift.liftDb), JSON.stringify(noLift));
-
-const lowPlayerVolumeNormalSource = computeLevelerGainDb({
-  rmsDb: -38,
-  peakDb: -24,
-  liftRmsDb: -26,
-  liftPeakDb: -12,
-  settings: baseSettings
-});
-assert('low player volume alone does not trigger quiet lift', lowPlayerVolumeNormalSource.targetGainDb <= 0.5 && lowPlayerVolumeNormalSource.liftDb <= 0.5, JSON.stringify(lowPlayerVolumeNormalSource));
-
-const lowPlayerVolumeQuietSource = computeLevelerGainDb({
-  rmsDb: -56,
-  peakDb: -42,
-  liftRmsDb: -44,
-  liftPeakDb: -30,
-  settings: baseSettings
-});
-assert('quiet source still lifts when player volume is low', lowPlayerVolumeQuietSource.targetGainDb >= 8 && lowPlayerVolumeQuietSource.liftDb >= 8, JSON.stringify(lowPlayerVolumeQuietSource));
-
-const fullPlayerVolumeLiftCap = computePlayerVolumeBoundedMaxLiftDb({
-  rmsDb: -56,
-  playerVolumeCap: 1,
-  respectPlayerVolume: true
-}, DEFAULT_LEVELER_PARAMS);
-assert('full player volume keeps full lift range', fullPlayerVolumeLiftCap === DEFAULT_LEVELER_PARAMS.maxLiftDb, String(fullPlayerVolumeLiftCap));
-
-const lowPlayerVolumeNormalLiftCap = computePlayerVolumeBoundedMaxLiftDb({
-  rmsDb: -38,
-  playerVolumeCap: 0.25,
-  respectPlayerVolume: true
-}, DEFAULT_LEVELER_PARAMS);
-assert('low player volume normal source has no lift headroom', closeToZero(lowPlayerVolumeNormalLiftCap), String(lowPlayerVolumeNormalLiftCap));
-
-const quarterVolumeDb = 20 * Math.log10(0.25);
-const lowPlayerVolumeQuietLiftCap = computePlayerVolumeBoundedMaxLiftDb({
-  rmsDb: -44 + quarterVolumeDb,
-  playerVolumeCap: 0.25,
-  respectPlayerVolume: true
-}, DEFAULT_LEVELER_PARAMS);
-assert(
-  'low player volume bounds quiet lift below full-volume target',
-  lowPlayerVolumeQuietLiftCap > 8 && lowPlayerVolumeQuietLiftCap <= DEFAULT_LEVELER_PARAMS.maxLiftDb,
-  String(lowPlayerVolumeQuietLiftCap)
-);
-
-const quarterVolumeLimiterCeiling = computePlayerVolumeLimiterCeilingDb({
-  playerVolumeCap: 0.25,
-  respectPlayerVolume: true
-});
-assert(
-  'player volume scales the hard limiter ceiling',
-  quarterVolumeLimiterCeiling < -14.9 && quarterVolumeLimiterCeiling > -15.2,
-  String(quarterVolumeLimiterCeiling)
-);
-assert(
-  'disabling player-volume safety keeps the base limiter ceiling',
-  computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: false }) === DEFAULT_LEVELER_PARAMS.limiterCeilingDb
-);
-
-const headroomOnlyParams = {
-  ...DEFAULT_LEVELER_PARAMS,
-  liftLimiterBudgetDb: 0
-};
-const fullVolumeHighCrest = computeLevelerGainDb({
-  rmsDb: -44,
-  peakDb: -20,
-  liftRmsDb: -44,
-  liftPeakDb: -20,
-  settings: baseSettings
-}, headroomOnlyParams);
-const quarterVolumeHighCrest = computeLevelerGainDb({
-  rmsDb: -44 + quarterVolumeDb,
-  peakDb: -20 + quarterVolumeDb,
-  liftRmsDb: -44,
-  liftPeakDb: -20 + quarterVolumeDb,
-  settings: baseSettings
-}, {
-  ...headroomOnlyParams,
-  maxLiftDb: lowPlayerVolumeQuietLiftCap,
-  limiterCeilingDb: quarterVolumeLimiterCeiling
-});
-const doubleCompensatedPeak = computeLevelerGainDb({
-  rmsDb: -44 + quarterVolumeDb,
-  peakDb: -20 + quarterVolumeDb,
-  liftRmsDb: -44,
-  liftPeakDb: -20,
-  settings: baseSettings
-}, {
-  ...headroomOnlyParams,
-  maxLiftDb: lowPlayerVolumeQuietLiftCap,
-  limiterCeilingDb: quarterVolumeLimiterCeiling
-});
-assert(
-  'player-volume scaling preserves captured-domain peak headroom',
-  Math.abs(fullVolumeHighCrest.targetGainDb - quarterVolumeHighCrest.targetGainDb) < 0.01
-    && quarterVolumeHighCrest.targetGainDb > 8
-    && doubleCompensatedPeak.targetGainDb < quarterVolumeHighCrest.targetGainDb - 5,
-  JSON.stringify({ fullVolumeHighCrest, quarterVolumeHighCrest, doubleCompensatedPeak })
-);
-
-assert(
-  'zero cut does not attenuate unlifted source peaks',
-  closeToZero(computeProcessingLimiterCeilingDb({
-    settings: { ...baseSettings, cutStrength: 0, liftStrength: 100 },
-    liftSafetyActive: false,
-    playerVolumeCap: 1,
-    respectPlayerVolume: true
-  }))
-);
-
-assert(
-  'cut strength scales the processing limiter ceiling',
-  Math.abs(computeProcessingLimiterCeilingDb({
-    settings: { ...baseSettings, cutStrength: 50, liftStrength: 100 },
-    liftSafetyActive: false,
-    playerVolumeCap: 1,
-    respectPlayerVolume: true
-  }) - (-1.5)) < 0.001
-);
-
-assert(
-  'active quiet lift uses the stricter transition safety ceiling',
-  Math.abs(computeProcessingLimiterCeilingDb({
-    settings: { ...baseSettings, cutStrength: 0, liftStrength: 100 },
-    liftSafetyActive: true,
-    playerVolumeCap: 1,
-    respectPlayerVolume: true
-  }) - DEFAULT_LEVELER_PARAMS.liftLimiterCeilingDb) < 0.001
-);
-
-if (process.exitCode) {
-  process.exit(process.exitCode);
-}
+if (process.exitCode) process.exit(process.exitCode);

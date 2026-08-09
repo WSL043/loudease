@@ -100,7 +100,7 @@ function knownMediaTarget(url) {
 function isCaptureProcessing(tab) {
   return Boolean(tab?.captureActive)
     && tab?.captureState === 'processing'
-    && tab?.capturePipelineMode === 'leveler-v3'
+    && tab?.capturePipelineMode === 'programme-leveler-v4'
     && tab?.captureContextState === 'running'
     && (tab?.meterMode === 'worklet' || tab?.meterMode === 'analyser-fallback')
     && Number(tab?.meterFrameAgeMs ?? Infinity) < 1000

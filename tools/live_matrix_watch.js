@@ -138,7 +138,7 @@ function selfTest() {
       activeProcessorCount: 1,
       captureActive: true,
       captureState: 'processing',
-      capturePipelineMode: 'leveler-v3',
+      capturePipelineMode: 'programme-leveler-v4',
       meterMode: 'worklet',
       meterFrameAgeMs: 5,
       captureContextState: 'running',

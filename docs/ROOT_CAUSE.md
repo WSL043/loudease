@@ -26,7 +26,7 @@ The dual architecture also created:
 The runtime now has one primary audio path:
 
 ```text
-user gesture -> tabCapture -> offscreen CaptureSession -> leveler-v3 AudioWorklet -> output
+user gesture -> tabCapture -> offscreen CaptureSession -> programme-leveler-v4 AudioWorklet -> output
 ```
 
 The content bridge is observation-only. It never calls `createMediaElementSource()` and does not patch media prototypes. The offscreen session owns PCM state; the service worker owns orchestration; the popup owns user intent and display.

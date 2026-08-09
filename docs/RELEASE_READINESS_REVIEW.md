@@ -15,7 +15,7 @@ Latest code/package audit: `2026-08-09`. Static, DSP, muted isolated-Chrome slid
 
 ## Confirmed implementation
 
-- One primary processing architecture: `tabCapture -> offscreen -> leveler-v3 AudioWorklet -> destination`.
+- One primary processing architecture: `tabCapture -> offscreen -> programme-leveler-v4 AudioWorklet -> destination`.
 - A lightweight bridge is injected on demand into audible, recognized-media, captured, or explicitly opened HTTP(S) tabs. It observes media/player state but does not process audio; there is no manifest-wide content-script injection.
 - Continuous worklet measurement, gain control, mute/player-volume enforcement, and sample-peak limiting.
 - Two independent user strengths with persistence regression coverage.

@@ -6,10 +6,10 @@ Local capture E2E emits synthetic audio by design. It is disabled on developer m
 
 | Layer | Scenarios | Command |
 |---|---|---|
-| Pure policy | settings, strength zero, K-weighting, dual windows, gate hysteresis, player-volume bounds, target hold | `npm test` |
-| Unified worklet | silence, quiet voice, loud tone, burst, mute, player cap, linked channels, long run | `npm run test:dsp` |
+| Pure policy | settings, gate hysteresis, gated programme estimate, confidence, strength zero, player-volume bounds | `npm test` |
+| Unified worklet | baseline neutrality, programme convergence, cold start, adaptive onset, dynamics, mute, player cap, source reset | `npm run test:dsp` |
 | Limiter | look-ahead delay, ceiling, clustered peaks, dynamic ceiling, stereo ratio, overshoot | `npm run test:dsp` |
-| Offline PCM | silence, voice-like tones, noise, loud/quiet alternation, recovery envelope | `npm run test:dsp` |
+| Offline PCM | legacy reference vs production vs independent v4 model, steady levels, dynamics, onset, player volume, boundaries | `npm run test:dsp` |
 | Offline graph | real AudioWorklet node and AudioContext graph | `npm run test:dsp` |
 | Capture E2E | start/stop, loud cut, quiet lift, mute, player volume, burst, source replacement | `npm test` |
 | Stability E2E | repeated capture, reload, source switching, session cleanup | `npm test` |

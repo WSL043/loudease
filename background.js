@@ -1,4 +1,5 @@
 import './shared/core.js';
+import './shared/programme-leveler-policy.js';
 
 const STORAGE_KEY = 'webVolumeBalancer.settings';
 const SITE_SETTINGS_KEY = 'webVolumeBalancer.siteSettings';
@@ -18,12 +19,12 @@ const OFFSCREEN_MESSAGE_ATTEMPTS = 60;
 
 const {
   DEFAULT_SETTINGS,
-  DEFAULT_LEVELER_PARAMS,
   clamp,
   finite,
   normalizeSettings,
   isAlreadyConnectedError
 } = globalThis.WebVolumeBalancerCore;
+const { DEFAULT_PARAMS: PROGRAMME_PARAMS } = globalThis.LoudEaseProgrammePolicy;
 
 function parseVersion(version) {
   return String(version || '')
@@ -79,6 +80,7 @@ const captureStatuses = new Map();
 const captureSettingsResyncAt = new Map();
 const captureNavigationRevisions = new Map();
 const tabHints = new Map();
+const lastProgrammeKeys = new Map();
 const diagnosticEvents = [];
 /* WVB_DEV_DIAGNOSTICS_START */
 let localDiagnosticsAvailable = false;
@@ -495,9 +497,16 @@ function mediaStateFromStatuses(tabId, statuses = []) {
   let hasVolumeConflict = false;
   let hasMediaVolume = false;
   let knownVolumeCount = 0;
+  const activeProgrammeKeys = new Set();
+  const fallbackProgrammeKeys = new Set();
 
   for (const status of statuses) {
     const frameActiveCount = Number(status.playerActiveMediaCount) || 0;
+    const frameProgrammeKey = String(status.programmeKey || '').slice(0, 64);
+    if (frameProgrammeKey) {
+      fallbackProgrammeKeys.add(frameProgrammeKey);
+      if (frameActiveCount > 0) activeProgrammeKeys.add(frameProgrammeKey);
+    }
     if (frameActiveCount <= 0) {
       continue;
     }
@@ -521,6 +530,16 @@ function mediaStateFromStatuses(tabId, statuses = []) {
     }
   }
 
+  let programmeKey = '';
+  if (activeProgrammeKeys.size > 0) {
+    programmeKey = Array.from(activeProgrammeKeys).sort().join(':').slice(0, 240);
+    lastProgrammeKeys.set(tabId, programmeKey);
+  } else if (lastProgrammeKeys.has(tabId)) {
+    programmeKey = lastProgrammeKeys.get(tabId);
+  } else {
+    programmeKey = Array.from(fallbackProgrammeKeys).sort().join(':').slice(0, 240);
+  }
+
   if (!hasMediaVolume) {
     return {
       playerActiveMediaCount: activeCount,
@@ -530,6 +549,7 @@ function mediaStateFromStatuses(tabId, statuses = []) {
       playerMinVolumeCap: tabMuted ? 0 : 1,
       playerVolumeKnown: false,
       playerVolumeConflict: false,
+      programmeKey,
       tabMuted,
       tabAudibleHint: tabAudible
     };
@@ -548,6 +568,7 @@ function mediaStateFromStatuses(tabId, statuses = []) {
     playerMinVolumeCap: tabMuted || pageMuteReliable ? 0 : (audibleVolumeMismatch ? 1 : safeMinVolumeCap),
     playerVolumeKnown: !audibleVolumeMismatch,
     playerVolumeConflict: hasVolumeConflict || audibleVolumeMismatch,
+    programmeKey,
     tabMuted,
     tabAudibleHint: tabAudible
   };
@@ -653,7 +674,6 @@ function aggregateStatus(tabId) {
         silentTickCount: Number(capture.silentTickCount) || 0,
         limiterTickCount: Number(capture.limiterTickCount) || 0,
         loudnessResetCount: Number(capture.loudnessResetCount) || 0,
-        targetHoldCount: Number(capture.targetHoldCount) || 0,
         kWeightingMode: String(capture.kWeightingMode || ''),
         lastSignalAgeMs: capture.lastSignalAgeMs == null ? null : Number(capture.lastSignalAgeMs) || 0,
         currentGainDb: finite(capture.currentGainDb, 0),
@@ -676,13 +696,12 @@ function aggregateStatus(tabId) {
         targetLiftDb: finite(capture.targetLiftDb, 0),
         targetReductionDb: finite(capture.targetReductionDb, 0),
         effectiveMaxLiftDb: finite(capture.effectiveMaxLiftDb, 0),
-        playerVolumeLiftCeilingDb: finite(capture.playerVolumeLiftCeilingDb, DEFAULT_LEVELER_PARAMS.liftTargetRmsDb),
+        playerVolumeLiftCeilingDb: finite(capture.playerVolumeLiftCeilingDb, PROGRAMME_PARAMS.programmeTargetDb),
         peakHeadroomDb: finite(capture.peakHeadroomDb, 0),
         rawPeakHeadroomDb: finite(capture.rawPeakHeadroomDb, 0),
         liftLimiterBudgetDb: finite(capture.liftLimiterBudgetDb, 0),
         effectiveLiftBudgetDb: finite(capture.effectiveLiftBudgetDb, 0),
         quietDeficitDb: finite(capture.quietDeficitDb, 0),
-        realizedLiftAssistDb: finite(capture.realizedLiftAssistDb, 0),
         requestedLiftDb: finite(capture.requestedLiftDb, 0),
         playerVolumeCap: finite(capture.playerVolumeCap, 1),
         playerMaxVolumeCap: finite(capture.playerMaxVolumeCap, finite(capture.playerVolumeCap, 1)),
@@ -872,7 +891,6 @@ function aggregateStatus(tabId) {
     silentTickCount: Number(capture?.silentTickCount) || 0,
     limiterTickCount: Number(capture?.limiterTickCount) || 0,
     loudnessResetCount: Number(capture?.loudnessResetCount) || 0,
-    targetHoldCount: Number(capture?.targetHoldCount) || 0,
     kWeightingMode: String(capture?.kWeightingMode || ''),
     lastSignalAgeMs: capture?.lastSignalAgeMs == null ? null : Number(capture.lastSignalAgeMs) || 0,
     currentGainDb: finite(capture?.currentGainDb, 0),
@@ -895,13 +913,12 @@ function aggregateStatus(tabId) {
     targetLiftDb: finite(capture?.targetLiftDb, 0),
     targetReductionDb: finite(capture?.targetReductionDb, 0),
     effectiveMaxLiftDb: finite(capture?.effectiveMaxLiftDb, 0),
-    playerVolumeLiftCeilingDb: finite(capture?.playerVolumeLiftCeilingDb, DEFAULT_LEVELER_PARAMS.liftTargetRmsDb),
+    playerVolumeLiftCeilingDb: finite(capture?.playerVolumeLiftCeilingDb, PROGRAMME_PARAMS.programmeTargetDb),
     peakHeadroomDb: finite(capture?.peakHeadroomDb, 0),
     rawPeakHeadroomDb: finite(capture?.rawPeakHeadroomDb, 0),
     liftLimiterBudgetDb: finite(capture?.liftLimiterBudgetDb, 0),
     effectiveLiftBudgetDb: finite(capture?.effectiveLiftBudgetDb, 0),
     quietDeficitDb: finite(capture?.quietDeficitDb, 0),
-    realizedLiftAssistDb: finite(capture?.realizedLiftAssistDb, 0),
     requestedLiftDb: finite(capture?.requestedLiftDb, 0),
     momentaryInputDb: capture?.momentaryInputDb == null ? null : finite(capture.momentaryInputDb, -91),
     shortTermInputDb: capture?.shortTermInputDb == null ? null : finite(capture.shortTermInputDb, -91),
@@ -1410,6 +1427,7 @@ async function clearTabState(tabId) {
   captureSettingsResyncAt.delete(tabId);
   captureNavigationRevisions.delete(tabId);
   tabHints.delete(tabId);
+  lastProgrammeKeys.delete(tabId);
   addEvent('tab:clear-state', { tabId });
   return { ok: true };
 }
@@ -1471,6 +1489,7 @@ chrome.tabs?.onRemoved?.addListener((tabId) => {
   captureSettingsResyncAt.delete(tabId);
   captureNavigationRevisions.delete(tabId);
   tabHints.delete(tabId);
+  lastProgrammeKeys.delete(tabId);
   stopTabCapture(tabId).catch(() => {});
 });
 
@@ -1481,6 +1500,7 @@ chrome.tabs?.onUpdated?.addListener((tabId, changeInfo) => {
     const navigationUrl = String(changeInfo.url || '');
     frameStatuses.delete(tabId);
     injectionAttempts.delete(tabId);
+    lastProgrammeKeys.delete(tabId);
     const previous = tabHints.get(tabId) || {};
     tabHints.set(tabId, {
       ...previous,
@@ -1513,6 +1533,7 @@ chrome.tabs?.onUpdated?.addListener((tabId, changeInfo) => {
   if (changeInfo?.status === 'loading') {
     frameStatuses.delete(tabId);
     injectionAttempts.delete(tabId);
+    lastProgrammeKeys.delete(tabId);
   }
   if (Object.prototype.hasOwnProperty.call(changeInfo || {}, 'audible') || Object.prototype.hasOwnProperty.call(changeInfo || {}, 'mutedInfo')) {
     chrome.tabs.get(tabId)

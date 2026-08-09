@@ -1,199 +1,136 @@
 # DSP evaluation contract
 
-LoudEase is optimized for comfortable web listening, not for maximizing standards compliance or forcing every source to one loudness. This document defines how a DSP candidate earns its way into the runtime.
+LoudEase is optimized for comfortable web listening, not for maximizing standards compliance or flattening every moment. A DSP candidate enters the runtime only when reproducible evidence shows that it improves the product objective without hiding a material regression.
 
 ## Product objective
 
-A candidate should improve one or more of these outcomes without materially regressing the others:
-
-- reduce disruptive loudness jumps and short peaks;
-- recover genuinely quiet detail when headroom exists;
-- preserve useful programme dynamics and transient character;
-- avoid pumping, breathing, noise-floor lift, clipping, and stereo movement;
+- reduce programme-to-programme average loudness differences;
+- reduce disruptive jumps and short peaks before they leak;
+- recover genuinely quiet material when evidence and headroom exist;
+- retain useful dynamics and transient character inside a programme;
+- avoid pumping, breathing, noise-floor lift, hard clipping, and stereo movement;
 - respect mute and player-volume intent;
-- keep latency and browser CPU cost low enough for continuous use.
+- keep latency, memory, and AudioWorklet CPU suitable for continuous use.
 
-There is no single universal score. A candidate may improve one axis and still be rejected because it causes an unacceptable regression elsewhere.
+There is no invented aggregate score. A candidate can win one metric and still be rejected.
 
-## Comparison states
+## Required comparison states
 
-Use only the states required to settle the claim:
+- **legacy reference** when the claim is a structural improvement over the replaced controller;
+- **current runtime** as the normal baseline for future changes;
+- **candidate** rendered from the same PCM and settings;
+- **bypass** when measuring coloration, latency, or false-positive processing.
 
-- **current baseline** — the released or current-main leveler under the same fixture and settings;
-- **candidate** — the proposed algorithm or parameter change;
-- **bypass** — useful when measuring coloration, latency, or false-positive processing;
-- **specialized candidate** — a content-specific strategy that should not become the default unless it generalizes.
-
-Run baseline and candidate with the same PCM input, sample rate, channel layout, player-volume state, strength settings, and evaluation code.
+Use identical PCM, sample rate, channel layout, programme boundaries, player-volume state, strength settings, and metric code.
 
 ## Deterministic fixture families
 
-Every DSP change should run the relevant subset and any new fixture needed to expose its claimed improvement.
+### Programme centre
 
-### Loud-jump protection
+Use steady sources at materially different levels. Record input loudness, output loudness, gain, limiter activity, and hard clips.
 
-Inputs:
+Acceptance requires both:
 
-- steady quiet -> sudden loud tone/noise;
-- repeated bursts with varied crest factor;
-- clustered transients;
-- loud programme followed by normal programme.
+- ordinary content remains close to its bypass average;
+- loud and quiet programme centres move materially closer together.
 
-Record:
+Do not demand that every individual source have zero enabled/bypass delta. That would make cross-source normalization impossible.
 
-- peak before protection takes effect;
-- gain-reduction onset time;
-- maximum output sample peak / true peak when available;
-- limiter-active samples;
-- hard-clipped samples;
-- recovery time and gain trajectory after the event.
+### Internal dynamics
 
-### Quiet-detail lift
+Use verse/chorus, dialogue/effect, transient-rich, and sparse-ambience sequences. Record input and output contrast, gain distribution, transient attenuation, and recovery.
 
-Inputs:
+The desired result is a smaller disruptive range, not a flat waveform.
 
-- low-level speech-like/high-crest signal;
-- low-level dense music-like signal;
-- full-volume and reduced-player-volume versions of the same source;
-- silence and near-noise-floor material.
+### Cold start and jumps
 
-Record:
+Use silence-to-loud, quiet-to-loud, normal-to-loud, and source-boundary transitions. Record the first 5, 20, and 40 ms; limiter samples; hard clips; and recovery trajectory.
 
-- requested and realized lift;
-- peak and instantaneous headroom;
-- player-volume invariance of the source decision;
-- false lift during silence/noise;
-- gain-velocity and settling behavior.
+Downward protection must act before upward programme confidence exists. Upward normalization must not guess from the first samples.
 
-A player-volume-scaled copy of the same source should produce an equivalent source classification when player-volume state is reliable. Peak safety is evaluated in the actual captured/output domain.
+### Quiet lift and noise
 
-### Dynamics preservation
+Use quiet speech-like, dense music-like, high-crest, silence, and near-floor signals. Record requested and realized lift, peak budget, limiter activity, and false lift.
 
-Inputs:
+Reliable player-volume-scaled copies of one source should receive equivalent source-domain gain decisions while retaining the intended output-volume difference.
 
-- speech with natural pauses;
-- music with verse/chorus contrast;
-- sparse ambience plus occasional foreground events;
-- transient-rich material.
+### Programme boundaries
 
-Record:
+Run a loud programme followed by a quiet programme with and without an explicit boundary. The boundary path must clear estimator history and inherited gain. Within one programme, ordinary amplitude changes must not reset the estimator.
 
-- input and output loudness range over the fixture;
-- time spent near maximum lift/cut;
-- gain-change distribution;
-- transient attenuation outside the stated protection goal.
+### Runtime boundaries
 
-The desired result is a narrower disruptive range, not a flat waveform or constant loudness.
-
-### State boundaries
-
-Verify:
-
-- mute and zero player volume;
-- unknown/conflicting player-volume state;
-- settings changing while audio is live;
-- source/navigation changes;
-- capture start/stop and worklet fallback;
-- mono/stereo linked gain.
+Verify mute, zero volume, unknown/conflicting player volume, live settings changes, navigation, capture start/stop, mono/stereo linked gain, worklet fallback, and multiple captured tabs.
 
 ## Controlled listening set
 
-Synthetic fixtures prove invariants but cannot determine listening preference. Maintain a legally usable evaluation set covering at least:
+Synthetic fixtures prove invariants but cannot select a universal listening preference. Maintain legally usable examples of:
 
-- normal dialogue;
-- very quiet/high-crest dialogue;
+- normal and very quiet dialogue;
 - music with preserved dynamics;
 - live speech;
-- advertisement or creator-to-creator loudness jumps;
-- dense transient material;
-- sparse ambience / background noise.
+- advertisements and creator-to-creator jumps;
+- dense transients;
+- sparse ambience and background noise.
 
-For listening comparisons:
-
-1. level-match only when the question requires it;
-2. randomize A/B order where practical;
-3. judge comfort, intelligibility, dynamics, pumping/breathing, noise lift, and transient damage separately;
-4. keep the current baseline in the comparison;
-5. record disagreement rather than collapsing it into an invented aggregate score.
+Randomize A/B order where practical. Judge comfort, intelligibility, dynamics, pumping, noise lift, and transient damage separately. Record disagreement rather than collapsing it into a false score.
 
 ## Performance budget
 
-Audio quality improvements are not free if they make normal browsing expensive. For candidates that add FFTs, oversampling, classification, or more history, measure:
+Measure render cost, allocations, algorithmic latency, retained memory per session, and multiple-tab behavior for any candidate that adds history, oversampling, FFTs, or classification.
 
-- AudioWorklet processing time or representative CPU utilization;
-- allocations on the render path;
-- additional algorithmic latency;
-- memory retained per capture session;
-- behavior with multiple captured tabs.
+The current estimator uses a fixed histogram and the worklet reuses control objects. No audio buffer or rolling programme window grows with runtime.
 
-Avoid per-render-block allocation in the production worklet.
+## Accepted structural replacement: programme-leveler-v4
+
+The former controller combined a fixed `-29 dB` output target with separate short-window quiet lift, peak allowances, output-feedback assistance, target holding, and an absolute `-24 dBFS` transition ceiling. It converged synthetic levels strongly, but lowered typical content, flattened internal dynamics, and visibly accumulated policy branches.
+
+The accepted replacement uses:
+
+```text
+gated cumulative programme reference
+  -> programme correction
+  + relative within-programme correction
+  -> one asymmetric smoother
+  -> adaptive 5 ms look-ahead limiter
+```
+
+`tools/programme_leveler_experiment.js` retains the same legacy measurements and renders both the production worklet and an independent model. At full strength:
+
+- the selected `-19 dB` centre minimizes worst enabled/bypass error across the two ordinary calibration levels to about `1.25 dB`;
+- five steady programme outputs span about `2.21 dB`;
+- a 12.04 dB internal contrast retains about `3.13 dB` instead of `0.40 dB`;
+- the quiet-to-loud first 20 ms changes from the old `-24 dBFS` peak / `-27.75 dB` RMS to about `-13 dBFS` peak / `-18.98 dB` RMS;
+- production and independent-model asserted metrics differ by less than `0.05 dB`;
+- deterministic steady fixtures have zero hard-clipped samples.
+
+An explicit source-boundary experiment also shows why cumulative measurement needs a real reset signal. A 10–30 second rolling baseline was rejected as the primary model because it would eventually chase programme sections.
 
 ## Candidate roadmap
 
-These are hypotheses to test, not pre-approved features.
+These are hypotheses, not promised features:
 
-### A. Adaptive programme reference
+### Quiet-signal confidence
 
-Keep the existing fast protection and slow quiet-lift structure, but derive a bounded bias from a robust longer-term loudness distribution (for example median/quantiles over tens of seconds). The purpose is to adapt to materially different programmes or creators without chasing every moment.
+Test cheap persistence, stationarity, crest, or spectral-flatness evidence against quiet dialogue, music, hiss, and ambience. Promote only if false noise lift falls without suppressing wanted quiet content.
 
-Promotion condition: meaningfully reduce source-to-source jumps while preserving within-programme dynamics and avoiding slow pumping.
+### Detector-only true peak
 
-### B. Better quiet-signal confidence
+Test 4x detector oversampling without oversampling the full audio path. Promote only if it catches inter-sample overshoot at acceptable render cost.
 
-Before adding a speech classifier, test low-cost evidence such as crest factor, persistence/stationarity, and noise-like behavior to prevent hiss or sparse ambience from receiving unnecessary lift.
+### Metadata-assisted boundaries and loudness
 
-Promotion condition: reduce false quiet lift without suppressing genuinely quiet dialogue or music.
-
-### C. Oversampled true-peak detector
-
-Add detector-path oversampling (4x at 48 kHz is the standards-aligned starting point) while keeping the audio path and latency as small as possible. Do not add oversampling merely to change a displayed number; it must reduce inter-sample overshoot or allow safer limiter behavior under real fixtures.
-
-Promotion condition: catch peaks missed by the sample-peak detector with acceptable render-thread cost and no material extra latency.
-
-### D. Single policy kernel
-
-The primary AudioWorklet and fallback currently implement equivalent control policy in different code. Prefer generating or sharing one policy kernel, or strengthen deterministic equivalence tests until that is practical.
-
-Promotion condition: remove drift risk without adding render-thread dependencies or changing proven behavior.
-
-## What is not automatically better
-
-Do not promote a change merely because it introduces:
-
-- a fixed broadcast LUFS target;
-- full-program integrated loudness in a short interactive control loop;
-- multiband compression;
-- a speech/music classifier;
-- a neural model;
-- more aggressive maximum gain;
-- more limiter activity.
-
-Those may be useful in a specific candidate, but each adds failure modes and must beat the current baseline on the product objective.
+Use trustworthy site or media metadata when available, while retaining the PCM fallback. Do not add site-specific assumptions that silently misclassify ordinary pages.
 
 ## Promotion rule
 
-A DSP candidate may enter the normal path only when:
+A candidate may enter the normal path only when:
 
-1. its claimed improvement is reproduced with before/after evidence;
-2. the relevant deterministic invariants still pass;
-3. no material listening-quality regression is found in contrasting fixtures;
-4. CPU, latency, privacy, and player-control boundaries remain acceptable;
-5. the result generalizes beyond the exact sample that motivated the change.
+1. the claimed improvement is reproduced against current runtime;
+2. relevant deterministic invariants pass;
+3. contrasting listening fixtures show no material regression;
+4. CPU, latency, memory, privacy, and player-control boundaries remain acceptable;
+5. the result generalizes beyond the motivating sample;
+6. obsolete policy branches and tests are removed rather than retained underneath the new path.
 
-A failed candidate is a successful experiment if it narrows the design space. Keep the evidence; do not keep the complexity.
-
-## Accepted experiment: realized-loudness assist
-
-`tools/dsp_candidate_compare.js` runs the production AudioWorklet twice from the same source: once with realized-loudness assistance disabled as the baseline and once with it enabled as the candidate.
-
-The accepted fixture combines a low-energy tonal bed with sparse high peaks. In the deterministic 48 kHz comparison, ordinary loud and quiet steady-state output changed by less than `0.05 dB`. For limiter-bound quiet material, the gap to the normal loud reference falls from approximately `3.05 dB` to `1.87 dB`, an improvement of approximately `1.19 dB`. Both paths remain at or below the `-3 dBFS` sample ceiling with zero hard-clipped samples.
-
-Full-strength feedback was rejected because it produced a hard-clip guard sample in the existing high-crest worklet regression. The retained candidate uses a feedback ratio of `0.5` and remains inside the existing `+34 dB` maximum lift and `15 dB` limiter allowance. This is deterministic fixture evidence, not a universal listening-preference claim.
-
-## Accepted experiment: strength-scaled onset protection
-
-The previous 40 ms transition guard prevented clipping but stopped at `-9 dBFS` regardless of the loud-cut setting. In the deterministic 48 kHz quiet-to-loud fixture, that left the first 20 ms at approximately `-13.15 dB` RMS even though the same loud tone settles near `-29 dB`. The same leak also existed when an already active normal-level signal jumped to loud material because the original guard only recognized silence and positive-gain transitions.
-
-The accepted candidate keeps the existing 5 ms look-ahead and 20 ms control frame, but scales an additional `15 dB` of temporary limiter protection with **Reduce loud sounds**. At full strength the transition ceiling is `-24 dBFS`; the fixture's first 20 ms falls to approximately `-27.75 dB` RMS and the first 40 ms to approximately `-29.33 dB` RMS. The peak improvement is `15 dB`. A repeated high-crest quiet fixture changed by less than `0.4 dB` in steady-state output and retained zero hard-clipped samples. At zero loud-cut strength, the prior `-9 dBFS` safety ceiling is retained.
-
-The active-programme path uses the preceding 20 ms input peak as its reference and requires both an absolute `-18 dBFS` crossing and a relative jump of at least `6 dB`. `tools/dsp_candidate_compare.js` reproduces quiet-to-loud and normal-to-loud transitions through both the old and accepted paths from the same production worklet source so this boundary cannot silently regress.
+A failed candidate is useful evidence. Keep the result; do not keep the complexity.

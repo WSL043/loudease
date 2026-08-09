@@ -42,6 +42,7 @@ if (manifest.name === '__MSG_appName__'
 exists(manifest.background.service_worker);
 exists(manifest.action.default_popup);
 exists('shared/core.js');
+exists('shared/programme-leveler-policy.js');
 exists('content/bridge.js');
 exists('popup/index.css');
 exists('popup/index.js');
@@ -116,7 +117,7 @@ exists('tools/limiter_worklet_tests.js');
 exists('tools/leveler_worklet_tests.js');
 exists('tools/assert_test_pages.js');
 exists('tools/dsp_unit_tests.js');
-exists('tools/offline_audio_tests.js');
+exists('tools/programme_leveler_experiment.js');
 exists('tools/run_all_checks.js');
 exists('tools/current_runtime_audit.js');
 exists('tools/acceptance_audit.js');

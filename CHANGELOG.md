@@ -4,6 +4,9 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Replaced the accumulated fixed-target loud/quiet controller with one programme-centred gain law shared by the primary AudioWorklet and fallback path.
+- Added constant-memory gated programme loudness estimation that persists through pause/resume and resets when the active media programme changes.
+- Calibrated the new policy against independent-model and legacy-reference experiments, including startup onset, dynamics, player-volume equivalence, programme-boundary, and clipping checks.
 - Tightened the first 40 ms after a loud onset in proportion to the loud-cut strength, closing the audible gap before the 20 ms programme controller catches up.
 - Removed the fixed all-page status heartbeat and reduced active AudioWorklet diagnostic messages from 50 Hz to about 10 Hz without changing render-thread DSP cadence.
 - Made already-stopped capture cleanup return promptly when no offscreen audio document exists.

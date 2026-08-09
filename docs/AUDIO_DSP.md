@@ -1,171 +1,125 @@
 # Audio DSP
 
-This document describes the current `leveler-v3` algorithm in version `0.7.1`.
+This document describes the `programme-leveler-v4` controller used by LoudEase version `0.7.1`.
 
-## Goals
+## Design goal
 
-- Reduce sudden loud material before it becomes uncomfortable.
-- Move sustained loud and genuinely quiet material toward one common target at full strength.
-- Preserve short-scale waveform detail while reducing program-to-program and passage-to-passage level differences.
-- Respect mute and player-volume intent.
-- Avoid clipping, pumping, abrupt gain jumps, and stereo image movement.
+LoudEase should make different web programmes feel closer in average loudness while retaining a smaller, useful amount of dynamics inside each programme. Enabling the extension should not push ordinary content several decibels below its unprocessed average.
 
-## Non-goals
-
-- Exact broadcast loudness normalization across complete programs.
-- Perfect perceived equality across different spectra, voices, devices, and listening environments.
-- Speech/source separation or content classification.
-- A calibrated acoustic safety limit at the listener's ear.
-- Mastering, EQ, denoising, or multiband dynamics processing.
+The controller is intentionally not a broadcast normalizer and does not claim exact standards compliance. It borrows the useful measurement model from ITU-R BS.1770 / EBU R128, then applies a low-latency receiver-side control policy suitable for live browser audio.
 
 ## Processing graph
 
 ```text
-captured PCM
+tabCapture
   -> K-weighted and raw measurement
-  -> signal gate
-  -> loudness target policy
-  -> smoothed linked-channel gain
-  -> player-volume boundary
-  -> 5 ms look-ahead sample-peak limiter
-  -> output
+  -> gated programme estimator
+  -> one programme-centred gain law
+  -> one linked gain smoother
+  -> 5 ms look-ahead adaptive limiter
+  -> player mute boundary
+  -> destination
 ```
 
-The normal graph runs in `offscreen/leveler-worklet.js` on the AudioWorklet render thread. The offscreen main thread sends settings and receives an immediate first-frame state followed by approximately 10 Hz diagnostic updates; it does not drive the normal 20 ms control loop. Peak and limiter counters accumulate between updates, while DSP control remains sample-rate/20 ms-frame local to the worklet.
+The normal path is entirely inside `offscreen/leveler-worklet.js`. The offscreen main thread sends settings and media state; it is not part of the 20 ms control loop. The fallback path uses the same policy functions from `shared/programme-leveler-policy.js` with lower timing guarantees.
 
 ## Measurement
 
-The worklet accumulates 20 ms frames and maintains bounded history:
+- Raw samples provide peak safety.
+- A K-weighting biquad approximation provides loudness energy.
+- Frames are 20 ms.
+- Momentary loudness uses 400 ms.
+- Short-term loudness uses 3 seconds for diagnostics.
+- A programme block is added every 100 ms once 400 ms of history exists.
 
-- fast cut window: the current 20 ms frame;
-- quiet-lift loudness window: 5 frames, approximately 100 ms, using the median frame energy;
-- momentary window: 20 frames, approximately 400 ms;
-- short-term window: 150 frames, approximately 3 s;
-- lift peak window: 10 frames, approximately 200 ms, using the 65th percentile.
+The programme estimator is a constant-memory loudness histogram. It applies an absolute `-70 dB` gate and a relative gate 10 dB below the current ungated programme estimate. The gated energy mean is the programme reference `P`.
 
-An approximate BS.1770-style K-weighting stage uses a high shelf and high pass so sub-bass contributes less than speech-band energy. The control loudness combines momentary and short-term energy; fast-cut energy can override it when a loud event arrives.
+This measurement continues for the programme, but it is not a 10–30 second rolling median. A rolling window would eventually mistake a quiet introduction, loud chorus, or action sequence for a new baseline and slowly pump the whole programme.
 
-This is intentionally not presented as standards-compliant LUFS. The implementation does not yet include the complete BS.1770 gating and channel weighting required for an integrated-loudness meter.
+## Programme boundaries
 
-## Signal gate
+`content/bridge.js` hashes the current page URL and active media-source identity locally. Only the short fingerprint is forwarded as `programmeKey`; the URL or source is not exposed as the key. The last active identity is retained while media is paused, so pause/resume does not create a false boundary. A navigation or a genuinely different active source changes the key. When that happens, the estimator, momentary history, inherited gain, and limiter state are reset before the new programme is learned.
 
-Upward gain is disabled until both energy and peak evidence indicate a real signal. The gate uses hysteresis:
+Resetting inherited gain is important. Carrying a large lift from a quiet video into the next loud video creates exactly the first-block leak that the controller is meant to prevent.
 
-- open energy: approximately `-62 dB`;
-- close energy: approximately `-68 dB`;
-- open peak: `0.00035` linear;
-- close peak: half the open threshold.
+When a site hides programme changes behind an unchanged URL and media identity, the estimator cannot know that a boundary occurred. That remains an explicit limitation rather than a reason to make the programme baseline continuously chase the audio.
 
-When the player volume is known and below unity, loudness measurement is compensated before gate and quietness decisions so a quiet player setting is not mistaken for quiet source mastering.
+## Single gain law
 
-## Gain policy
+Let:
 
-Current defaults:
+- `T = -19 dB` be the current product loudness centre;
+- `P` be gated programme loudness;
+- `M` be 400 ms momentary loudness;
+- `C` and `L` be the normalized cut and lift slider strengths.
 
-| Parameter | Value |
-|---|---:|
-| Loud target | `-29 dB` weighted RMS approximation |
-| Quiet-lift target | `-29 dB` |
-| Maximum upward gain | `+34 dB` |
-| Maximum downward gain | `-30 dB` |
-| Limiter ceiling | `-3 dBFS` sample peak |
-| Peak guard | `-6 dBFS` |
-| Peak-compression allowance for lift | up to `15 dB` at full strength |
+The controller forms two terms:
 
-Downward gain is derived from the loudness excess above the target and the **Reduce loud sounds** strength. Upward gain uses the same target at full strength and is derived from the median energy of the five most recent 20 ms frames. The median prevents one isolated peak from making the whole 100 ms passage look loud. Once that faster window confirms a quiet passage, stale longer-window loudness is prevented from cancelling the recovery gain. Upward gain is then limited by:
+```text
+programme correction = T - P
+dynamic correction   = -0.72 * (M - P)
+target gain          = programme correction + dynamic correction
+```
 
-- robust peak headroom;
-- instantaneous peak headroom;
-- the player-volume-aware maximum lift;
-- the configured maximum lift;
-- a bounded allowance of up to `15 dB` for look-ahead peak compression at full strength;
-- signal-gate state.
+Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre. The dynamic term reduces disruptive contrast inside a programme without forcing every moment to exactly `T`.
 
-The first `headroom` portion of lift fits below both robust and instantaneous peak ceilings. At full strength, up to `15 dB` more may be requested so a brief high-crest peak does not keep an otherwise quiet passage inaudible. Lower slider values scale this allowance down. The look-ahead limiter absorbs that bounded excess; gain above this allowance is rejected. This deliberately trades more macro-dynamics at high settings for substantially closer loudness while keeping output below the ceiling.
+The `-19 dB` centre is a LoudEase product calibration, not an EBU or platform mandate. A reproducible sweep compares `-20`, `-19`, `-18`, and `-16 dB` centres with the lift needed to keep the same quiet boundary. Across two ordinary reference levels, `-19 dB` minimizes the worst enabled/bypass error at about `1.25 dB`; `-20 dB` reaches about `2.19 dB` and `-18 dB` about `2.25 dB`. Any future change to `T` must beat this sweep and a controlled listening corpus rather than being inferred from the first seconds of one programme.
 
-When quiet lift is active and the measured output remains below its player-volume-aware target, the leveler may compensate for limiter attenuation that it has actually observed. The assist is half of the smaller of the output deficit and measured limiter reduction. It does not activate for ordinary quiet material without limiting, and it cannot exceed the existing maximum-lift or limiter-budget boundaries. The half-strength feedback is deliberate damping: full feedback improved the synthetic target error but caused a hard-clip guard sample in the high-crest regression and was rejected.
+## Cold start and confidence
 
-## Gain stability
+Upward gain is asymmetric by design:
 
-The processor uses separate time constants:
+- before the first 400 ms programme block, upward gain is zero;
+- confidence ramps across accepted blocks;
+- confidence reaches 1 after nine blocks, at roughly 1.2 seconds for continuous signal;
+- downward fast protection does not wait for confidence.
 
-| Transition | Time constant |
-|---|---:|
-| Apply protective cut | `3 ms` |
-| Release protective cut | `180 ms` |
-| Apply quiet lift | `100 ms` |
-| Release quiet lift | `250 ms` |
+Perfect first-frame upward normalization is impossible without metadata or pre-analysis: a quiet opening can be either an under-mastered programme or intentional dynamics. LoudEase therefore protects immediately, but waits for evidence before lifting.
 
-Additional stability controls:
+## Fast protection and limiter
 
-- target deadband: `0.8 dB`;
-- upward target hold: `80 ms`;
-- maximum upward gain increase: `3 dB` per 20 ms frame;
-- one linked gain value for all channels.
+The 20 ms fast path cuts material above `T + 3 dB` even before programme confidence exists.
 
-These controls keep changes continuous while allowing a confirmed quiet passage to recover within a few hundred milliseconds. Full strength is intentionally assertive; lower settings retain more original macro-dynamics.
+The sample-rate limiter has 5 ms look-ahead. During a detected onset or programme jump, its temporary ceiling is derived from the quieter of:
 
-## Look-ahead limiter
+- `T + 6 dB`, and
+- the recent output peak plus 3 dB.
 
-The unified worklet delays audio by approximately 5 ms and keeps a rolling future-peak queue. Gain moves toward the required attenuation before the buffered peak reaches the output. Channels share the same envelope so stereo balance is preserved.
+The temporary ceiling follows the cut slider and lasts 40 ms. This replaces the old absolute `-24 dBFS` transition ceiling, which prevented a leak by audibly collapsing the first block. The ordinary sample ceiling remains `-3 dBFS`, adjusted downward when reliable player volume is below 100%.
 
-The limiter reports:
+The controller bounds downward gain to 24 dB and upward gain to 25 dB. Upward gain is additionally limited by captured-domain peak headroom plus a 10 dB limiter allowance. Hard clipping remains a last-resort guard and is expected to stay at zero in deterministic tests.
 
-- input and output sample peak;
-- limiter reduction;
-- limited sample count;
-- hard-clipped sample count;
-- maximum overshoot.
-- realized-loudness assist requested from measured limiter loss.
+## Gain smoothing
 
-Hard clipping remains a final invariant guard. Tests require normal fixtures and clustered peaks to reach the configured ceiling without using that guard.
+One linked gain envelope is used for all channels:
 
-The current limiter is sample-peak based. It does not yet use 4x or higher oversampling to estimate inter-sample true peaks.
+- cut attack: 20 ms;
+- cut release: 250 ms;
+- lift attack: 180 ms;
+- lift release: 600 ms;
+- maximum upward movement: 3 dB per 20 ms frame.
 
-## Player volume
+Signal-gate hysteresis opens near `-62 dB` and closes near `-68 dB`. Gain is held through pauses up to one second so speech gaps do not reset the first following syllable; after that it returns toward unity without erasing the programme estimate.
 
-When media state is fresh and conflict-free:
+## Player-volume boundary
 
-- mute or zero player volume sets output gain to zero;
-- the maximum upward gain is reduced with the player volume;
-- the limiter ceiling is lowered proportionally;
-- DSP never writes to `HTMLMediaElement.volume`.
+When player volume is known and reliable, loudness measurement is compensated into the source domain. Peak headroom remains in the captured/output domain, and the limiter ceiling already includes the player attenuation. This prevents double-counting player volume.
 
-Player-volume handling deliberately uses two measurement domains:
+The same source therefore receives approximately the same DSP gain decision at full and quarter player volume, while quarter volume still remains about 12.04 dB quieter at the output. Mute and zero volume remain hard boundaries. Unknown or conflicting player volume blocks upward gain unless the existing WebAudio-only audible fallback is valid.
 
-- **source classification domain** — loudness and signal-gate measurements may be compensated for a known low player volume so the source is judged independently of the user's volume setting;
-- **captured/output peak domain** — peak headroom remains in the captured PCM domain because the limiter ceiling already includes the player-volume reduction.
+## Deterministic evidence
 
-Do not compensate the peak and also lower the limiter ceiling for the same player-volume reduction. That double-counts attenuation and can incorrectly block quiet lift on high-crest material. `tools/leveler_worklet_tests.js` and `tools/dsp_unit_tests.js` contain regressions for this invariant.
+`tools/programme_leveler_experiment.js` compares the production worklet with an independent implementation of the same policy and retains the measured legacy reference:
 
-The startup output gate remains closed until the first measured control frame is available. A low-crest loud 20 ms frame immediately invalidates an older quiet-window classification. A short transition guard activates when an already lifted signal would cross `-9 dBFS`, a post-silence onset crosses `-18 dBFS`, or an active programme crosses `-18 dBFS` after jumping at least `6 dB` above the preceding 20 ms input peak. The guard tightens the limiter ceiling for at least 40 ms while the protective gain catches up. Its ceiling scales with **Reduce loud sounds**, from `-9 dBFS` at zero strength to `-24 dBFS` at full strength. This keeps the first audible frame close to the eventual programme level instead of merely preventing clipping, while avoiding a permanent low ceiling on steady high-crest material.
+- worst enabled/bypass delta across the two ordinary calibration levels: about `1.25 dB` (the old controller's retained typical reference was `-7.76 dB`);
+- five steady input levels: v4 output range about `2.21 dB`;
+- 12.04 dB internal contrast: old about `0.40 dB`, v4 about `3.13 dB`;
+- quiet-to-loud first 20 ms: old peak `-24 dBFS` and RMS `-27.75 dB`; v4 peak about `-13 dBFS` and RMS about `-18.98 dB`;
+- production and independent model differ by less than `0.05 dB` on the asserted steady, dynamics, and onset metrics;
+- deterministic steady fixtures report zero hard-clipped samples.
 
-When player-volume state is unknown or conflicting, upward lift is disabled unless the narrow tab-audible fallback is safe. Downward protection remains available.
+These results prove implementation invariants and the claimed structural improvement. They do not replace randomized listening tests on real dialogue, music, live speech, advertisements, and ambience.
 
-## Fallback path
+## Deliberately excluded
 
-If the unified worklet cannot load, the offscreen document falls back to a render-thread meter or analyser, main-thread gain control, and a dedicated limiter worklet or `DynamicsCompressorNode`. Diagnostics expose the fallback mode. The fallback exists for resilience; it is not the quality reference. The fallback and primary worklet must preserve the same source/output-domain rules even though their control loops are implemented separately.
-
-## Verification
-
-Automated coverage includes:
-
-- pure policy tests in `tools/dsp_unit_tests.js`;
-- synthetic PCM regression in `tools/offline_audio_tests.js`;
-- unified processor tests in `tools/leveler_worklet_tests.js`;
-- look-ahead peak and stereo-link tests in `tools/limiter_worklet_tests.js`;
-- render-thread metering tests in `tools/meter_worklet_tests.js`;
-- OfflineAudioContext graph checks in `tools/offline_audio_graph_tests.js`;
-- isolated Chrome E2E for quiet lift, loud cut, bursts, mute, player volume, source switching, persistence, and capture lifecycle.
-
-Algorithm changes that affect listening quality are additionally governed by [`DSP_EVALUATION.md`](DSP_EVALUATION.md). A more complex candidate is not accepted merely because it uses a newer standard, more signal features, or a more sophisticated model.
-
-## Known DSP gaps
-
-- No oversampled true-peak estimation.
-- No standards-compliant integrated LUFS meter.
-- No speech/music classifier or source separation.
-- The primary worklet and fallback still contain duplicated control-policy implementation that can drift; equivalence is enforced by tests today, but a single generated/shared policy kernel is preferable long term.
-- Synthetic fixtures do not replace licensed real-program material and controlled listening tests.
-- Perceptual tuning still needs a larger, legally redistributable evaluation corpus.
-- Strong lift can make source noise, codec damage, breaths, or room tone more audible and can invoke peak limiting on high-crest material.
+The default path does not include a speech/music neural classifier, multiband compression, a rolling target, or full-path oversampling. Those features add failure modes and CPU cost. They should be considered only as isolated candidates that beat this controller on the evaluation contract.

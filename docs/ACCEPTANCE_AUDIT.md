@@ -25,7 +25,7 @@ Current source of truth: version `0.7.1`. Runtime evidence must match this versi
 ## Architecture acceptance
 
 - The media-element engine is removed from the runtime.
-- The main DSP loop is inside `leveler-v3 AudioWorklet`.
+- The main DSP loop is inside `programme-leveler-v4 AudioWorklet`.
 - Main-thread analyser/controller code is fallback-only.
 - The offscreen document is the source of truth for active captures.
 - Status queries and repair commands are separate message types.

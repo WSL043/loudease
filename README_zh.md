@@ -54,7 +54,7 @@ LoudEase 不是简单的音量放大器、均衡器，也不是经过校准的�
   <img src="docs/processing-flow.png" width="960" alt="忽大忽小的输入经过响度测量、增益平衡和峰值保护后，变成保留层次但范围更窄的输出">
 </p>
 
-用户授权后，LoudEase 会把标签页作为一条完整音频流捕获，并在本机 `AudioWorklet` 中处理。K-weighted 测量分别驱动“压大声”和“提小声”；稳健小声检测避免单个尖峰压住整段小声，前视限幅器让输出保持在边界内，原始音频不会上传。
+用户授权后，LoudEase 会把标签页作为一条完整音频流捕获，并在本机 `AudioWorklet` 中处理。K-weighted 门控节目响度只驱动一条以节目基线为中心的增益规则：向上提升要等待持续证据，快速保护与 5 ms 前视限幅则负责接住突然的大声。原始音频不会上传。
 
 实现细节、算法假设和当前缺口见 [声音算法](docs/AUDIO_DSP.md)、[架构](docs/ARCHITECTURE.md) 与 [已知限制](docs/KNOWN_LIMITATIONS.md)。
 
