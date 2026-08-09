@@ -102,7 +102,7 @@ function isCaptureProcessing(tab) {
     && tab?.captureState === 'processing'
     && tab?.capturePipelineMode === 'programme-leveler-v4'
     && tab?.captureContextState === 'running'
-    && (tab?.meterMode === 'worklet' || tab?.meterMode === 'analyser-fallback')
+    && ['leveler-worklet', 'worklet', 'analyser-fallback'].includes(tab?.meterMode)
     && Number(tab?.meterFrameAgeMs ?? Infinity) < 1000
     && Number(tab?.captureAudioTrackCount || 0) > 0;
 }

@@ -1,6 +1,6 @@
 # Release Readiness Review
 
-Review baseline: version `0.7.1`, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
+Review baseline: version `0.7.2`, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
 
 Latest code/package audit: `2026-08-09`. Static, DSP, muted isolated-Chrome slider/capture, release-build, and package checks passed locally. The store ZIP was byte-for-byte reproducible across two consecutive builds and contained 41 verified runtime files. The acceptance audit remains incomplete because current real-site and endurance evidence is missing.
 

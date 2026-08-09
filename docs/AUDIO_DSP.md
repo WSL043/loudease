@@ -1,6 +1,6 @@
 # Audio DSP
 
-This document describes the `programme-leveler-v4` controller used by LoudEase version `0.7.1`.
+This document describes the `programme-leveler-v4` controller used by LoudEase version `0.7.2`.
 
 ## Design goal
 

@@ -31,6 +31,6 @@
 
 ## Product status
 
-- Version `0.7.1` is a beta, not a hearing-protection or medical product.
+- Version `0.7.2` is a beta, not a hearing-protection or medical product.
 - The GitHub build contains optional localhost diagnostics; the store build removes them.
 - Version `1.0.0` requires the gates documented in `docs/VERSIONING.md`.
