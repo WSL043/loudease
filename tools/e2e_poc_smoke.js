@@ -477,6 +477,28 @@ async function evaluateValue(cdp, expression, options = {}) {
   return result.result?.value || null;
 }
 
+async function configureSilentSinkInExtensionPage(browserCdp, debugPort, extensionId) {
+  const pageUrl = `chrome-extension://${extensionId}/e2e/harness.html?silent-config=1`;
+  const created = await browserCdp.command('Target.createTarget', { url: pageUrl, forTab: true });
+  const page = await connectTarget(debugPort, (target) => (
+    target.id === created.targetId || target.url === pageUrl
+  ));
+  try {
+    const configured = await evaluateValue(page.cdp, `(${async function configureSilentSink(key) {
+      await chrome.storage.local.set({ [key]: true });
+      const stored = await chrome.storage.local.get(key);
+      return stored[key] === true;
+    }})(${JSON.stringify('webVolumeBalancer.e2eSilentSink')})`);
+    if (configured !== true) {
+      throw new Error('Failed to configure the silent AudioContext sink in extension storage.');
+    }
+  } finally {
+    page.cdp.close();
+    await browserCdp.command('Target.closeTarget', { targetId: created.targetId }).catch(() => null);
+  }
+  log('silent AudioContext sink configured from a deterministic extension page');
+}
+
 async function prepareExternalMedia(cdp, timeoutMs) {
   await cdp.command('Runtime.enable');
   await cdp.command('Page.enable');
@@ -786,6 +808,9 @@ async function main() {
       throw new Error('Extensions.loadUnpacked did not return an extension id.');
     }
     log(`loaded extension id ${extensionId}`);
+    if (silentSink) {
+      await configureSilentSinkInExtensionPage(browserCdp, debugPort, extensionId);
+    }
 
     const createdTab = await browserCdp.command('Target.createTarget', { url: pageUrl, forTab: true });
     const page = await connectTarget(debugPort, (target) => target.type === 'page' && (
@@ -831,7 +856,6 @@ async function main() {
 
     const targets = await httpJson(`http://127.0.0.1:${debugPort}/json/list`);
     log(`targets ${targets.map((target) => `${target.type}:${target.url}`).join(' | ')}`);
-    let silentSinkConfigured = false;
     for (const target of targets.filter((item) => /chrome-extension:\/\//.test(item.url) && item.webSocketDebuggerUrl)) {
       const probe = new CdpSocket(target.webSocketDebuggerUrl);
       await probe.connect();
@@ -845,21 +869,6 @@ async function main() {
         }
       })()`).catch((error) => ({ error: String(error?.message || error) }));
       log(`extension target manifest ${target.type}:${target.url} => ${JSON.stringify(manifest)}`);
-      if (silentSink && !silentSinkConfigured && target.url.startsWith(`chrome-extension://${extensionId}/`)) {
-        const configured = await evaluateValue(probe, `(${async function configureSilentSink(key) {
-          await chrome.storage.local.set({ [key]: true });
-          const stored = await chrome.storage.local.get(key);
-          return stored[key] === true;
-        }})(${JSON.stringify('webVolumeBalancer.e2eSilentSink')})`);
-        if (configured !== true) {
-          throw new Error('Failed to configure the silent AudioContext sink in extension storage.');
-        }
-        silentSinkConfigured = true;
-        log('silent AudioContext sink configured in the isolated extension profile');
-      }
-    }
-    if (silentSink && !silentSinkConfigured) {
-      throw new Error('No extension target was available to configure the silent AudioContext sink.');
     }
     const targetInfos = await browserCdp.command('Target.getTargets');
     log(`targetInfos ${targetInfos.targetInfos.map((target) => `${target.type}:${target.targetId}:${target.url}`).join(' | ')}`);
