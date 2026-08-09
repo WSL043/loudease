@@ -49,6 +49,9 @@ assert(
     && /WASAPIAudioOutputStream/i.test(runner)
     && /latestStatus\.silentSink\s*!==\s*true/.test(runner)
     && /nativeAudioOutputOpened/.test(runner)
+    && /configureSilentSinkInExtensionPage/.test(runner)
+    && /Target\.createTarget/.test(runner)
+    && /Target\.closeTarget/.test(runner)
     && /meterFrameAgeMs:\s*tab\.meterFrameAgeMs/.test(runner)
     && /e2e-profile-\$\{runSuffix\}/.test(runner)
     && /cleanupRunDirectories\(\)/.test(runner)
@@ -56,6 +59,10 @@ assert(
     && /readExternalMediaState/.test(runner)
     && /--disable-background-media-suspend/.test(runner),
   'E2E runner combines fake browser output, silent sink verification, native-output detection, and long-run source diagnostics'
+);
+assert(
+  /configureSilentSinkInExtensionPage/.test(read('tools/e2e_stability_smoke.js')),
+  'stability runner configures the silent sink from a deterministic extension page'
 );
 assert(/WVB_E2E_SILENT_SINK\s*=\s*['"]1['"]/.test(slider), 'slider persistence uses the silent E2E path');
 assert(

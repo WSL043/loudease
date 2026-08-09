@@ -355,24 +355,29 @@ async function connectTarget(port, predicate) {
   throw new Error('Target not found.');
 }
 
-async function configureSilentSink(debugPort, extensionId, sockets) {
+async function configureSilentSinkInExtensionPage(browserCdp, debugPort, extensionId) {
   if (!silentSink) {
     return;
   }
-  const target = await connectTarget(
-    debugPort,
-    (item) => item.url === `chrome-extension://${extensionId}/background.js`
-  );
-  sockets.push(target.cdp);
-  const configured = await evaluateValue(target.cdp, `(${async function setSilentSink(key) {
-    await chrome.storage.local.set({ [key]: true });
-    const stored = await chrome.storage.local.get(key);
-    return stored[key] === true;
-  }})(${JSON.stringify('webVolumeBalancer.e2eSilentSink')})`);
-  if (configured !== true) {
-    throw new Error('Failed to configure the silent AudioContext sink.');
+  const pageUrl = `chrome-extension://${extensionId}/e2e/harness.html?silent-config=1`;
+  const created = await browserCdp.command('Target.createTarget', { url: pageUrl, forTab: true });
+  const page = await connectTarget(debugPort, (item) => (
+    item.id === created.targetId || item.url === pageUrl
+  ));
+  try {
+    const configured = await evaluateValue(page.cdp, `(${async function setSilentSink(key) {
+      await chrome.storage.local.set({ [key]: true });
+      const stored = await chrome.storage.local.get(key);
+      return stored[key] === true;
+    }})(${JSON.stringify('webVolumeBalancer.e2eSilentSink')})`);
+    if (configured !== true) {
+      throw new Error('Failed to configure the silent AudioContext sink.');
+    }
+  } finally {
+    page.cdp.close();
+    await browserCdp.command('Target.closeTarget', { targetId: created.targetId }).catch(() => null);
   }
-  log('silent AudioContext sink configured; DSP remains live without hardware audio output');
+  log('silent AudioContext sink configured from a deterministic extension page');
 }
 
 async function evaluateValue(cdp, expression, options = {}) {
@@ -811,7 +816,7 @@ async function main() {
       throw new Error('Extensions.loadUnpacked did not return an extension id.');
     }
     log(`loaded extension id ${extensionId}`);
-    await configureSilentSink(debugPort, extensionId, sockets);
+    await configureSilentSinkInExtensionPage(browserCdp, debugPort, extensionId);
 
     const createdTab = await browserCdp.command('Target.createTarget', { url: pageUrl, forTab: true });
     const page = await connectTarget(debugPort, (target) => target.type === 'page' && target.url === pageUrl);
