@@ -348,7 +348,7 @@
   "sitesTab": { "message": "Site rules" },
   "diagnosticsTab": { "message": "Support & diagnostics" },
   "captureGestureTitle": { "message": "New tabs need one click" },
-  "captureGestureHelp": { "message": "Chrome requires you to open the extension once before a new tab can be balanced." },
+  "captureGestureHelp": { "message": "Chrome requires one click before a new tab can be balanced. A lightweight local observer uses the page URL and media play, mute, and volume state; browsing and audio data are not sent to the developer." },
   "generalHelp": { "message": "Choose how the extension looks and behaves by default." },
   "appearanceHeading": { "message": "Appearance" },
   "languageLabel": { "message": "Language" },

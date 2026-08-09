@@ -24,6 +24,7 @@ ok(/pending\.port !== port/.test(background) && /pending\.port !== port[\s\S]*?c
 ok(/capture:navigation-settings-applied/.test(background) && /captureNavigationRevisions/.test(background) && /capture:navigation-settings-superseded/.test(background), 'active capture adopts only the latest destination site settings during navigation');
 ok(/offscreen stop was not acknowledged/.test(background) && /capture:stop-error/.test(background), 'capture stop keeps status truthful until offscreen acknowledges teardown');
 ok(/async function clearTabState/.test(background) && /const stopped = await stopTabCapture\(tabId\)/.test(background), 'clearing tab state stops the offscreen session before deleting ownership');
+ok(/async function offscreenDocumentExists\(\)/.test(background) && /capture:already-stopped/.test(background) && /alreadyStopped: true/.test(background), 'stopping an already stopped tab returns promptly when no offscreen document exists');
 ok(/return sessions\.size;/.test(offscreen) && /remainingSessions = stopCapture/.test(offscreen), 'offscreen stop reports whether other capture sessions remain');
 ok(/Number\(response\.remainingSessions\) === 0/.test(background) && /scheduleOffscreenIdleClose\(\)/.test(background) && /chrome\.offscreen\.closeDocument\(\)/.test(background), 'last capture stop closes the idle offscreen document');
 ok(/ensureOffscreenDocument\(\)[\s\S]*?cancelOffscreenIdleClose\(\)/.test(background), 'new capture creation cancels a pending offscreen close');

@@ -30,7 +30,7 @@ Chrome requires disclosure even when data is handled only on the user's device.
 | Dashboard category | Selection | Explanation |
 | --- | --- | --- |
 | Website content | Yes | Tab audio samples and media/player state are processed locally to balance sound and enforce mute/volume intent. Audio samples are never uploaded. |
-| Web history | Yes | The current tab URL/origin is used locally for authorization ownership and per-site rules. LoudEase does not read Chrome history or build a historical browsing profile. |
+| Web history | Yes | URLs/origins of active, audible, recognized-media, or user-authorized HTTP(S) tabs are handled locally for observer recovery, authorization ownership, and per-site rules. The observer is injected only for audible, recognized-media, captured, or explicitly opened tabs. LoudEase does not read Chrome history or build a historical browsing profile, and audio capture still starts only after the user invokes LoudEase for a tab. |
 | User activity | No | LoudEase does not monitor general clicks, keystrokes, cursor movement, scrolling, or network activity. Media play/mute/volume state is disclosed above as website content. |
 | Personally identifiable information | No | No names, email addresses, account identifiers, addresses, or government identifiers are collected. |
 | Health, financial, authentication, personal communications, location | No | These categories are not accessed or collected. |

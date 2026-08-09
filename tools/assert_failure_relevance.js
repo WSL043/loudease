@@ -11,7 +11,7 @@ const legacyEnginePath = path.join(root, 'content', 'engine.js');
 
 const checks = [
   ['legacy MAIN world content engine is deleted', !fs.existsSync(legacyEnginePath)],
-  ['manifest injects only lightweight bridge', manifest.includes('"content/bridge.js"') && !manifest.includes('"content/engine.js"') && !manifest.includes('"shared/core.js"')],
+  ['manifest avoids all-page content injection and background injects only the lightweight bridge', !manifest.includes('"content/bridge.js"') && !manifest.includes('"content/engine.js"') && /files: \['content\/bridge\.js'\]/.test(background) && !/files: \[[^\]]*(?:content\/engine|shared\/core)/.test(background)],
   ['bridge has media observer helpers', /function mediaDetail\(media, index\)/.test(bridge) && /function playerState\(media\)/.test(bridge)],
   ['bridge reports media status without page audio processing', /processedCount: 0/.test(bridge) && /activeProcessorCount: 0/.test(bridge) && /averageLiftDb: 0/.test(bridge)],
   ['bridge does not use WebAudio or page source hooks', !/AudioContext|webkitAudioContext|createMediaElementSource|captureStream|getUserMedia|tabCapture/.test(bridge)],
@@ -24,7 +24,7 @@ const checks = [
   ['background no longer stops stale page engines from MAIN world', !/function stopStaleEngine\(tabId/.test(background) && !/__WEB_VOLUME_BALANCER_ENGINE_STOP__/.test(background)],
   ['GET_STATUS is a read-only status query', /message\.type === 'WVB_GET_STATUS'[\s\S]*?return aggregateStatus\(tabId\);/.test(background) && !/message\.ensure === true[\s\S]*?ensureInjected/.test(background)],
   ['observer injection is an explicit action', /message\.type === 'WVB_ENSURE_OBSERVER'[\s\S]*?ensureInjected\(tabId, tabUrl, \{ clearStatus: true, force: true \}\)/.test(background) && /observer:ensure-ok/.test(background)],
-  ['extension install proactively reinjects lightweight observers', /function ensureOpenTabsInjected\(options = \{\}\)/.test(background) && /tab\.audible \|\| tab\.active/.test(background) && /onInstalled\.addListener[\s\S]*?ensureOpenTabsInjected\(\{ clearStatus: true \}\)/.test(background)],
+  ['extension install restores lightweight observers only for useful tabs', /function ensureOpenTabsInjected\(options = \{\}\)/.test(background) && /hint\.mediaTarget && !hint\.audible && !captureStatuses\.get\(hint\.tabId\)\?\.active/.test(background) && /onInstalled\.addListener[\s\S]*?ensureOpenTabsInjected\(\{ clearStatus: true \}\)/.test(background)],
   ['background aggregates analyser silent status', /analysisSilentCount/.test(background) && /averageInputDb/.test(background) && /averageInputPeak/.test(background)],
   ['offscreen reports manifest version', /ENGINE_VERSION = chrome\.runtime\?\.getManifest\?\.\(\)\.version/.test(offscreen) && /manifest\.json/.test(offscreen)],
   ['offscreen reports capture state and tracks', /state: this\.state/.test(offscreen) && /trackCount: stream\.trackCount/.test(offscreen) && /audioTracks: stream\.audioTracks/.test(offscreen)],

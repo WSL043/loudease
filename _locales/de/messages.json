@@ -348,7 +348,7 @@
   "sitesTab": { "message": "Website-Regeln" },
   "diagnosticsTab": { "message": "Support & Diagnose" },
   "captureGestureTitle": { "message": "Neue Tabs brauchen einen Klick" },
-  "captureGestureHelp": { "message": "Chrome verlangt, dass die Erweiterung einmal geöffnet wird, bevor ein neuer Tab ausgeglichen werden kann." },
+  "captureGestureHelp": { "message": "Chrome verlangt einen Klick, bevor ein neuer Tab ausgeglichen werden kann. Ein schlanker lokaler Beobachter verwendet die Seiten-URL sowie Wiedergabe-, Stumm- und Lautstärkestatus; Browser- und Audiodaten werden nicht an den Entwickler gesendet." },
   "generalHelp": { "message": "Lege das Standardaussehen und -verhalten der Erweiterung fest." },
   "appearanceHeading": { "message": "Darstellung" },
   "languageLabel": { "message": "Sprache" },

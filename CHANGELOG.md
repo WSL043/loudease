@@ -4,6 +4,9 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Tightened the first 40 ms after a loud onset in proportion to the loud-cut strength, closing the audible gap before the 20 ms programme controller catches up.
+- Removed the fixed all-page status heartbeat and reduced active AudioWorklet diagnostic messages from 50 Hz to about 10 Hz without changing render-thread DSP cadence.
+- Made already-stopped capture cleanup return promptly when no offscreen audio document exists.
 - Strengthened full-scale quiet leveling so genuinely quiet passages move toward the same bounded target as loud material.
 - Replaced the quiet detector's mean-energy window with a robust 100 ms median window so isolated peaks no longer suppress the whole passage.
 - Added a strength-scaled, bounded look-ahead limiter allowance for high-crest quiet material, plus convergence and no-hard-clip regressions.

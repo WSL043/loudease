@@ -17,9 +17,9 @@ const checks = [
   ['worklet strong lift stays explicitly bounded', /MAX_LIFT_DB = 34/.test(worklet) && /LIFT_LIMITER_BUDGET_DB = 15/.test(worklet) && /effectiveLiftBudget/.test(worklet)],
   ['worklet assists only measured limiter-bound quiet output', /REALIZED_LIFT_ASSIST_RATIO = 0\.5/.test(worklet) && /realizedLiftAssistDb/.test(worklet) && /limiterReductionDb/.test(worklet)],
   ['worklet immediately invalidates stale quiet classification on a low-crest loud frame', /LIFT_ONSET_MAX_CREST_DB = 18/.test(worklet) && /Math\.max\(robustLiftDb, instantDb\)/.test(worklet)],
-  ['lifted transitions and new loud onsets use a short stricter safety ceiling', /LIFT_SAFETY_CEILING_DB = -9/.test(worklet) && /ONSET_PROTECTION_TRIGGER_DB = -18/.test(worklet) && /TRANSITION_PROTECTION_SECONDS = 0\.04/.test(worklet) && /transitionProtectionSamples > 0/.test(worklet)],
+  ['lifted transitions, post-silence onsets, and active programme jumps use a strength-scaled short safety ceiling', /LIFT_SAFETY_CEILING_DB = -9/.test(worklet) && /TRANSITION_PROTECTION_DEPTH_DB = 15/.test(worklet) && /ONSET_PROTECTION_TRIGGER_DB = -18/.test(worklet) && /PROGRAMME_JUMP_TRIGGER_DB = 6/.test(worklet) && /previousInputFramePeak/.test(worklet) && /activeProgrammeJump/.test(worklet) && /TRANSITION_PROTECTION_SECONDS = 0\.04/.test(worklet) && /transitionProtectionSamples > 0/.test(worklet) && /TRANSITION_PROTECTION_DEPTH_DB \* \(this\.cutStrength \/ 100\)/.test(worklet)],
   ['startup gate waits for the first measured control frame', /meterSequence < 0/.test(offscreen) && /this\.openStartupGateIfReady\(\);/.test(offscreen)],
-  ['diagnostics are returned by the worklet', /type: 'state'/.test(worklet) && /handleLevelerMessage/.test(offscreen)]
+  ['diagnostics are returned at a lower rate without slowing DSP control', /STATE_REPORT_INTERVAL_FRAMES = 5/.test(worklet) && /type: 'state'/.test(worklet) && /reportLimitedSamples \+= this\.limitedSamples/.test(worklet) && /handleLevelerMessage/.test(offscreen)]
 ];
 let failed = false;
 for (const [name, ok] of checks) { if (ok) console.log(`OK   ${name}`); else { console.error(`FAIL ${name}`); failed = true; } }

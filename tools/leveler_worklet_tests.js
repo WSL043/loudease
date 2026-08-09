@@ -84,7 +84,17 @@ assert(
   JSON.stringify(unconfigured.messages)
 );
 const configuredOut = render(unconfigured, 0.1, 0.2, unconfiguredOut.samples);
-assert('configured worklet begins processing audio', configuredOut.rms > 0.05, String(configuredOut.rms));
+assert(
+  'configured worklet begins processing audio without a loud startup leak',
+  configuredOut.rms > 0.01 && configuredOut.rms < 0.04,
+  String(configuredOut.rms)
+);
+const configuredStates = unconfigured.messages.filter((message) => message.type === 'state');
+assert(
+  'worklet keeps sample-rate DSP while limiting diagnostic state messages to about 10 Hz',
+  configuredStates.length >= 1 && configuredStates.length <= 2,
+  String(configuredStates.length)
+);
 
 const zero = new ProcessorClass();
 configure(zero, { cutStrength: 0, liftStrength: 0 });
@@ -175,8 +185,15 @@ const liftedOnsetLoud = renderGenerated(liftedOnset, 0.04, (sampleIndex) => (
 ), liftedOnsetQuiet.samples, -1);
 assert(
   'loud onset after quiet lift is caught before the first audible block',
-  liftedOnsetLoud.peak <= Math.pow(10, -9 / 20) + 1e-6,
+  liftedOnsetLoud.peak <= Math.pow(10, -24 / 20) + 1e-6,
   JSON.stringify({ peak: liftedOnsetLoud.peak, state: latest(liftedOnset) })
+);
+liftedOnset.transitionProtectionSamples = 1;
+liftedOnset.cutStrength = 50;
+assert(
+  'transition protection depth follows the loud-cut strength',
+  Math.abs(liftedOnset.ceilingDb() - (-16.5)) < 1e-9,
+  String(liftedOnset.ceilingDb())
 );
 liftedOnset.transitionProtectionSamples = 0;
 liftedOnset.cutStrength = 0;
@@ -195,8 +212,20 @@ const silentOnsetLoud = renderGenerated(silentOnset, 0.04, (sampleIndex) => (
 ), silentOnsetLead.samples, -1);
 assert(
   'loud onset after silence is caught before the first audible block',
-  silentOnsetLoud.peak <= Math.pow(10, -9 / 20) + 1e-6,
+  silentOnsetLoud.peak <= Math.pow(10, -24 / 20) + 1e-6,
   JSON.stringify({ peak: silentOnsetLoud.peak, state: latest(silentOnset) })
+);
+
+const normalOnset = new ProcessorClass();
+configure(normalOnset);
+const normalOnsetLead = render(normalOnset, 1.2, 0.05);
+const normalOnsetLoud = renderGenerated(normalOnset, 0.04, (sampleIndex) => (
+  0.35 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
+), normalOnsetLead.samples, -1);
+assert(
+  'loud jump from an already active normal programme is caught before the first audible block',
+  normalOnsetLoud.peak <= Math.pow(10, -24 / 20) + 1e-6,
+  JSON.stringify({ peak: normalOnsetLoud.peak, state: latest(normalOnset) })
 );
 
 const limited = new ProcessorClass();

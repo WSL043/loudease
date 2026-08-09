@@ -348,7 +348,7 @@
   "sitesTab": { "message": "Regras de sites" },
   "diagnosticsTab": { "message": "Suporte e diagnóstico" },
   "captureGestureTitle": { "message": "Um clique para cada nova guia" },
-  "captureGestureHelp": { "message": "O Chrome exige abrir a extensão uma vez antes de equilibrar uma nova guia." },
+  "captureGestureHelp": { "message": "O Chrome exige um clique antes de equilibrar uma nova guia. Um observador local leve usa a URL da página e o estado de reprodução, silêncio e volume da mídia; dados de navegação e áudio não são enviados ao desenvolvedor." },
   "generalHelp": { "message": "Escolha a aparência e o comportamento padrão da extensão." },
   "appearanceHeading": { "message": "Aparência" },
   "languageLabel": { "message": "Idioma" },

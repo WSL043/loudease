@@ -348,7 +348,7 @@
   "sitesTab": { "message": "Règles de site" },
   "diagnosticsTab": { "message": "Assistance et diagnostic" },
   "captureGestureTitle": { "message": "Un clic pour chaque nouvel onglet" },
-  "captureGestureHelp": { "message": "Chrome impose d'ouvrir l'extension une fois avant d'équilibrer un nouvel onglet." },
+  "captureGestureHelp": { "message": "Chrome impose un clic avant d'équilibrer un nouvel onglet. Un observateur local léger utilise l'URL de la page ainsi que l'état de lecture, de sourdine et de volume des médias ; aucune donnée de navigation ou audio n'est envoyée au développeur." },
   "generalHelp": { "message": "Choisissez l'apparence et le comportement par défaut de l'extension." },
   "appearanceHeading": { "message": "Apparence" },
   "languageLabel": { "message": "Langue" },

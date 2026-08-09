@@ -42,7 +42,7 @@ If the unified worklet cannot load, `offscreen/index.js` falls back to the older
 
 ### Content bridge (`content/bridge.js`)
 
-The isolated content script starts at `document_start` in ordinary HTTP(S) frames. It reports:
+The background injects the isolated content script on demand into ordinary HTTP(S) frames for tabs that are audible, recognized media targets, already captured, or explicitly opened through the popup. Merely being the active tab is not enough. Unrelated pages do not receive it. The bridge reports:
 
 - media element count and playback state;
 - mute and volume observations;
@@ -50,6 +50,7 @@ The isolated content script starts at `document_start` in ordinary HTTP(S) frame
 - lifecycle and frame freshness.
 
 It does not patch `HTMLMediaElement.play`, does not call `createMediaElementSource`, and does not process PCM audio.
+Status updates are event-driven while a tab is idle. The background explicitly polls only active capture sessions, so ordinary pages do not wake the service worker on a fixed heartbeat.
 
 ### Popup (`popup/`)
 

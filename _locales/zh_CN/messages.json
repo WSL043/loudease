@@ -348,7 +348,7 @@
   "sitesTab": { "message": "站点规则" },
   "diagnosticsTab": { "message": "反馈与诊断" },
   "captureGestureTitle": { "message": "新标签页需要点击一次" },
-  "captureGestureHelp": { "message": "受 Chrome 限制，新标签页首次平衡前需要打开一次扩展。" },
+  "captureGestureHelp": { "message": "受 Chrome 限制，新标签页首次平衡前需要点击一次。轻量本地观察器会使用页面网址及媒体播放、静音和音量状态；浏览与音频数据不会发送给开发者。" },
   "generalHelp": { "message": "设置扩展的默认外观和行为。" },
   "appearanceHeading": { "message": "外观" },
   "languageLabel": { "message": "语言" },

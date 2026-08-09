@@ -348,7 +348,7 @@
   "sitesTab": { "message": "網站規則" },
   "diagnosticsTab": { "message": "支援與診斷" },
   "captureGestureTitle": { "message": "新分頁需要點擊一次" },
-  "captureGestureHelp": { "message": "受 Chrome 限制，新分頁首次平衡前需要開啟一次擴充功能。" },
+  "captureGestureHelp": { "message": "受 Chrome 限制，新分頁首次平衡前需要點擊一次。輕量本機觀察器會使用頁面網址及媒體播放、靜音和音量狀態；瀏覽與音訊資料不會傳送給開發者。" },
   "generalHelp": { "message": "設定擴充功能的預設外觀和行為。" },
   "appearanceHeading": { "message": "外觀" },
   "languageLabel": { "message": "語言" },

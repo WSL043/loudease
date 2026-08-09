@@ -348,7 +348,7 @@
   "sitesTab": { "message": "قواعد المواقع" },
   "diagnosticsTab": { "message": "الدعم والتشخيص" },
   "captureGestureTitle": { "message": "النقر مرة واحدة لكل علامة تبويب جديدة" },
-  "captureGestureHelp": { "message": "يتطلب Chrome فتح الإضافة مرة واحدة قبل موازنة علامة تبويب جديدة." },
+  "captureGestureHelp": { "message": "يتطلب Chrome نقرة واحدة قبل موازنة علامة تبويب جديدة. يستخدم مراقب محلي خفيف عنوان الصفحة وحالة تشغيل الوسائط وكتمها ومستوى صوتها؛ ولا تُرسل بيانات التصفح أو الصوت إلى المطوّر." },
   "generalHelp": { "message": "اختر المظهر والسلوك الافتراضيين للإضافة." },
   "appearanceHeading": { "message": "المظهر" },
   "languageLabel": { "message": "اللغة" },

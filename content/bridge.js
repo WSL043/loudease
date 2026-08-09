@@ -8,7 +8,6 @@
   const bridgeToken = `${Date.now()}:${Math.random().toString(36).slice(2)}`;
   const STORAGE_KEY = 'webVolumeBalancer.settings';
   const SITE_SETTINGS_KEY = 'webVolumeBalancer.siteSettings';
-  const STATUS_INTERVAL_MS = 1500;
   const MUTATION_DEBOUNCE_MS = 350;
   const FULL_RESCAN_INTERVAL_MS = 15000;
   const MAX_TEXT = 240;
@@ -30,7 +29,6 @@
   };
   let observer = null;
   let mutationTimer = null;
-  let statusTimer = null;
   let storageChangeListener = null;
   let runtimeMessageListener = null;
   let lastFullScanAt = 0;
@@ -399,7 +397,6 @@
   }
 
   function cleanup() {
-    window.clearInterval(statusTimer);
     window.clearTimeout(mutationTimer);
     observer?.disconnect();
     for (const [media, eventNames] of mediaListeners.entries()) {
@@ -419,7 +416,6 @@
     document.removeEventListener('visibilitychange', reportStatus);
     document.removeEventListener('DOMContentLoaded', startObserver);
     window.removeEventListener('pagehide', cleanup);
-    statusTimer = null;
     mutationTimer = null;
     observer = null;
   }
@@ -468,5 +464,4 @@
   }
   syncSettings();
   reportStatus();
-  statusTimer = window.setInterval(reportStatus, STATUS_INTERVAL_MS);
 })();

@@ -348,7 +348,7 @@
   "sitesTab": { "message": "サイトルール" },
   "diagnosticsTab": { "message": "サポートと診断" },
   "captureGestureTitle": { "message": "新しいタブでは1回クリック" },
-  "captureGestureHelp": { "message": "Chrome の制限により、新しいタブを調整する前に拡張機能を一度開く必要があります。" },
+  "captureGestureHelp": { "message": "Chrome の制限により、新しいタブを調整する前に1回クリックする必要があります。軽量なローカル監視機能はページ URL とメディアの再生・ミュート・音量状態を使用しますが、閲覧データや音声データを開発者へ送信しません。" },
   "generalHelp": { "message": "拡張機能の既定の外観と動作を設定します。" },
   "appearanceHeading": { "message": "外観" },
   "languageLabel": { "message": "言語" },
