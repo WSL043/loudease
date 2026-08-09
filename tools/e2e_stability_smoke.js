@@ -492,7 +492,7 @@ function assertActiveCapture(snapshot, label) {
   if (!status.captureActive) {
     throw new Error(`${label}: captureActive=false ${JSON.stringify(status)}`);
   }
-  if (status.capturePipelineMode !== 'leveler-v3') {
+  if (status.capturePipelineMode !== 'programme-leveler-v4') {
     throw new Error(`${label}: unexpected pipeline ${status.capturePipelineMode}`);
   }
   if (Number(status.captureAudioTrackCount || status.capture?.audioTrackCount || 0) < 1) {

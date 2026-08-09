@@ -13,66 +13,127 @@ global.AudioWorkletProcessor = class {
 global.registerProcessor = (name, implementation) => {
   if (name === 'wvb-leveler-processor') ProcessorClass = implementation;
 };
+require(path.resolve(__dirname, '..', 'shared', 'programme-leveler-policy.js'));
 require(path.resolve(__dirname, '..', 'offscreen', 'leveler-worklet.js'));
 
 function assert(name, condition, details = '') {
   if (condition) console.log(`OK   ${name}`);
-  else { console.error(`FAIL ${name}${details ? `: ${details}` : ''}`); process.exitCode = 1; }
+  else {
+    console.error(`FAIL ${name}${details ? `: ${details}` : ''}`);
+    process.exitCode = 1;
+  }
 }
 
 function configure(processor, overrides = {}, media = {}) {
   processor.port.onmessage({ data: {
     type: 'configure',
-    configSequence: 1,
-    settings: { enabled: true, respectPlayerVolume: true, cutStrength: 100, liftStrength: 100, ...overrides },
+    configSequence: media.configSequence ?? 1,
+    settings: {
+      enabled: true,
+      respectPlayerVolume: true,
+      cutStrength: 100,
+      liftStrength: 100,
+      ...overrides
+    },
     playerVolumeCap: media.playerVolumeCap ?? 1,
     playerVolumeReliable: media.playerVolumeReliable ?? true,
     playerMuted: media.playerMuted ?? false,
-    allowUnknownVolumeLift: media.allowUnknownVolumeLift ?? false
+    allowUnknownVolumeLift: media.allowUnknownVolumeLift ?? false,
+    programmeKey: media.programmeKey ?? 'programme-a'
   } });
 }
 
-function render(processor, seconds, amplitude, startSample = 0) {
-  return renderGenerated(processor, seconds, (sampleIndex) => (
-    amplitude * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
-  ), startSample);
+function sine(amplitude, frequency = 997) {
+  return (sampleIndex) => amplitude * Math.sin(2 * Math.PI * frequency * sampleIndex / SAMPLE_RATE);
 }
 
-function renderGenerated(processor, seconds, generator, startSample = 0, warmupBlocks = 2) {
+function renderGenerated(processor, seconds, generator, startSample = 0, collect = false) {
   const blocks = Math.ceil(seconds * SAMPLE_RATE / BLOCK_SIZE);
+  const outputSamples = collect ? [] : null;
   let peak = 0;
   let energy = 0;
   let samples = 0;
   for (let block = 0; block < blocks; block += 1) {
     const input = new Float32Array(BLOCK_SIZE);
     const output = new Float32Array(BLOCK_SIZE);
-    for (let i = 0; i < BLOCK_SIZE; i += 1) input[i] = generator(startSample + block * BLOCK_SIZE + i);
-    processor.process([[input]], [[output]]);
-    if (block > warmupBlocks) for (const value of output) { peak = Math.max(peak, Math.abs(value)); energy += value * value; samples += 1; }
-  }
-  return { peak, rms: Math.sqrt(energy / Math.max(1, samples)), samples: blocks * BLOCK_SIZE };
-}
-
-function renderImpulseTrain(processor, seconds, peakAmplitude, startSample = 0) {
-  const blocks = Math.ceil(seconds * SAMPLE_RATE / BLOCK_SIZE);
-  const frameSamples = Math.round(SAMPLE_RATE * 0.02);
-  let peak = 0;
-  let energy = 0;
-  let samples = 0;
-  for (let block = 0; block < blocks; block += 1) {
-    const input = new Float32Array(BLOCK_SIZE);
-    const output = new Float32Array(BLOCK_SIZE);
-    for (let i = 0; i < BLOCK_SIZE; i += 1) {
-      const absoluteSample = startSample + block * BLOCK_SIZE + i;
-      input[i] = absoluteSample % frameSamples === 0 ? peakAmplitude : 0;
+    for (let index = 0; index < BLOCK_SIZE; index += 1) {
+      input[index] = generator(startSample + (block * BLOCK_SIZE) + index);
     }
     processor.process([[input]], [[output]]);
-    if (block > 2) for (const value of output) { peak = Math.max(peak, Math.abs(value)); energy += value * value; samples += 1; }
+    for (const value of output) {
+      peak = Math.max(peak, Math.abs(value));
+      energy += value * value;
+      samples += 1;
+      if (outputSamples) outputSamples.push(value);
+    }
   }
-  return { peak, rms: Math.sqrt(energy / Math.max(1, samples)), samples: blocks * BLOCK_SIZE };
+  return {
+    peak,
+    rms: Math.sqrt(energy / Math.max(1, samples)),
+    sampleCount: blocks * BLOCK_SIZE,
+    outputSamples
+  };
 }
 
-function latest(processor) { return processor.messages.filter((message) => message.type === 'state').at(-1) || {}; }
+function render(processor, seconds, amplitude, startSample = 0, collect = false) {
+  return renderGenerated(processor, seconds, sine(amplitude), startSample, collect);
+}
+
+function states(processor) {
+  return processor.messages.filter((message) => message.type === 'state');
+}
+
+function latest(processor) {
+  return states(processor).at(-1) || {};
+}
+
+function steady(processor, fraction = 0.35) {
+  const all = states(processor);
+  const selected = all.slice(Math.floor(all.length * (1 - fraction)));
+  const average = (field) => selected.reduce((sum, state) => sum + Number(state[field] || 0), 0)
+    / Math.max(1, selected.length);
+  return {
+    inputDb: average('momentaryInputDb'),
+    outputDb: average('outputMomentaryDb'),
+    gainDb: average('currentGainDb'),
+    limiterReductionDb: average('currentLimiterReductionDb'),
+    hardClippedSamples: all.reduce((sum, state) => sum + Number(state.hardClippedSamples || 0), 0)
+  };
+}
+
+function renderSteady(amplitude, media = {}) {
+  const processor = new ProcessorClass();
+  configure(processor, {}, media);
+  render(processor, 5, amplitude);
+  return { processor, summary: steady(processor) };
+}
+
+function windowMetrics(samples, seconds) {
+  const length = Math.min(samples.length, Math.round(SAMPLE_RATE * seconds));
+  let energy = 0;
+  let peak = 0;
+  for (let index = 0; index < length; index += 1) {
+    const value = samples[index];
+    energy += value * value;
+    peak = Math.max(peak, Math.abs(value));
+  }
+  return {
+    rmsDb: 20 * Math.log10(Math.max(1e-12, Math.sqrt(energy / Math.max(1, length)))),
+    peakDb: 20 * Math.log10(Math.max(1e-12, peak))
+  };
+}
+
+function onsetAfter(leadAmplitude, onsetAmplitude = 0.35) {
+  const processor = new ProcessorClass();
+  configure(processor);
+  const lead = render(processor, 1.5, leadAmplitude);
+  const onset = render(processor, 0.08, onsetAmplitude, lead.sampleCount, true);
+  return {
+    processor,
+    first20Ms: windowMetrics(onset.outputSamples, 0.02),
+    first40Ms: windowMetrics(onset.outputSamples, 0.04)
+  };
+}
 
 const unconfigured = new ProcessorClass();
 const unconfiguredOut = render(unconfigured, 0.05, 0.2);
@@ -83,17 +144,16 @@ assert(
   unconfigured.messages.some((message) => message.type === 'configured' && message.configSequence === 1),
   JSON.stringify(unconfigured.messages)
 );
-const configuredOut = render(unconfigured, 0.1, 0.2, unconfiguredOut.samples);
+const configuredOut = render(unconfigured, 0.1, 0.2, unconfiguredOut.sampleCount);
 assert(
-  'configured worklet begins processing audio without a loud startup leak',
-  configuredOut.rms > 0.01 && configuredOut.rms < 0.04,
-  String(configuredOut.rms)
+  'configured worklet opens through the adaptive startup ceiling',
+  configuredOut.rms > 0.01 && configuredOut.peak <= 10 ** (-12.9 / 20),
+  JSON.stringify(configuredOut)
 );
-const configuredStates = unconfigured.messages.filter((message) => message.type === 'state');
 assert(
-  'worklet keeps sample-rate DSP while limiting diagnostic state messages to about 10 Hz',
-  configuredStates.length >= 1 && configuredStates.length <= 2,
-  String(configuredStates.length)
+  'diagnostic messages remain near 10 Hz while control runs at audio rate',
+  states(unconfigured).length >= 1 && states(unconfigured).length <= 2,
+  String(states(unconfigured).length)
 );
 
 const zero = new ProcessorClass();
@@ -101,146 +161,120 @@ configure(zero, { cutStrength: 0, liftStrength: 0 });
 const zeroOut = render(zero, 0.8, 0.2);
 assert('zero strength remains unity', Math.abs(zeroOut.rms - 0.2 / Math.SQRT2) < 0.003, String(zeroOut.rms));
 
-const loud = new ProcessorClass();
-configure(loud);
-const loudOut = render(loud, 1.2, 0.35);
-assert('loud material is attenuated to the common target', latest(loud).currentGainDb < -15 && Math.abs(latest(loud).outputMomentaryDb - (-29)) < 1, JSON.stringify(latest(loud)));
-
-const quiet = new ProcessorClass();
-configure(quiet);
-const quietOut = render(quiet, 1.2, 0.008);
-assert('quiet material receives strong lift to the common target', latest(quiet).currentGainDb > 15 && Math.abs(latest(quiet).outputMomentaryDb - (-29)) < 1, JSON.stringify(latest(quiet)));
+const loud = renderSteady(0.35);
+const typical = renderSteady(0.12);
+const quiet = renderSteady(0.02);
+const veryQuiet = renderSteady(0.008);
+const outputs = [loud, typical, quiet, veryQuiet].map((item) => item.summary.outputDb);
 assert(
-  'worklet loud and quiet outputs converge',
-  Math.abs(latest(loud).outputMomentaryDb - latest(quiet).outputMomentaryDb) < 1,
-  JSON.stringify({ loud: latest(loud).outputMomentaryDb, quiet: latest(quiet).outputMomentaryDb, loudRms: loudOut.rms, quietRms: quietOut.rms })
+  'typical programme keeps nearly the same enabled and bypass average',
+  Math.abs(typical.summary.outputDb - typical.summary.inputDb) < 2,
+  JSON.stringify(typical.summary)
+);
+assert(
+  'loud programme receives bounded downward normalization around the new centre',
+  loud.summary.gainDb < -4.5 && loud.summary.outputDb > -19.5 && loud.summary.outputDb < -17.5,
+  JSON.stringify(loud.summary)
+);
+assert(
+  'quiet programme receives strong upward normalization around the new centre',
+  quiet.summary.gainDb > 16 && quiet.summary.outputDb > -21.5 && quiet.summary.outputDb < -19,
+  JSON.stringify(quiet.summary)
+);
+assert(
+  'very quiet programme stays inside the explicit 25 dB lift bound',
+  veryQuiet.summary.gainDb <= 25.01 && veryQuiet.summary.gainDb > 24,
+  JSON.stringify(veryQuiet.summary)
+);
+assert(
+  'loud and quiet programme centres converge without forcing exact identity',
+  Math.max(...outputs) - Math.min(...outputs) < 4,
+  JSON.stringify(outputs)
 );
 
-const lowPlayerVolumeQuiet = new ProcessorClass();
-configure(lowPlayerVolumeQuiet, {}, { playerVolumeCap: 0.25, playerVolumeReliable: true });
-renderImpulseTrain(lowPlayerVolumeQuiet, 1.6, Math.pow(10, -30 / 20));
+const coldQuiet = new ProcessorClass();
+configure(coldQuiet);
+render(coldQuiet, 0.3, 0.02);
 assert(
-  'low player volume preserves captured-domain peak headroom for high-crest quiet material',
-  latest(lowPlayerVolumeQuiet).currentGainDb > 4,
-  JSON.stringify(latest(lowPlayerVolumeQuiet))
+  'upward gain waits for a measured programme instead of guessing from the first samples',
+  Math.abs(latest(coldQuiet).currentGainDb || 0) < 0.25,
+  JSON.stringify(latest(coldQuiet))
+);
+render(coldQuiet, 1.3, 0.02, Math.round(0.3 * SAMPLE_RATE));
+assert(
+  'quiet lift becomes confident after gated programme blocks accumulate',
+  latest(coldQuiet).programmeConfidence >= 0.99 && latest(coldQuiet).currentGainDb > 8,
+  JSON.stringify(latest(coldQuiet))
 );
 
-const noHeadroom = new ProcessorClass();
-configure(noHeadroom);
-render(noHeadroom, 1.2, 0.75);
-assert('quiet lift is unavailable without peak headroom', latest(noHeadroom).currentGainDb <= 0, JSON.stringify(latest(noHeadroom)));
+const quietOnset = onsetAfter(0.008);
+assert(
+  'adaptive lookahead catches a loud onset without the legacy -24 dBFS deep duck',
+  quietOnset.first20Ms.peakDb <= -12.9
+    && quietOnset.first20Ms.rmsDb > -23
+    && quietOnset.first20Ms.rmsDb < -17,
+  JSON.stringify(quietOnset)
+);
+const silenceOnset = onsetAfter(0, 0.8);
+assert(
+  'cold loud onset is caught before the first audible block',
+  silenceOnset.first20Ms.peakDb <= -12.9,
+  JSON.stringify(silenceOnset)
+);
+const normalOnset = onsetAfter(0.12);
+assert(
+  'active-programme jump is bounded relative to the learned output peak',
+  normalOnset.first20Ms.peakDb <= -13.5,
+  JSON.stringify(normalOnset)
+);
 
-const silence = new ProcessorClass();
-configure(silence);
-render(silence, 0.8, 0);
-assert('silence is never lifted', Math.abs(latest(silence).targetGainDb || 0) < 1e-6 && latest(silence).signalActive === false, JSON.stringify(latest(silence)));
-
-const stepped = new ProcessorClass();
-configure(stepped);
-render(stepped, 0.8, 0.35);
-const before = latest(stepped).currentGainDb;
-render(stepped, 0.02, 0.006, 40000);
-const after = latest(stepped).currentGainDb;
-assert('gain envelope has bounded upward steps', after - before <= 3.01, JSON.stringify({ before, after }));
+const fullVolumeQuiet = renderSteady(0.02).summary;
+const quarterVolumeQuiet = renderSteady(0.005, { playerVolumeCap: 0.25, playerVolumeReliable: true }).summary;
+assert(
+  'player-volume compensation preserves the source decision without undoing user volume',
+  Math.abs(fullVolumeQuiet.gainDb - quarterVolumeQuiet.gainDb) < 0.5
+    && Math.abs((fullVolumeQuiet.outputDb - quarterVolumeQuiet.outputDb) - 12.041) < 0.75,
+  JSON.stringify({ fullVolumeQuiet, quarterVolumeQuiet })
+);
+const unknownVolume = renderSteady(0.02, { playerVolumeReliable: false }).summary;
+assert('unknown player volume blocks automatic upward gain', unknownVolume.gainDb <= 0.1, JSON.stringify(unknownVolume));
 
 const highCrest = new ProcessorClass();
 configure(highCrest);
-const highCrestOut = renderGenerated(highCrest, 3, (sampleIndex) => {
-  const quietBed = 0.006 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE);
-  return sampleIndex % Math.round(SAMPLE_RATE * 0.25) === 4000 ? 0.55 : quietBed;
+const highCrestOut = renderGenerated(highCrest, 4, (sampleIndex) => {
+  const bed = 0.006 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE);
+  return sampleIndex % Math.round(SAMPLE_RATE * 0.25) === 4000 ? 0.55 : bed;
 });
-const highCrestStates = highCrest.messages.filter((message) => message.type === 'state');
-const highCrestLimitedSamples = highCrestStates.reduce((sum, state) => sum + Number(state.limitedSamples || 0), 0);
+const highCrestStates = states(highCrest);
 const highCrestHardClips = highCrestStates.reduce((sum, state) => sum + Number(state.hardClippedSamples || 0), 0);
-const highCrestSteadyStates = highCrestStates.slice(Math.floor(highCrestStates.length / 2));
-const highCrestSummary = highCrestSteadyStates.reduce((summary, state) => ({
-  minTargetGainDb: Math.min(summary.minTargetGainDb, Number(state.targetGainDb || 0)),
-  maxTargetGainDb: Math.max(summary.maxTargetGainDb, Number(state.targetGainDb || 0)),
-  averageCurrentGainDb: summary.averageCurrentGainDb + (Number(state.currentGainDb || 0) / highCrestSteadyStates.length),
-  averageOutputMomentaryDb: summary.averageOutputMomentaryDb + (Number(state.outputMomentaryDb || 0) / highCrestSteadyStates.length)
-}), {
-  minTargetGainDb: Infinity,
-  maxTargetGainDb: -Infinity,
-  averageCurrentGainDb: 0,
-  averageOutputMomentaryDb: 0
-});
-const highCrestLoudGapDb = Math.abs(
-  highCrestSummary.averageOutputMomentaryDb - latest(loud).outputMomentaryDb
-);
-assert(
-  'full-strength high-crest quiet material converges through bounded limiting',
-  highCrestSummary.averageCurrentGainDb > 18
-    && highCrestLoudGapDb < 3.5
-    && highCrestLimitedSamples > 0,
-  JSON.stringify({ latest: latest(highCrest), highCrestLimitedSamples, highCrestLoudGapDb, highCrestSummary })
-);
-assert('high-crest lift remains below the ceiling', highCrestOut.peak <= Math.pow(10, -3 / 20) + 1e-6, String(highCrestOut.peak));
-assert('high-crest lift uses lookahead limiting without hard clipping', highCrestHardClips === 0, String(highCrestHardClips));
+assert('high-crest material receives useful but bounded lift', steady(highCrest).gainDb > 15, JSON.stringify(steady(highCrest)));
+assert('lookahead limiter keeps high-crest output sample-safe', highCrestOut.peak <= 10 ** (-3 / 20) + 1e-6 && highCrestHardClips === 0, JSON.stringify({ highCrestOut, highCrestHardClips }));
 
-const liftedOnset = new ProcessorClass();
-configure(liftedOnset);
-const liftedOnsetQuiet = render(liftedOnset, 1.2, 0.008);
-const liftedOnsetLoud = renderGenerated(liftedOnset, 0.04, (sampleIndex) => (
-  0.35 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
-), liftedOnsetQuiet.samples, -1);
+const boundary = new ProcessorClass();
+configure(boundary, {}, { programmeKey: 'programme-a' });
+const boundaryLead = render(boundary, 5, 0.2);
+configure(boundary, {}, { programmeKey: 'programme-b', configSequence: 2 });
+render(boundary, 5, 0.02, boundaryLead.sampleCount);
 assert(
-  'loud onset after quiet lift is caught before the first audible block',
-  liftedOnsetLoud.peak <= Math.pow(10, -24 / 20) + 1e-6,
-  JSON.stringify({ peak: liftedOnsetLoud.peak, state: latest(liftedOnset) })
-);
-liftedOnset.transitionProtectionSamples = 1;
-liftedOnset.cutStrength = 50;
-assert(
-  'transition protection depth follows the loud-cut strength',
-  Math.abs(liftedOnset.ceilingDb() - (-16.5)) < 1e-9,
-  String(liftedOnset.ceilingDb())
-);
-liftedOnset.transitionProtectionSamples = 0;
-liftedOnset.cutStrength = 0;
-liftedOnset.currentGainDb = 1;
-assert(
-  'ordinary lift keeps its -3 dBFS ceiling when cut strength is zero',
-  Math.abs(liftedOnset.ceilingDb() - (-3)) < 1e-9,
-  String(liftedOnset.ceilingDb())
-);
-
-const silentOnset = new ProcessorClass();
-configure(silentOnset);
-const silentOnsetLead = render(silentOnset, 0.2, 0);
-const silentOnsetLoud = renderGenerated(silentOnset, 0.04, (sampleIndex) => (
-  0.8 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
-), silentOnsetLead.samples, -1);
-assert(
-  'loud onset after silence is caught before the first audible block',
-  silentOnsetLoud.peak <= Math.pow(10, -24 / 20) + 1e-6,
-  JSON.stringify({ peak: silentOnsetLoud.peak, state: latest(silentOnset) })
-);
-
-const normalOnset = new ProcessorClass();
-configure(normalOnset);
-const normalOnsetLead = render(normalOnset, 1.2, 0.05);
-const normalOnsetLoud = renderGenerated(normalOnset, 0.04, (sampleIndex) => (
-  0.35 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE)
-), normalOnsetLead.samples, -1);
-assert(
-  'loud jump from an already active normal programme is caught before the first audible block',
-  normalOnsetLoud.peak <= Math.pow(10, -24 / 20) + 1e-6,
-  JSON.stringify({ peak: normalOnsetLoud.peak, state: latest(normalOnset) })
+  'explicit programme key change resets cumulative measurement',
+  latest(boundary).loudnessResetCount === 1
+    && latest(boundary).programmeInputDb < -35
+    && steady(boundary).outputDb > -23,
+  JSON.stringify(latest(boundary))
 );
 
 const limited = new ProcessorClass();
 configure(limited);
-const limitedOut = render(limited, 0.6, 1);
-const limitedStates = limited.messages.filter((message) => message.type === 'state');
-const hardClips = limitedStates.reduce((sum, state) => sum + Number(state.hardClippedSamples || 0), 0);
-assert('lookahead limiter respects the ceiling', limitedOut.peak <= Math.pow(10, -3 / 20) + 1e-6, String(limitedOut.peak));
+const limitedOut = render(limited, 0.8, 1);
+const hardClips = states(limited).reduce((sum, state) => sum + Number(state.hardClippedSamples || 0), 0);
+assert('lookahead limiter respects the -3 dBFS ceiling', limitedOut.peak <= 10 ** (-3 / 20) + 1e-6, String(limitedOut.peak));
 assert('lookahead limiter avoids hard clipping', hardClips === 0, String(hardClips));
 
 const runtime = new ProcessorClass();
 configure(runtime, { cutStrength: 0, liftStrength: 0 });
 render(runtime, 0.5, 0.35);
-configure(runtime, { cutStrength: 100, liftStrength: 100 });
-render(runtime, 1, 0.35, 30000);
+configure(runtime, { cutStrength: 100, liftStrength: 100 }, { configSequence: 2 });
+render(runtime, 2, 0.35, Math.round(0.5 * SAMPLE_RATE));
 assert('runtime setting updates change processing', latest(runtime).currentGainDb < -3, JSON.stringify(latest(runtime)));
 
 const muted = new ProcessorClass();

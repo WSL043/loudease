@@ -20,7 +20,7 @@ const checks = [
   ['audit doc names first principles and non-negotiable facts', /^# First-principles audit/m.test(audit) && /## Non-negotiable facts/.test(audit) && /## Failure containment/.test(audit)],
   ['audit doc records the open-source boundary', /Open-source the runtime and public tests/.test(audit) && /Keep private any licensed listening corpus/.test(audit)],
   ['architecture cites the current runtime version', architecture.includes(`current \`${currentVersion}\` runtime`)],
-  ['DSP doc cites the current implementation version', dsp.includes(`version \`${currentVersion}\``) && /momentary window/.test(dsp) && /short-term window/.test(dsp)],
+  ['DSP doc cites the current implementation version', dsp.includes(`version \`${currentVersion}\``) && /Momentary loudness uses/.test(dsp) && /Short-term loudness uses/.test(dsp)],
   ['known limitations cite the current beta version', limitations.includes(`Version \`${currentVersion}\` is a beta`)],
   ['research documents established methods without novelty inflation', /established browser and audio engineering techniques/.test(research) && /not an uncopyable secret/.test(research)],
   ['legacy page engine is not present', !fs.existsSync(path.join(root, 'content', 'engine.js'))],

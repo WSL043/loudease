@@ -17,13 +17,13 @@ The runtime combines established browser and audio engineering techniques. The v
 
 Tab capture avoids one-source-node ownership conflicts and follows SPA media replacement, live players, and page Web Audio. The tradeoff is mandatory per-tab user authorization.
 
-### Loudness riding instead of one fixed compressor
+### Programme-centred control instead of one fixed compressor
 
-The product needs slow program-level consistency and fast peak protection. One aggressive compressor can pump, alter transients, and make music tiring. The current design separates loudness measurement, gain target policy, envelope stability, and final limiting.
+The product needs programme-level consistency and fast peak protection. One aggressive compressor can pump, alter transients, and make music tiring. The current design uses gated cumulative programme measurement, one relative gain law, one asymmetric envelope, and final limiting.
 
-### Strength-scaled bounded upward gain
+### Confidence-gated bounded upward gain
 
-Quiet material is not automatically safe to amplify. Low RMS can coexist with high peaks or noise. Upward gain therefore depends on a signal gate, a median-based 100 ms quiet deficit, robust and instantaneous peak headroom, and player-volume reliability. Full strength can use up to `15 dB` of bounded look-ahead peak compression to move high-crest quiet passages closer to the common target; lower settings scale that allowance down.
+Quiet material is not automatically safe to amplify. Low RMS can coexist with high peaks or noise. Upward gain therefore waits for gated programme confidence and depends on captured-domain peak headroom and player-volume reliability. Full strength is capped at `25 dB` and can use up to `10 dB` of bounded look-ahead limiter allowance; lower settings scale both down.
 
 ### Sample-peak look-ahead limiter
 

@@ -16,10 +16,11 @@
 ## DSP
 
 - The limiter is sample-peak based and does not yet estimate oversampled true peak.
-- Measurement is K-weighted and dual-window but is not a complete BS.1770 integrated LUFS implementation.
+- Measurement is K-weighted with gated cumulative programme estimation, but is not a certified BS.1770 implementation.
 - There is no speech/music classifier, source separation, denoising, or multiband compression.
 - Equal perceived loudness across all content is impossible without sacrificing dynamics and introducing artifacts.
-- Full-strength quiet lift can use up to `15 dB` of bounded peak compression, so high-crest music may sound intentionally denser and source noise may become more audible.
+- Full-strength quiet lift can use up to `10 dB` of bounded limiter allowance, so high-crest music may sound intentionally denser and source noise may become more audible.
+- A site that changes programmes without changing page or media identity can leave the cumulative reference stale; LoudEase deliberately does not use a rolling target that would chase ordinary programme sections.
 - Synthetic fixtures do not prove universal listening preference.
 
 ## Compatibility

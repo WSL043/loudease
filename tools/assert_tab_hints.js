@@ -44,5 +44,6 @@ ok(/const status = await collectFrameStatusNow[\s\S]*?if \(!status\)[\s\S]*?awai
 ok(background.includes('classifyFrameRuntime(status)'), 'background classifies bridgeVersion as well as engineVersion');
 ok(background.includes('playerVolumeConflict') && background.includes('audibleVolumeMismatch') && background.includes('hasVolumeConflict ? safeMinVolumeCap : maxVolumeCap'), 'background uses conservative volume cap when active media volumes conflict but does not hard-mute audible tabs from stale page state');
 ok(background.includes('const effectiveVolumeKnown = captureVolumeKnown || mediaVolumeKnown'), 'fresh bridge volume state can correct stale capture volume state');
+ok(background.includes('const lastProgrammeKeys = new Map();') && background.includes('lastProgrammeKeys.get(tabId)'), 'paused media retains the last active programme key instead of aggregating idle frame identities');
 ok(audit.includes('knownMediaDiagnosticTab'), 'runtime audit searches all diagnostic tabs for media targets');
 ok(audit.includes('live\\.(douyin|bilibili)'), 'runtime audit recognizes live Douyin and live Bilibili hosts');

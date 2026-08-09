@@ -75,6 +75,8 @@ const popupJs = readText('popup/index.js');
 const monitorHtml = readText('monitor/index.html');
 const monitorJs = readText('monitor/index.js');
 const core = readText('shared/core.js');
+const programmePolicy = readText('shared/programme-leveler-policy.js');
+const levelerWorklet = readText('offscreen/leveler-worklet.js');
 const requiredDocs = [
   'docs/RESEARCH.md',
   'docs/ARCHITECTURE.md',
@@ -122,7 +124,7 @@ const realSiteTabs = Array.isArray(diagnostics.tabs)
 const processingRealSiteTabs = realSiteTabs.filter((tab) => (
   tab?.captureActive
   && tab?.captureState === 'processing'
-  && tab?.capturePipelineMode === 'leveler-v3'
+  && tab?.capturePipelineMode === 'programme-leveler-v4'
   && tab?.captureContextState === 'running'
   && ['leveler-worklet', 'worklet', 'analyser-fallback'].includes(tab?.meterMode)
   && Number(tab?.meterFrameAgeMs ?? Infinity) < 1000
@@ -151,7 +153,7 @@ function pocReportReady(report, expect) {
   return report.phase === 'capture-active'
     && report.stopPhase === 'capture-stopped'
     && report.stopOk === true
-    && tab.capturePipelineMode === 'leveler-v3'
+    && tab.capturePipelineMode === 'programme-leveler-v4'
     && tab.captureState === 'processing'
     && tab.captureContextState === 'running'
     && ['leveler-worklet', 'worklet', 'analyser-fallback'].includes(tab.meterMode)
@@ -211,7 +213,7 @@ const dynamicVideoSwitchReady = latestSwitchReports.dynamicVideoReplace?.passed 
   && Number.isFinite(Number(latestSwitchReports.dynamicVideoReplace?.tab?.averageInputDb))
   && Number(latestSwitchReports.dynamicVideoReplace?.tab?.captureAudioTrackCount || 0) >= 1
   && latestSwitchReports.dynamicVideoReplace?.tab?.captureState === 'processing'
-  && latestSwitchReports.dynamicVideoReplace?.tab?.capturePipelineMode === 'leveler-v3'
+  && latestSwitchReports.dynamicVideoReplace?.tab?.capturePipelineMode === 'programme-leveler-v4'
   && Number(latestSwitchReports.dynamicVideoReplace?.tab?.lastSignalAgeMs ?? Infinity) < 2500
   && Number(latestSwitchReports.dynamicVideoReplace?.pageStateAfter?.switchCount || 0) >= 1;
 const pocEvidence = [
@@ -263,10 +265,16 @@ const results = [
   ),
   status(
     'DSP unit coverage',
-    exists('tools/dsp_unit_tests.js') && /computeLevelerGainDb/.test(readText('tools/dsp_unit_tests.js'))
-      ? 'partial'
+    exists('tools/dsp_unit_tests.js')
+      && exists('tools/programme_leveler_experiment.js')
+      && exists('tools/leveler_worklet_tests.js')
+      && exists('tools/offline_audio_graph_tests.js')
+      && /ProgrammeLoudnessEstimator/.test(readText('tools/dsp_unit_tests.js'))
+      && /calibrationSweep/.test(readText('tools/programme_leveler_experiment.js'))
+      && /computeTargetGainDb/.test(programmePolicy)
+      ? 'verified'
       : 'missing',
-    'basic gain policy tests exist'
+    'policy units, centre calibration A/B, production worklet rendering, and OfflineAudioContext graph coverage exist'
   ),
   status(
     'Local extension E2E coverage',
@@ -329,10 +337,16 @@ const results = [
   ),
   status(
     'AudioWorklet or OfflineAudioContext integration tests',
-    /new AudioWorkletNode\(this\.context, 'wvb-limiter-processor'/.test(offscreen) && exists('offscreen/limiter-worklet.js') && exists('tools/offline_audio_graph_tests.js') ? 'verified' : 'partial',
-    /new AudioWorkletNode\(this\.context, 'wvb-limiter-processor'/.test(offscreen) && exists('offscreen/limiter-worklet.js') && exists('tools/offline_audio_graph_tests.js')
-      ? 'AudioWorklet limiter is in the offscreen graph and OfflineAudioContext graph test covers the worklet path'
-      : 'AudioWorklet limiter or OfflineAudioContext graph coverage is incomplete'
+    /new AudioWorkletNode\(this\.context, 'wvb-leveler-processor'/.test(offscreen)
+      && /registerProcessor\('wvb-leveler-processor'/.test(levelerWorklet)
+      && exists('tools/leveler_worklet_tests.js')
+      && exists('tools/offline_audio_graph_tests.js') ? 'verified' : 'partial',
+    /new AudioWorkletNode\(this\.context, 'wvb-leveler-processor'/.test(offscreen)
+      && /registerProcessor\('wvb-leveler-processor'/.test(levelerWorklet)
+      && exists('tools/leveler_worklet_tests.js')
+      && exists('tools/offline_audio_graph_tests.js')
+      ? 'unified leveler worklet has direct render tests and OfflineAudioContext graph coverage'
+      : 'unified AudioWorklet or OfflineAudioContext graph coverage is incomplete'
   ),
   status(
     'Long-run leak test',
@@ -404,12 +418,12 @@ const hardRequirements = [
   ),
   hardRequirement(
     '不出现明显爆音或 clipping',
-    /LIMITER_CEILING_DB/.test(offscreen) && /overall output never clips/.test(readText('tools/offline_audio_tests.js')),
+    /LIMITER_CEILING_DB/.test(offscreen) && /runtime remains sample-safe/.test(readText('tools/programme_leveler_experiment.js')),
     'limiter is present and offline PCM test asserts no clipping'
   ),
   hardRequirement(
     '小声音能被提高',
-    /quiet voice is lifted clearly/.test(readText('tools/offline_audio_tests.js')) && /currentLiftDb/.test(offscreen) && pocLiftReady && pocLiftLowVolumeReady,
+    /quiet programme receives strong upward normalization/.test(readText('tools/leveler_worklet_tests.js')) && /currentLiftDb/.test(offscreen) && pocLiftReady && pocLiftLowVolumeReady,
     pocLiftReady && pocLiftLowVolumeReady
       ? `offline PCM and latest lift E2E prove quiet lift, including low-player-volume source lift: outputDelta=${Number(reportOutputDelta(latestPocReports.liftLowVolume)).toFixed(2)} dB`
       : 'offline PCM covers quiet lift; latest structured lift and low-player-volume lift E2E are required'
@@ -464,7 +478,7 @@ const hardRequirements = [
   ),
   hardRequirement(
     '有自动测试',
-    exists('tools/run_all_checks.js') && exists('tools/offline_audio_tests.js') && exists('tools/e2e_poc_smoke.js'),
+    exists('tools/run_all_checks.js') && exists('tools/programme_leveler_experiment.js') && exists('tools/e2e_poc_smoke.js'),
     'static, DSP, offline audio, and E2E test entrypoints exist'
   ),
   hardRequirement(

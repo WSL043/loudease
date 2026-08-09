@@ -170,7 +170,7 @@ function summarizeTab(tab) {
   const activeProcessorCount = finiteNumber(tab?.activeProcessorCount);
   const captureProcessing = Boolean(tab?.captureActive)
     && tab?.captureState === 'processing'
-    && tab?.capturePipelineMode === 'leveler-v3'
+    && tab?.capturePipelineMode === 'programme-leveler-v4'
     && tab?.captureContextState === 'running'
     && (tab?.meterMode === 'worklet' || tab?.meterMode === 'analyser-fallback')
     && tab?.meterFrameAgeMs != null
@@ -362,7 +362,7 @@ function selfTest() {
         activeProcessorCount: 1,
         captureActive: true,
         captureState: 'processing',
-        capturePipelineMode: 'leveler-v3',
+        capturePipelineMode: 'programme-leveler-v4',
         captureContextState: 'running',
         captureAudioTrackCount: 1,
         meterMode: 'worklet',
@@ -388,7 +388,7 @@ function selfTest() {
         audibleCount: 1,
         captureActive: true,
         captureState: 'processing',
-        capturePipelineMode: 'leveler-v3',
+        capturePipelineMode: 'programme-leveler-v4',
         captureContextState: 'running',
         captureAudioTrackCount: 1,
         meterMode: 'worklet',

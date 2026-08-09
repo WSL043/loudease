@@ -20,7 +20,7 @@
 node .\tools\run_all_checks.js
 ```
 
-该命令会聚合当前所有本地静态/结构检查。它不是行为测试；真实 Chrome 行为由下面的隔离 Chrome E2E 覆盖。
+该命令会聚合本地静态/结构检查、纯 DSP 渲染和 OfflineAudioContext 图测试；它仍不能证明真实站点或可听设备行为，后者由下面的隔离 Chrome E2E 与人工站点矩阵覆盖。
 
 当前已有隔离 Chrome E2E：
 
@@ -32,7 +32,7 @@ node .\tools\e2e_stability_smoke.js
 node .\tools\e2e_long_run_smoke.js --duration-ms 30000
 ```
 
-这些 E2E 已证明本地测试页里的 tabCapture 成功、offscreen 有输入/输出 meter、压大声/提小声/burst 恢复有效、连续接管/停止可恢复、页面 reload 后可重新接管，以及本地切源后仍继续处理。`0.4.82` 还包含 `tools/dsp_unit_tests.js` 核心增益计算测试、`tools/offline_audio_tests.js` 合成 PCM 曲线测试、`tools/offline_audio_graph_tests.js` 真实 OfflineAudioContext 图测试，并通过 `tools/e2e_long_run_smoke.js` 对接管后的状态、音轨、信号 tick、输出峰值、AudioContext 和 offscreen heap 做可配置时长监控。它们仍不能替代真实站点矩阵，包括 YouTube、Bilibili、抖音基线和后续全球代表平台。
+这些 E2E 已证明本地测试页里的 tabCapture 成功、offscreen 有输入/输出 meter、压大声/提小声/burst 恢复有效、连续接管/停止可恢复、页面 reload 后可重新接管，以及本地切源后仍继续处理。当前 DSP 证据由 `tools/dsp_unit_tests.js`、`tools/programme_leveler_experiment.js`、`tools/leveler_worklet_tests.js` 和 `tools/offline_audio_graph_tests.js` 共同提供；`tools/e2e_long_run_smoke.js` 对接管后的状态、音轨、信号 tick、输出峰值、AudioContext 和 offscreen heap 做可配置时长监控。它们仍不能替代真实站点矩阵，包括 YouTube、Bilibili、抖音基线和后续全球代表平台。
 
 30 分钟长跑验收命令：
 
@@ -60,7 +60,7 @@ node .\tools\current_runtime_audit.js
 node .\tools\dsp_unit_tests.js
 ```
 
-覆盖：关闭、0 强度、大声压低、强力小声提升、大小声目标收敛、高峰均方根素材的受控 limiter 预算、峰值保护、播放器音量边界和强度缩放。
+覆盖：关闭、0 强度、节目门控累计、冷启动置信度、节目中心修正、内部动态修正、快速压大声、自适应 onset、峰值预算、播放器音量边界和节目切换重置。`tools/programme_leveler_experiment.js` 还会同条件对打多个节目中心，验证当前 `-19 dB / +25 dB` 选择没有靠单一素材拍脑袋确定。
 
 输入样本：
 

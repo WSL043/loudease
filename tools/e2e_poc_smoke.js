@@ -780,7 +780,7 @@ async function main() {
         }
         if (
           tabStatus?.captureActive &&
-          tabStatus?.capturePipelineMode === 'leveler-v3' &&
+          tabStatus?.capturePipelineMode === 'programme-leveler-v4' &&
           ['leveler-worklet', 'worklet', 'analyser-fallback'].includes(tabStatus?.meterMode) &&
           Number(tabStatus?.meterFrameAgeMs ?? Infinity) < 1000 &&
           hasCapturedSignal &&
@@ -864,7 +864,7 @@ async function main() {
       throw new Error(`Capture did not become active: ${status?.phase || 'unknown'}`);
     }
     const tab = status.tab || {};
-    if (tab.capturePipelineMode !== 'leveler-v3') {
+    if (tab.capturePipelineMode !== 'programme-leveler-v4') {
       throw new Error(`Unexpected pipeline mode: ${tab.capturePipelineMode}`);
     }
     if (tab.staleEngine) {

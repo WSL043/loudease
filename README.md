@@ -54,7 +54,7 @@ LoudEase is not a simple volume booster, an equalizer, or a calibrated hearing-p
   <img src="docs/processing-flow.png" width="960" alt="Uneven input is measured, balanced, and peak limited into a narrower output range while retaining variation">
 </p>
 
-The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted measurements guide separate loud-cut and quiet-lift policies; robust quiet detection prevents isolated peaks from suppressing an otherwise quiet passage, and a look-ahead limiter keeps the result bounded. No raw audio is uploaded.
+The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted gated programme measurement drives one programme-centred gain law: upward gain waits for sustained evidence, while fast protection and a 5 ms look-ahead limiter catch loud onsets. No raw audio is uploaded.
 
 For implementation details, assumptions, and current gaps, read [Audio DSP](docs/AUDIO_DSP.md), [Architecture](docs/ARCHITECTURE.md), and [Known limitations](docs/KNOWN_LIMITATIONS.md).
 
