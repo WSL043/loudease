@@ -12,6 +12,7 @@ const CAPTURE_MEDIA_REFRESH_INTERVAL_MS = 1000;
 const LOCAL_DIAGNOSTICS_URL = 'http://127.0.0.1:18765/loudease';
 const LOCAL_DIAGNOSTICS_INTERVAL_MS = 1000;
 const LOCAL_DIAGNOSTICS_STORAGE_KEY = 'webVolumeBalancer.localDiagnosticsEnabled';
+const E2E_SILENT_SINK_STORAGE_KEY = 'webVolumeBalancer.e2eSilentSink';
 /* WVB_DEV_DIAGNOSTICS_END */
 const CURRENT_VERSION = chrome.runtime.getManifest().version;
 const OFFSCREEN_MESSAGE_RETRY_MS = 120;
@@ -668,6 +669,9 @@ function aggregateStatus(tabId) {
         captureState: capture.state || 'processing',
         capturePipelineMode: capture.pipelineMode || '',
         captureContextState: capture.contextState || '',
+        /* WVB_DEV_DIAGNOSTICS_START */
+        silentSink: capture.silentSink === true,
+        /* WVB_DEV_DIAGNOSTICS_END */
         captureTrackCount: Number(capture.trackCount) || 0,
         captureAudioTrackCount: Number(capture.audioTrackCount) || 0,
         signalTickCount: Number(capture.signalTickCount) || 0,
@@ -885,6 +889,9 @@ function aggregateStatus(tabId) {
     captureState: capture?.state || 'idle',
     capturePipelineMode: capture?.pipelineMode || '',
     captureContextState: capture?.contextState || '',
+    /* WVB_DEV_DIAGNOSTICS_START */
+    silentSink: capture?.silentSink === true,
+    /* WVB_DEV_DIAGNOSTICS_END */
     captureTrackCount: Number(capture?.trackCount) || 0,
     captureAudioTrackCount: Number(capture?.audioTrackCount) || 0,
     signalTickCount: Number(capture?.signalTickCount) || 0,
@@ -1307,11 +1314,17 @@ async function startTabCapture(tabId, tabUrl, providedStreamId = '', popupStream
   }
   let response;
   try {
+    /* WVB_DEV_DIAGNOSTICS_START */
+    const e2eSinkSetting = await chrome.storage.local.get({ [E2E_SILENT_SINK_STORAGE_KEY]: false });
+    /* WVB_DEV_DIAGNOSTICS_END */
     response = await sendOffscreenMessage({
       type: 'WVB_OFFSCREEN_START_CAPTURE',
       tabId,
       streamId,
       nextSettings: await readSettingsForUrl(tabUrl),
+      /* WVB_DEV_DIAGNOSTICS_START */
+      e2eSilentSink: e2eSinkSetting[E2E_SILENT_SINK_STORAGE_KEY] === true,
+      /* WVB_DEV_DIAGNOSTICS_END */
       mediaState: currentTabMediaState(tabId)
     });
   } catch (error) {

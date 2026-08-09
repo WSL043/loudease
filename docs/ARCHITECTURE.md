@@ -98,7 +98,7 @@ The repository produces two allowlist-based builds:
 - `dist/github-dev`: contributor build with opt-in localhost diagnostics;
 - `dist/store`: public store runtime with localhost permission, messages, symbols, and network code removed.
 
-`tools/assert_release_build.js` rejects forbidden paths, localhost strings, development markers, dynamic evaluation, missing runtime references, and invalid locale catalogs.
+The contributor build also exposes a test-only silent `AudioContext` sink for isolated E2E. It is never selected in ordinary use and is removed from the store target. `tools/assert_release_build.js` rejects forbidden paths, localhost or silent-E2E symbols, development markers, dynamic evaluation, missing runtime references, and invalid locale catalogs.
 
 ## Security boundaries
 

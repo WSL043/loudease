@@ -49,6 +49,10 @@ function mb(value) {
 const manifest = readJson('manifest.json') || {};
 const diagnostics = readJson('tmp/latest-diagnostics.json') || {};
 const latestLongRun = readJson('tmp/latest-long-run.json') || {};
+const latestAudibleEndpoint = readJson('tmp/latest-audible-endpoint-a-b.json') || {};
+const latestRealSiteMatrix = readJson('tmp/latest-real-site-matrix-e2e.json') || {};
+const latestRealSiteEndurance = readJson('tmp/latest-real-site-endurance-e2e.json') || {};
+const requiredRealSiteScenarios = ['youtube-video', 'youtube-live', 'bilibili-video', 'bilibili-live', 'douyin-short', 'douyin-live'];
 const latestPocReports = {
   reduce: readJson('tmp/latest-e2e-poc-reduce.json'),
   lift: readJson('tmp/latest-e2e-poc-lift.json'),
@@ -141,6 +145,79 @@ const localLongRunReady = latestLongRun.passed === true
 const localLongRunEvidence = latestLongRun.version
   ? `latest=${latestLongRun.version}, passed=${Boolean(latestLongRun.passed)}, requested=${latestLongRun.requestedDurationMs || 0}ms, signalDelta=${latestLongRun.signalTickDelta || 0}, heapGrowth=${mb(latestLongRun.maxHeapGrowthBytes)}, finalTracks=${latestLongRun.finalAudioTrackCount || 0}, context=${latestLongRun.finalContextState || 'unknown'}`
   : 'no structured long-run report in tmp/latest-long-run.json';
+function realSiteResultBaseReady(result) {
+  const report = result?.report || {};
+  const tab = report.tab || {};
+  return result?.passed === true
+    && Number(result.exitCode) === 0
+    && report.passed === true
+    && report.version === manifest.version
+    && report.silentSink === true
+    && report.nativeAudioOutputOpened === false
+    && report.requestedUrl === result.url
+    && report.phase === 'capture-active'
+    && report.stopPhase === 'capture-stopped'
+    && report.stopOk === true
+    && tab.captureState === 'processing'
+    && tab.capturePipelineMode === 'programme-leveler-v4'
+    && tab.captureContextState === 'running'
+    && tab.silentSink === true
+    && Number(tab.captureAudioTrackCount || 0) >= 1
+    && Number(tab.signalTickCount || 0) >= 20
+    && Number(tab.lastSignalAgeMs ?? Infinity) < 1000
+    && Number(tab.workletHardClippedSamples || 0) === 0
+    && Number(tab.workletMaxHardClipOvershoot || 0) <= 1e-9
+    && !tab.captureError;
+}
+function realSiteResultReady(result) {
+  const tab = result?.report?.tab || {};
+  return realSiteResultBaseReady(result)
+    && ['leveler-worklet', 'worklet', 'analyser-fallback'].includes(tab.meterMode)
+    && Number(tab.meterFrameAgeMs ?? Infinity) < 1000;
+}
+const structuredRealSiteResults = Array.isArray(latestRealSiteMatrix.results)
+  ? latestRealSiteMatrix.results.filter(realSiteResultReady)
+  : [];
+const structuredRealSiteIds = new Set(structuredRealSiteResults.map((result) => result.id));
+const missingStructuredRealSiteScenarios = requiredRealSiteScenarios.filter((id) => !structuredRealSiteIds.has(id));
+const structuredRealSiteReady = latestRealSiteMatrix.version === manifest.version
+  && latestRealSiteMatrix.isolatedProfile === true
+  && latestRealSiteMatrix.silentAudio === true
+  && missingStructuredRealSiteScenarios.length === 0;
+const structuredRealSiteEvidence = latestRealSiteMatrix.version
+  ? `latest=${latestRealSiteMatrix.version}, passed=${structuredRealSiteResults.length}/${requiredRealSiteScenarios.length}, silent=${latestRealSiteMatrix.silentAudio === true}`
+  : 'no structured six-site report in tmp/latest-real-site-matrix-e2e.json';
+const realSiteEnduranceResult = Array.isArray(latestRealSiteEndurance.results)
+  ? latestRealSiteEndurance.results[0]
+  : null;
+const realSiteEnduranceHold = realSiteEnduranceResult?.report?.hold || {};
+const realSiteEnduranceSamples = Array.isArray(realSiteEnduranceHold.samples) ? realSiteEnduranceHold.samples : [];
+const realSiteEnduranceSamplesHealthy = realSiteEnduranceSamples.length >= 30
+  && realSiteEnduranceSamples.every((sample, index) => (
+    Number(sample.lastSignalAgeMs ?? Infinity) <= 10000
+    && Number(sample.signalTickCount || 0) > Number(index === 0
+      ? realSiteEnduranceHold.baselineTicks
+      : realSiteEnduranceSamples[index - 1].signalTickCount)
+  ));
+const realSiteEnduranceReady = latestRealSiteEndurance.version === manifest.version
+  && latestRealSiteEndurance.isolatedProfile === true
+  && latestRealSiteEndurance.silentAudio === true
+  && Number(latestRealSiteEndurance.requestedHoldMs || 0) >= 1800000
+  && realSiteResultBaseReady(realSiteEnduranceResult)
+  && realSiteEnduranceHold.passed === true
+  && Number(realSiteEnduranceHold.durationMs || 0) >= 1800000
+  && Number(realSiteEnduranceHold.signalTickDelta || 0) > 5
+  && realSiteEnduranceSamplesHealthy
+  && Number(realSiteEnduranceHold.maxHeapGrowthBytes || 0) <= Number(realSiteEnduranceHold.maxAllowedHeapGrowthBytes || Infinity);
+const realSiteEnduranceEvidence = latestRealSiteEndurance.version
+  ? `scenario=${realSiteEnduranceResult?.id || 'unknown'}, latest=${latestRealSiteEndurance.version}, passed=${realSiteEnduranceReady}, requested=${latestRealSiteEndurance.requestedHoldMs || 0}ms, duration=${realSiteEnduranceHold.durationMs || 0}ms, samples=${realSiteEnduranceSamples.length}, continuousSignal=${realSiteEnduranceSamplesHealthy}, signalDelta=${realSiteEnduranceHold.signalTickDelta || 0}, heapGrowth=${mb(realSiteEnduranceHold.maxHeapGrowthBytes)}`
+  : 'no structured real-site endurance report in tmp/latest-real-site-endurance-e2e.json';
+const anyLongRunReady = localLongRunReady || realSiteEnduranceReady;
+const audibleEndpointEvidenceReady = latestAudibleEndpoint.version === manifest.version
+  && latestAudibleEndpoint.passed === true
+  && latestAudibleEndpoint.enabledAudible === true
+  && latestAudibleEndpoint.stoppedAudible === true
+  && Math.abs(Number(latestAudibleEndpoint.stoppedBaselineDeltaDb ?? Infinity)) <= 2;
 function pocReportReady(report, expect) {
   if (!report || report.passed !== true || report.version !== manifest.version) {
     return false;
@@ -307,7 +384,9 @@ const results = [
   ),
   status(
     'Real site matrix',
-    !diagnosticsVersionMatchesManifest
+    structuredRealSiteReady
+      ? 'verified'
+      : !diagnosticsVersionMatchesManifest
       ? 'blocked'
       : processingRealSiteTabs.length >= 6
       ? 'verified'
@@ -316,7 +395,9 @@ const results = [
         : /Bilibili/.test(testMatrix) && /抖音/.test(testMatrix)
           ? 'blocked'
           : 'missing',
-    !diagnosticsVersionMatchesManifest
+    structuredRealSiteReady
+      ? `structured isolated matrix passed: ${structuredRealSiteEvidence}`
+      : !diagnosticsVersionMatchesManifest
       ? `runtime version ${diagnostics.version || 'unknown'} != disk ${manifest.version || 'unknown'}; real-site results prove only the loaded runtime`
       : processingRealSiteTabs.length > 0
       ? `${processingRealSiteTabs.length} real-site tab(s) currently processing; full baseline requires YouTube, Bilibili, and Douyin video/live coverage`
@@ -350,10 +431,12 @@ const results = [
   ),
   status(
     'Long-run leak test',
-    localLongRunReady ? 'verified' : (exists('tools/e2e_long_run_smoke.js') ? 'partial' : 'missing'),
-    localLongRunReady
-      ? `structured local hold report passed: ${localLongRunEvidence}`
-      : (exists('tools/e2e_long_run_smoke.js') ? `hold test exists but latest report is insufficient: ${localLongRunEvidence}` : 'no 30-minute track/context/memory monitor test')
+    anyLongRunReady ? 'verified' : (exists('tools/e2e_long_run_smoke.js') ? 'partial' : 'missing'),
+    realSiteEnduranceReady
+      ? `structured real-site hold passed: ${realSiteEnduranceEvidence}`
+      : localLongRunReady
+        ? `structured local hold report passed: ${localLongRunEvidence}`
+        : (exists('tools/e2e_long_run_smoke.js') ? `hold tests exist but latest reports are insufficient: local=${localLongRunEvidence}; real=${realSiteEnduranceEvidence}` : 'no 30-minute track/context/memory monitor test')
   ),
   status(
     'Content script complexity risk',
@@ -369,8 +452,8 @@ const processingScenarioIds = new Set(
     .filter((item) => item.status === 'processing')
     .map((item) => item.id)
 );
-const requiredRealSiteScenarios = ['youtube-video', 'youtube-live', 'bilibili-video', 'bilibili-live', 'douyin-short', 'douyin-live'];
-const missingRealSiteScenarios = requiredRealSiteScenarios.filter((id) => !processingScenarioIds.has(id));
+const missingLiveRealSiteScenarios = requiredRealSiteScenarios.filter((id) => !processingScenarioIds.has(id));
+const missingRealSiteScenarios = structuredRealSiteReady ? [] : missingLiveRealSiteScenarios;
 const localE2eEvidence = [
   exists('tools/e2e_poc_smoke.js'),
   exists('tools/e2e_stability_smoke.js'),
@@ -397,16 +480,20 @@ const hardRequirements = [
   ),
   hardRequirement(
     '开启后声音不会消失',
-    /this\.outputAnalyser\.connect\(this\.context\.destination\)/.test(offscreen) && (pocReduceReady || pocLiftReady),
-    (pocReduceReady || pocLiftReady)
-      ? `offscreen graph reconnects captured stream to destination; latest audible E2E: ${pocEvidence}`
+    audibleEndpointEvidenceReady,
+    audibleEndpointEvidenceReady
+      ? `current audible endpoint A/B passed; enabledAudible=${latestAudibleEndpoint.enabledAudible}`
+      : /this\.outputAnalyser\.connect\(this\.context\.destination\)/.test(offscreen) && (pocReduceReady || pocLiftReady)
+      ? `silent E2E proves a live output graph and output meter (${pocEvidence}); an audible endpoint A/B is still required to prove user-heard sound`
       : 'offscreen graph reconnects captured stream to AudioContext.destination; latest structured E2E missing'
   ),
   hardRequirement(
     '关闭后声音恢复原状',
-    /track\.stop\(\)/.test(offscreen) && /this\.context\.close\(\)/.test(offscreen) && /WVB_STOP_TAB_CAPTURE/.test(background) && (pocReduceReady || pocLiftReady || pocMutedReady),
-    (pocReduceReady || pocLiftReady || pocMutedReady)
-      ? `stop path stops tracks and closes AudioContext; latest E2E stop clean: ${pocEvidence}`
+    audibleEndpointEvidenceReady,
+    audibleEndpointEvidenceReady
+      ? `current audible endpoint A/B passed; stoppedBaselineDelta=${Number(latestAudibleEndpoint.stoppedBaselineDeltaDb).toFixed(2)} dB`
+      : /track\.stop\(\)/.test(offscreen) && /this\.context\.close\(\)/.test(offscreen) && /WVB_STOP_TAB_CAPTURE/.test(background) && (pocReduceReady || pocLiftReady || pocMutedReady)
+      ? `silent E2E proves tracks/context stop cleanly (${pocEvidence}); audible before/after equality is still a manual A/B gate`
       : 'stop path exists; latest structured stop evidence missing'
   ),
   hardRequirement(
@@ -430,23 +517,28 @@ const hardRequirements = [
   ),
   hardRequirement(
     '大声音能被压低',
-    /loud input is reduced/.test(readText('tools/dsp_unit_tests.js')) && /currentReductionDb/.test(offscreen) && pocReduceReady,
+    /loud programme receives downward correction/.test(readText('tools/dsp_unit_tests.js')) && /currentReductionDb/.test(offscreen) && pocReduceReady,
     pocReduceReady
       ? `DSP unit test and latest reduce E2E prove reduction: reduction=${Number(latestPocReports.reduce?.tab?.averageReductionDb || 0).toFixed(2)} dB`
       : 'DSP unit test covers reduction; latest structured reduce E2E missing'
   ),
   hardRequirement(
     '播放器音量调低不会被误当成小声素材',
-    /liftRmsDb/.test(core) && /volumeCompensationDb/.test(offscreen) && pocLowPlayerVolumeHoldReady,
+    /computePlayerVolumeLimiterCeilingDb/.test(core)
+      && /signalGateCompensationDb/.test(offscreen)
+      && /source decision remains equivalent at quarter player volume/.test(readText('tools/programme_leveler_experiment.js'))
+      && pocLowPlayerVolumeHoldReady,
     pocLowPlayerVolumeHoldReady
       ? `low player-volume hold E2E proves no false lift: playerVolume=${scenarioPlayerVolume(latestPocReports.lowPlayerVolumeHold)}, currentGain=${Number(latestPocReports.lowPlayerVolumeHold?.tab?.currentGainDb || 0).toFixed(2)} dB`
       : 'latest low-player-volume hold E2E missing; this guards the small-sound algorithm against false boosting'
   ),
   hardRequirement(
     'YouTube、B站、抖音的视频与直播完成基础播放测试',
-    missingRealSiteScenarios.length === 0 && diagnosticsReady,
-    missingRealSiteScenarios.length
-      ? `missing live processing evidence: ${missingRealSiteScenarios.join(', ')}`
+    structuredRealSiteReady || (missingLiveRealSiteScenarios.length === 0 && diagnosticsReady),
+    structuredRealSiteReady
+      ? `structured isolated matrix passed: ${structuredRealSiteEvidence}`
+      : missingLiveRealSiteScenarios.length
+      ? `missing live processing evidence: ${missingLiveRealSiteScenarios.join(', ')}`
       : 'all required real-site scenarios processing in fresh diagnostics'
   ),
   hardRequirement(
@@ -483,10 +575,12 @@ const hardRequirements = [
   ),
   hardRequirement(
     '没有明显内存泄漏',
-    localLongRunReady,
-    localLongRunReady
-      ? `structured local long-run evidence: ${localLongRunEvidence}`
-      : `local long-run evidence insufficient: ${localLongRunEvidence}; real-site 30-minute proof is still separate`
+    anyLongRunReady,
+    realSiteEnduranceReady
+      ? `structured real-site long-run evidence: ${realSiteEnduranceEvidence}`
+      : localLongRunReady
+        ? `structured local long-run evidence: ${localLongRunEvidence}`
+        : `long-run evidence insufficient: local=${localLongRunEvidence}; real=${realSiteEnduranceEvidence}`
   ),
   hardRequirement(
     '没有把错误藏起来',
@@ -496,7 +590,7 @@ const hardRequirements = [
 ];
 
 const completionBlockers = [];
-if (!diagnosticsReady) {
+if (!diagnosticsReady && !structuredRealSiteReady) {
   completionBlockers.push(
     diagnosticsCurrent
       ? `主 Chrome 运行版本 ${diagnostics.version || 'unknown'} != 磁盘版本 ${manifest.version || 'unknown'}，需要刷新解包扩展`
@@ -509,7 +603,9 @@ if (missingRealSiteScenarios.length) {
 if (hardRequirements.find((item) => item.name === '没有明显内存泄漏')?.state !== 'verified') {
   completionBlockers.push('长时间内存/音频 track 监控证据不足');
 }
-completionBlockers.push('完整 30 分钟真实站点连续使用矩阵仍未完成');
+if (!realSiteEnduranceReady) {
+  completionBlockers.push('完整 30 分钟真实站点连续使用矩阵仍未完成');
+}
 
 const counts = results.reduce((acc, item) => {
   acc[item.state] = (acc[item.state] || 0) + 1;

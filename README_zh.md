@@ -142,6 +142,10 @@ Chrome 要求 `tabCapture` 由用户手势启动，因此全新标签页不能�
 ```bash
 npm test              # 契约、DSP 与离线音频图测试
 npm run test:dsp      # DSP 专项验证
+npm run test:silent   # 不向系统声卡输出的隔离实时接管
+npm run test:capture  # 静默覆盖压大声/提小声/静音/播放器音量/burst
+npm run test:sites    # 静默运行 YouTube/B站/抖音视频与直播矩阵
+npm run test:long     # 可配置的隔离稳定性/长跑
 npm run test:slider   # 弹窗滑块持久化回归
 npm run test:release  # Chrome 商店精简构建验证
 npm run audit         # 发布就绪证据审查

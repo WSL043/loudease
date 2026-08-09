@@ -1,6 +1,6 @@
 # 测试计划
 
-日期：2026-07-07
+日期：2026-08-10
 
 ## 原则
 
@@ -25,22 +25,26 @@ node .\tools\run_all_checks.js
 当前已有隔离 Chrome E2E：
 
 ```powershell
-node .\tools\e2e_poc_smoke.js
-$env:WVB_E2E_PAGE='quiet-dialog.html'; $env:WVB_E2E_EXPECT='lift'; node .\tools\e2e_poc_smoke.js
-$env:WVB_E2E_PAGE='burst-volume.html'; $env:WVB_E2E_EXPECT='burst'; $env:WVB_E2E_MIN_REDUCTION_DB='3'; node .\tools\e2e_poc_smoke.js
-node .\tools\e2e_stability_smoke.js
-node .\tools\e2e_long_run_smoke.js --duration-ms 30000
+npm run test:silent
+npm run test:capture
+npm run test:sites
+npm run test:long -- --duration-ms 30000
 ```
 
-这些 E2E 已证明本地测试页里的 tabCapture 成功、offscreen 有输入/输出 meter、压大声/提小声/burst 恢复有效、连续接管/停止可恢复、页面 reload 后可重新接管，以及本地切源后仍继续处理。当前 DSP 证据由 `tools/dsp_unit_tests.js`、`tools/programme_leveler_experiment.js`、`tools/leveler_worklet_tests.js` 和 `tools/offline_audio_graph_tests.js` 共同提供；`tools/e2e_long_run_smoke.js` 对接管后的状态、音轨、信号 tick、输出峰值、AudioContext 和 offscreen heap 做可配置时长监控。它们仍不能替代真实站点矩阵，包括 YouTube、Bilibili、抖音基线和后续全球代表平台。
+`test:silent`、`test:capture` 和 `test:long` 使用每次运行独占的临时 Chrome Profile，并同时启用浏览器假音频输出和 `AudioContext.setSinkId({ type: 'none' })`。DSP 与 meter 保持运行，但音频不会送到系统播放设备；测试还会在 Chrome 日志中拒绝原生 WASAPI 输出流。`test:capture` 覆盖 loud cut、quiet lift、低播放器音量的 source-domain 等价性、mute boundary 和 burst recovery。`test:sites` 依次打开 YouTube 视频/直播、Bilibili 视频/直播、抖音短视频/直播，默认同样静默运行。这些命令不读取或控制用户正在使用的 Chrome Profile。独占目录允许并行执行而不互相覆盖，但真实站点长跑仍会消耗本机 CPU、内存和网络；为了不影响日常播放或游戏，一次只运行一个真实站点浏览器。真实站点 URL、页面结构、反自动化策略和直播状态仍可能变化。
+
+这些 E2E 已证明本地测试页里的 tabCapture 成功、offscreen 有输入/输出 meter、压大声/提小声/burst 恢复有效、连续接管/停止可恢复、页面 reload 后可重新接管，以及本地切源后仍继续处理。当前 DSP 证据由 `tools/dsp_unit_tests.js`、`tools/programme_leveler_experiment.js`、`tools/leveler_worklet_tests.js` 和 `tools/offline_audio_graph_tests.js` 共同提供；`tools/e2e_long_run_smoke.js` 对接管后的状态、音轨、信号 tick、输出峰值、AudioContext 和 offscreen heap 做可配置时长监控。真实站点结果必须另外记录，因为自动播放、登录、地区限制或站点改版都可能改变结果。
 
 30 分钟长跑验收命令：
 
 ```powershell
-node .\tools\e2e_long_run_smoke.js --duration-ms 1800000 --cycles 3 --sample-ms 5000
+npm run test:long -- --duration-ms 1800000 --cycles 3 --sample-ms 5000
+node .\tools\e2e_real_site_matrix.js --scenario bilibili-live --hold-ms 1800000
 ```
 
-该命令会占用一个隔离 Chrome，不会操作用户正在使用的主 Chrome。
+真实站点长跑应选择当次快速矩阵中能够持续播放的公开源，不绑定某一家网站。汇总写入 `tmp/latest-real-site-endurance-e2e.json`；每个样本都必须推进 signal tick、保持 meter 新鲜、维持静音 sink、无硬 clipping，并满足 heap 上限。若站点播放器自行暂停、卸载媒体元素或断流，测试必须失败并将其与扩展会话仍存活的情况区分开，不能只凭进程存活判通过。
+
+两条命令都会占用一个隔离且静默的 Chrome，不会操作用户正在使用的主 Chrome，也不会占用系统播放设备。第一条覆盖可控本地源的重复接管、reload 与切源；第二条覆盖真实直播的持续输入、DSP 新鲜度、hard clipping、offscreen heap 和退出清理。
 
 当前运行状态审计：
 

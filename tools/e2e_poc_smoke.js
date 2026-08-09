@@ -7,12 +7,18 @@ const { spawn } = require('child_process');
 
 const root = path.resolve(__dirname, '..');
 const tmpDir = path.join(root, 'tmp');
-const profileDir = path.join(tmpDir, 'e2e-profile');
-const extensionDir = path.join(tmpDir, 'e2e-extension');
+const runSuffix = `${Date.now()}-${process.pid}`;
+const profileDir = path.join(tmpDir, `e2e-profile-${runSuffix}`);
+const extensionDir = path.join(tmpDir, `e2e-extension-${runSuffix}`);
 const testPagesDir = path.join(root, 'test-pages');
+const externalPageUrl = String(process.env.WVB_E2E_URL || '').trim();
 const scenarioExpect = process.env.WVB_E2E_EXPECT || 'reduce';
 const requirePopupAutoCapture = process.env.WVB_E2E_REQUIRE_POPUP_AUTOCAPTURE === '1';
 const checkPopupStrengthPersistence = process.env.WVB_E2E_CHECK_SLIDER_PERSIST === '1';
+const captureHoldMs = Math.max(0, Number(process.env.WVB_E2E_HOLD_MS || 0));
+const holdSampleMs = Math.max(250, Number(process.env.WVB_E2E_HOLD_SAMPLE_MS || 5000));
+const maxHoldHeapGrowthBytes = Math.max(1, Number(process.env.WVB_E2E_MAX_HEAP_GROWTH_MB || 32)) * 1024 * 1024;
+const maxHoldSignalAgeMs = Math.max(1000, Number(process.env.WVB_E2E_MAX_SIGNAL_AGE_MS || 10000));
 const playerVolume = process.env.WVB_E2E_PLAYER_VOLUME === ''
   ? NaN
   : Number(process.env.WVB_E2E_PLAYER_VOLUME);
@@ -39,7 +45,10 @@ const manifestVersion = (() => {
     return 'unknown';
   }
 })();
-const scenarioReportName = `latest-e2e-poc-${String(scenario.expect).replace(/[^a-z0-9_-]+/gi, '-')}.json`;
+const reportId = String(process.env.WVB_E2E_REPORT_ID || '').replace(/[^a-z0-9_-]+/gi, '-');
+const scenarioReportName = reportId
+  ? `latest-real-site-${reportId}.json`
+  : `latest-e2e-poc-${String(scenario.expect).replace(/[^a-z0-9_-]+/gi, '-')}.json`;
 const scenarioReportPath = path.join(tmpDir, scenarioReportName);
 const latestReportPath = path.join(tmpDir, 'latest-e2e-poc.json');
 const scenarioReportNames = new Set([scenarioReportName]);
@@ -56,6 +65,36 @@ function log(message) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function reserveFreePort() {
+  return new Promise((resolve, reject) => {
+    const probe = net.createServer();
+    probe.unref();
+    probe.once('error', reject);
+    probe.listen(0, '127.0.0.1', () => {
+      const port = probe.address().port;
+      probe.close((error) => error ? reject(error) : resolve(port));
+    });
+  });
+}
+
+function waitForChildExit(child, timeoutMs = 5000) {
+  if (child.exitCode != null) return Promise.resolve();
+  return Promise.race([
+    new Promise((resolve) => child.once('exit', resolve)),
+    sleep(timeoutMs)
+  ]);
+}
+
+function cleanupRunDirectories() {
+  for (const directory of [profileDir, extensionDir]) {
+    assertInside(tmpDir, directory);
+    fs.rmSync(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    if (fs.existsSync(directory)) {
+      throw new Error(`E2E run directory was not removed: ${directory}`);
+    }
+  }
 }
 
 function writeJson(filePath, value) {
@@ -334,8 +373,10 @@ class CdpSocket {
 
 async function connectTarget(port, predicate) {
   const startedAt = Date.now();
+  let latestTargets = [];
   while (Date.now() - startedAt < 10000) {
     const targets = await httpJson(`http://127.0.0.1:${port}/json/list`);
+    latestTargets = targets;
     const target = targets.find(predicate);
     if (target?.webSocketDebuggerUrl) {
       const cdp = new CdpSocket(target.webSocketDebuggerUrl);
@@ -344,7 +385,7 @@ async function connectTarget(port, predicate) {
     }
     await sleep(200);
   }
-  throw new Error('Target not found.');
+  throw new Error(`Target not found: ${latestTargets.map((target) => `${target.type}:${target.id || ''}:${target.url}`).join(' | ')}`);
 }
 
 async function clickElement(cdp, selector) {
@@ -436,10 +477,244 @@ async function evaluateValue(cdp, expression, options = {}) {
   return result.result?.value || null;
 }
 
+async function prepareExternalMedia(cdp, timeoutMs) {
+  await cdp.command('Runtime.enable');
+  await cdp.command('Page.enable');
+  const startedAt = Date.now();
+  let latest = null;
+  while (Date.now() - startedAt < timeoutMs) {
+    latest = await evaluateValue(cdp, `(${async function startSiteMedia() {
+      const consentPattern = /^(accept all|accept|i agree|agree|同意|接受|全部接受|我知道了|继续访问)$/i;
+      for (const button of document.querySelectorAll('button, [role="button"]')) {
+        const text = String(button.textContent || button.getAttribute('aria-label') || '').trim();
+        const rect = button.getBoundingClientRect();
+        if (consentPattern.test(text) && rect.width > 2 && rect.height > 2) {
+          button.click();
+          break;
+        }
+      }
+
+      const playPattern = /^(play|播放|继续播放|点击播放|unmute|取消静音)|play video|播放视频/i;
+      for (const control of document.querySelectorAll('button, [role="button"], .ytp-large-play-button, .ytp-play-button, .bpx-player-ctrl-play')) {
+        const label = String(control.getAttribute('aria-label') || control.getAttribute('title') || control.textContent || '').trim();
+        const rect = control.getBoundingClientRect();
+        if (playPattern.test(label) && rect.width > 2 && rect.height > 2) {
+          control.click();
+          break;
+        }
+      }
+
+      const media = Array.from(document.querySelectorAll('audio,video'));
+      const playResults = await Promise.all(media.map(async (item) => {
+        try {
+          item.muted = false;
+          if (Number(item.volume) <= 0.01) item.volume = 1;
+          await Promise.race([
+            item.play(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('play-timeout')), 1500))
+          ]);
+          return { ok: true };
+        } catch (error) {
+          return { ok: false, error: String(error?.message || error) };
+        }
+      }));
+      const states = media.map((item, index) => ({
+        index,
+        tag: item.tagName.toLowerCase(),
+        paused: item.paused,
+        muted: item.muted,
+        volume: item.volume,
+        readyState: item.readyState,
+        networkState: item.networkState,
+        currentTime: Number(item.currentTime) || 0,
+        duration: Number.isFinite(Number(item.duration)) ? Number(item.duration) : null,
+        error: item.error ? String(item.error.message || item.error.code || item.error) : '',
+        play: playResults[index]
+      }));
+      return {
+        url: location.href,
+        title: document.title,
+        readyState: document.readyState,
+        mediaCount: states.length,
+        playingCount: states.filter((item) => !item.paused && item.readyState >= 2).length,
+        states
+      };
+    }})()`, { userGesture: true }).catch((error) => ({ error: String(error?.message || error) }));
+    if (Number(latest?.playingCount || 0) > 0) {
+      await sleep(1000);
+      const advanced = await evaluateValue(cdp, `(() => ({
+        url: location.href,
+        title: document.title,
+        times: Array.from(document.querySelectorAll('audio,video')).map((item) => Number(item.currentTime) || 0)
+      }))()`);
+      latest.advancedTimes = advanced?.times || [];
+      latest.url = advanced?.url || latest.url;
+      latest.title = advanced?.title || latest.title;
+      return latest;
+    }
+    await sleep(500);
+  }
+  return latest;
+}
+
+async function readExternalMediaState(cdp) {
+  if (!cdp) return null;
+  return await evaluateValue(cdp, `(() => ({
+    url: location.href,
+    title: document.title,
+    visibilityState: document.visibilityState,
+    hasFocus: document.hasFocus(),
+    media: Array.from(document.querySelectorAll('audio,video')).map((item, index) => ({
+      index,
+      tag: item.tagName.toLowerCase(),
+      paused: item.paused,
+      ended: item.ended,
+      muted: item.muted,
+      volume: item.volume,
+      readyState: item.readyState,
+      networkState: item.networkState,
+      currentTime: Number(item.currentTime) || 0,
+      duration: Number.isFinite(Number(item.duration)) ? Number(item.duration) : null,
+      error: item.error ? String(item.error.message || item.error.code || item.error) : ''
+    }))
+  }))()`).catch((error) => ({ error: String(error?.message || error) }));
+}
+
+async function readPopupCaptureStatus(cdp, targetPrefix, fallbackPageUrl) {
+  return await evaluateValue(cdp, `(${async function readCapture(prefix, fallbackUrl) {
+    const tabs = await chrome.tabs.query({});
+    const target = tabs.find((tab) => String(tab.url || '').startsWith(prefix))
+      || tabs.find((tab) => tab.active)
+      || tabs[0];
+    if (!target?.id) return { error: 'missing-target-tab', tabs };
+    return await chrome.runtime.sendMessage({
+      type: 'WVB_GET_STATUS',
+      tabId: target.id,
+      tabUrl: String(target.url || fallbackUrl),
+      ensure: false
+    });
+  }})(${JSON.stringify(targetPrefix)}, ${JSON.stringify(fallbackPageUrl)})`, { userGesture: true });
+}
+
+async function stopPopupCapture(cdp, targetPrefix, fallbackPageUrl) {
+  return await evaluateValue(cdp, `(${async function stopCapture(prefix, fallbackUrl) {
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const tabs = await chrome.tabs.query({});
+    const target = tabs.find((tab) => String(tab.url || '').startsWith(prefix))
+      || tabs.find((tab) => tab.active)
+      || tabs[0];
+    if (!target?.id) return { stopPhase: 'error', stopResponse: { ok: false, error: 'missing-target-tab' } };
+    const tabUrl = String(target.url || fallbackUrl);
+    const stopResponse = await chrome.runtime.sendMessage({ type: 'WVB_STOP_TAB_CAPTURE', tabId: target.id });
+    let stopTab = null;
+    for (let index = 0; index < 24; index += 1) {
+      stopTab = await chrome.runtime.sendMessage({
+        type: 'WVB_GET_STATUS',
+        tabId: target.id,
+        tabUrl,
+        ensure: false
+      });
+      if (!stopTab?.captureActive) {
+        return { stopPhase: 'capture-stopped', stopResponse, stopTab };
+      }
+      await sleep(250);
+    }
+    return { stopPhase: 'capture-still-active', stopResponse, stopTab };
+  }})(${JSON.stringify(targetPrefix)}, ${JSON.stringify(fallbackPageUrl)})`, { userGesture: true });
+}
+
+async function holdCapture({ debugPort, extensionId, popupCdp, pageCdp, targetPrefix, pageUrl, sockets, initialStatus }) {
+  const offscreenUrl = `chrome-extension://${extensionId}/offscreen/index.html`;
+  const offscreen = await connectTarget(debugPort, (target) => target.url === offscreenUrl);
+  sockets.push(offscreen.cdp);
+  const baselineHeap = await offscreen.cdp.command('Runtime.getHeapUsage').catch(() => null);
+  const baselineTicks = Number(initialStatus?.signalTickCount || 0);
+  const startedAt = Date.now();
+  const deadline = startedAt + captureHoldMs;
+  const samples = [];
+  let latestStatus = initialStatus;
+  let finalHeap = baselineHeap;
+  let maxHeapGrowthBytes = 0;
+  let maxOutputPeak = Number(initialStatus?.averageOutputPeak || 0);
+  let previousSignalTicks = baselineTicks;
+
+  log(`capture hold started durationMs=${captureHoldMs} sampleMs=${holdSampleMs} baselineTicks=${baselineTicks}`);
+  while (Date.now() < deadline) {
+    await sleep(Math.min(holdSampleMs, Math.max(1, deadline - Date.now())));
+    latestStatus = await readPopupCaptureStatus(popupCdp, targetPrefix, pageUrl);
+    if (!latestStatus?.captureActive || latestStatus.captureState !== 'processing') {
+      throw new Error(`capture hold lost the active session: ${JSON.stringify(latestStatus)}`);
+    }
+    if (latestStatus.captureContextState !== 'running' || Number(latestStatus.meterFrameAgeMs ?? Infinity) >= 1000) {
+      throw new Error(`capture hold DSP became stale: ${JSON.stringify(latestStatus)}`);
+    }
+    if (latestStatus.captureError) {
+      throw new Error(`capture hold reported an error: ${latestStatus.captureError}`);
+    }
+    const signalTicks = Number(latestStatus.signalTickCount || 0);
+    const signalAgeMs = Number(latestStatus.lastSignalAgeMs ?? Infinity);
+    if (!Number.isFinite(signalAgeMs) || signalAgeMs > maxHoldSignalAgeMs || signalTicks <= previousSignalTicks) {
+      const mediaState = await readExternalMediaState(pageCdp);
+      throw new Error(`capture hold input stopped progressing: ${JSON.stringify({ previousSignalTicks, signalTicks, signalAgeMs, maxHoldSignalAgeMs, mediaState })}`);
+    }
+    previousSignalTicks = signalTicks;
+    if (process.env.WVB_E2E_SILENT_SINK === '1' && latestStatus.silentSink !== true) {
+      throw new Error('capture hold lost the silent AudioContext sink');
+    }
+    if (Number(latestStatus.workletHardClippedSamples || 0) > 0 || Number(latestStatus.workletMaxHardClipOvershoot || 0) > 1e-9) {
+      throw new Error(`capture hold detected hard clipping: ${JSON.stringify(latestStatus)}`);
+    }
+    maxOutputPeak = Math.max(maxOutputPeak, Number(latestStatus.averageOutputPeak || 0));
+    finalHeap = await offscreen.cdp.command('Runtime.getHeapUsage').catch(() => finalHeap);
+    if (baselineHeap?.usedSize != null && finalHeap?.usedSize != null) {
+      maxHeapGrowthBytes = Math.max(maxHeapGrowthBytes, Number(finalHeap.usedSize) - Number(baselineHeap.usedSize));
+      if (maxHeapGrowthBytes > maxHoldHeapGrowthBytes) {
+        throw new Error(`capture hold heap growth too high: ${maxHeapGrowthBytes} bytes`);
+      }
+    }
+    samples.push({
+      atMs: Date.now() - startedAt,
+      signalTickCount: Number(latestStatus.signalTickCount || 0),
+      lastSignalAgeMs: latestStatus.lastSignalAgeMs == null ? null : Number(latestStatus.lastSignalAgeMs),
+      inputDb: latestStatus.averageInputDb ?? null,
+      outputDb: latestStatus.averageOutputDb ?? null,
+      gainDb: Number(latestStatus.currentGainDb || 0),
+      reductionDb: Number(latestStatus.averageReductionDb || 0),
+      outputPeak: Number(latestStatus.averageOutputPeak || 0),
+      heapBytes: finalHeap?.usedSize ?? null
+    });
+    log(`capture hold sample ${samples.length} ticks=${samples.at(-1).signalTickCount} gain=${samples.at(-1).gainDb.toFixed(2)}dB`);
+  }
+
+  const finalTicks = Number(latestStatus?.signalTickCount || 0);
+  if (finalTicks <= baselineTicks + 5) {
+    throw new Error(`capture hold signal ticks did not advance: ${baselineTicks} -> ${finalTicks}`);
+  }
+  const hold = {
+    passed: true,
+    requestedDurationMs: captureHoldMs,
+    durationMs: Date.now() - startedAt,
+    sampleMs: holdSampleMs,
+    baselineTicks,
+    finalTicks,
+    signalTickDelta: finalTicks - baselineTicks,
+    baselineHeapBytes: baselineHeap?.usedSize ?? null,
+    finalHeapBytes: finalHeap?.usedSize ?? null,
+    maxHeapGrowthBytes,
+    maxAllowedHeapGrowthBytes: maxHoldHeapGrowthBytes,
+    maxAllowedSignalAgeMs: maxHoldSignalAgeMs,
+    maxOutputPeak,
+    samples
+  };
+  log(`capture hold passed durationMs=${hold.durationMs} tickDelta=${hold.signalTickDelta} heapGrowth=${hold.maxHeapGrowthBytes}`);
+  return { hold, latestStatus };
+}
+
 async function main() {
   const muteAudio = process.env.WVB_E2E_MUTE_AUDIO === '1';
+  const silentSink = process.env.WVB_E2E_SILENT_SINK === '1';
   const captureOnly = muteAudio || process.env.WVB_E2E_CAPTURE_ONLY === '1';
-  if (process.env.CI !== 'true' && process.env.WVB_E2E_ALLOW_LOCAL_AUDIO !== '1' && !muteAudio) {
+  if (process.env.CI !== 'true' && process.env.WVB_E2E_ALLOW_LOCAL_AUDIO !== '1' && !muteAudio && !silentSink) {
     throw new Error('Local audio E2E is disabled by default because it emits test tones. Set WVB_E2E_MUTE_AUDIO=1 for a muted browser run, or WVB_E2E_ALLOW_LOCAL_AUDIO=1 only when a silent audio endpoint is selected.');
   }
   const chrome = findChrome();
@@ -450,8 +725,9 @@ async function main() {
   stageExtensionForE2e();
 
   const { server, origin } = await startStaticServer();
-  const debugPort = 19233 + Math.floor(Math.random() * 1000);
-  const pageUrl = `${origin}/${scenario.page}`;
+  const debugPort = await reserveFreePort();
+  const pageUrl = externalPageUrl || `${origin}/${scenario.page}`;
+  const targetPrefix = externalPageUrl ? new URL(pageUrl).origin : origin;
   const args = [
     `--user-data-dir=${profileDir}`,
     `--remote-debugging-port=${debugPort}`,
@@ -460,6 +736,12 @@ async function main() {
     '--enable-logging=stderr',
     '--v=1',
     '--autoplay-policy=no-user-gesture-required',
+    '--disable-background-media-suspend',
+    '--disable-background-timer-throttling',
+    '--disable-backgrounding-occluded-windows',
+    '--disable-renderer-backgrounding',
+    '--disable-component-update',
+    '--disable-features=CalculateNativeWinOcclusion,MediaPlaybackWhileNotVisiblePermissionPolicy',
     '--window-size=1000,800',
     'about:blank'
   ];
@@ -469,14 +751,24 @@ async function main() {
   if (muteAudio) {
     args.push('--mute-audio');
   }
+  if (silentSink) {
+    args.push('--disable-audio-output');
+  }
 
   log(`launching isolated Chrome profile at ${profileDir}`);
-  log(`scenario page=${scenario.page} expect=${scenario.expect}`);
+  log(`scenario page=${externalPageUrl || scenario.page} expect=${scenario.expect}`);
+  if (silentSink) log('fake browser output and a silent AudioContext sink requested; DSP remains live without hardware audio output');
   if (captureOnly) log('capture-only verification enabled; signal and gain assertions are skipped');
   const child = spawn(chrome, args, { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
   let chromeStderr = '';
+  let stderrProbeTail = '';
+  let nativeAudioOutputOpened = false;
   child.stderr?.on('data', (chunk) => {
-    chromeStderr += chunk.toString('utf8');
+    const next = chunk.toString('utf8');
+    const probe = `${stderrProbeTail}${next}`;
+    nativeAudioOutputOpened ||= /WASAPIAudioOutputStream/i.test(probe);
+    stderrProbeTail = probe.slice(-128);
+    chromeStderr += next;
     if (chromeStderr.length > 12000) {
       chromeStderr = chromeStderr.slice(-12000);
     }
@@ -496,9 +788,24 @@ async function main() {
     log(`loaded extension id ${extensionId}`);
 
     const createdTab = await browserCdp.command('Target.createTarget', { url: pageUrl, forTab: true });
-    const page = await connectTarget(debugPort, (target) => target.type === 'page' && target.url === pageUrl);
+    const page = await connectTarget(debugPort, (target) => target.type === 'page' && (
+      target.id === createdTab.targetId
+      || target.url.startsWith(targetPrefix)
+    ));
     sockets.push(page.cdp);
-    await clickElement(page.cdp, '#start');
+    let externalPlayback = null;
+    if (externalPageUrl) {
+      externalPlayback = await prepareExternalMedia(
+        page.cdp,
+        Math.max(5000, Number(process.env.WVB_E2E_SITE_SETTLE_MS || 12000))
+      );
+      log(`external playback ${JSON.stringify(externalPlayback)}`);
+      if (Number(externalPlayback?.playingCount || 0) < 1) {
+        throw new Error(`No playing media was found on the real site: ${JSON.stringify(externalPlayback)}`);
+      }
+    } else {
+      await clickElement(page.cdp, '#start');
+    }
     if (scenario.playerVolume != null) {
       await evaluateValue(page.cdp, `((volume) => {
         for (const media of document.querySelectorAll('audio,video')) {
@@ -524,6 +831,7 @@ async function main() {
 
     const targets = await httpJson(`http://127.0.0.1:${debugPort}/json/list`);
     log(`targets ${targets.map((target) => `${target.type}:${target.url}`).join(' | ')}`);
+    let silentSinkConfigured = false;
     for (const target of targets.filter((item) => /chrome-extension:\/\//.test(item.url) && item.webSocketDebuggerUrl)) {
       const probe = new CdpSocket(target.webSocketDebuggerUrl);
       await probe.connect();
@@ -537,6 +845,21 @@ async function main() {
         }
       })()`).catch((error) => ({ error: String(error?.message || error) }));
       log(`extension target manifest ${target.type}:${target.url} => ${JSON.stringify(manifest)}`);
+      if (silentSink && !silentSinkConfigured && target.url.startsWith(`chrome-extension://${extensionId}/`)) {
+        const configured = await evaluateValue(probe, `(${async function configureSilentSink(key) {
+          await chrome.storage.local.set({ [key]: true });
+          const stored = await chrome.storage.local.get(key);
+          return stored[key] === true;
+        }})(${JSON.stringify('webVolumeBalancer.e2eSilentSink')})`);
+        if (configured !== true) {
+          throw new Error('Failed to configure the silent AudioContext sink in extension storage.');
+        }
+        silentSinkConfigured = true;
+        log('silent AudioContext sink configured in the isolated extension profile');
+      }
+    }
+    if (silentSink && !silentSinkConfigured) {
+      throw new Error('No extension target was available to configure the silent AudioContext sink.');
     }
     const targetInfos = await browserCdp.command('Target.getTargets');
     log(`targetInfos ${targetInfos.targetInfos.map((target) => `${target.type}:${target.targetId}:${target.url}`).join(' | ')}`);
@@ -615,7 +938,7 @@ async function main() {
           width: rect.width,
           height: rect.height
         };
-      }})(${JSON.stringify(origin)})`, { userGesture: true });
+      }})(${JSON.stringify(targetPrefix)})`, { userGesture: true });
       if (!sliderReady?.ok) {
         throw new Error(`Popup strength control did not initialize: ${JSON.stringify(sliderReady)}`);
       }
@@ -664,7 +987,7 @@ async function main() {
           stableMatches,
           saved
         };
-      }})(${JSON.stringify(sliderReady.initialValue)}, ${JSON.stringify(origin)})`, { userGesture: true });
+      }})(${JSON.stringify(sliderReady.initialValue)}, ${JSON.stringify(targetPrefix)})`, { userGesture: true });
       log(`slider persistence ${JSON.stringify(sliderResult)}`);
       if (!sliderResult?.ok) {
         throw new Error(`Popup strength persistence failed: ${JSON.stringify(sliderResult)}`);
@@ -696,7 +1019,7 @@ async function main() {
           return { captureActive: false, error: 'no-target-tab' };
         }
         return await send({ type: 'WVB_GET_STATUS', tabId: target.id, tabUrl: target.url || '', ensure: false });
-      }})(${JSON.stringify(origin)})`, { userGesture: true }).catch((error) => ({ error: String(error?.message || error) }));
+      }})(${JSON.stringify(targetPrefix)})`, { userGesture: true }).catch((error) => ({ error: String(error?.message || error) }));
       if (preClickStatus?.captureActive) {
         log('popup auto capture became active before manual button click');
       } else {
@@ -705,7 +1028,7 @@ async function main() {
       }
     }
 
-    const status = await evaluateValue(popup.cdp, `(${async function waitForCapture(targetOrigin, fallbackPageUrl, minSignalTicks, expectation) {
+    const status = await evaluateValue(popup.cdp, `(${async function waitForCapture(targetOrigin, fallbackPageUrl, minSignalTicks, expectation, deferStop) {
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const send = (message) => new Promise((resolve) => {
         chrome.runtime.sendMessage(message, (response) => {
@@ -818,28 +1141,59 @@ async function main() {
         latest.recentEvents = Array.isArray(diagnostics.events) ? diagnostics.events.slice(0, 20) : [];
         latest.observed = observed;
       }
-      latest.stopResponse = await send({ type: 'WVB_STOP_TAB_CAPTURE', tabId: target.id })
-        .catch((error) => ({ ok: false, error: String(error?.message || error) }));
-      for (let index = 0; index < 24; index += 1) {
-        const stoppedStatus = await send({
-          type: 'WVB_GET_STATUS',
-          tabId: target.id,
-          tabUrl,
-          ensure: false
-        }).catch((error) => ({ error: String(error?.message || error) }));
-        latest.stopTab = stoppedStatus;
-        if (!stoppedStatus?.captureActive) {
-          latest.stopPhase = 'capture-stopped';
-          break;
+      if (deferStop) {
+        latest.stopPhase = 'capture-held';
+      } else {
+        latest.stopResponse = await send({ type: 'WVB_STOP_TAB_CAPTURE', tabId: target.id })
+          .catch((error) => ({ ok: false, error: String(error?.message || error) }));
+        for (let index = 0; index < 24; index += 1) {
+          const stoppedStatus = await send({
+            type: 'WVB_GET_STATUS',
+            tabId: target.id,
+            tabUrl,
+            ensure: false
+          }).catch((error) => ({ error: String(error?.message || error) }));
+          latest.stopTab = stoppedStatus;
+          if (!stoppedStatus?.captureActive) {
+            latest.stopPhase = 'capture-stopped';
+            break;
+          }
+          await sleep(250);
         }
-        await sleep(250);
-      }
-      if (!latest.stopPhase) {
-        latest.stopPhase = 'capture-still-active';
+        if (!latest.stopPhase) {
+          latest.stopPhase = 'capture-still-active';
+        }
       }
       return latest || { phase: 'error' };
-    }})(${JSON.stringify(origin)}, ${JSON.stringify(pageUrl)}, ${JSON.stringify(scenario.minSignalTicks)}, ${JSON.stringify(scenario.expect)})`, { userGesture: true });
+    }})(${JSON.stringify(targetPrefix)}, ${JSON.stringify(pageUrl)}, ${JSON.stringify(scenario.minSignalTicks)}, ${JSON.stringify(scenario.expect)}, ${JSON.stringify(captureHoldMs > 0)})`, { userGesture: true });
     log('status polled');
+    if (captureHoldMs > 0 && status?.phase === 'capture-active') {
+      let holdFailure = null;
+      try {
+        const held = await holdCapture({
+          debugPort,
+          extensionId,
+          popupCdp: popup.cdp,
+          pageCdp: externalPageUrl ? page.cdp : null,
+          targetPrefix,
+          pageUrl,
+          sockets,
+          initialStatus: status.tab || {}
+        });
+        status.hold = held.hold;
+        status.tab = held.latestStatus;
+      } catch (error) {
+        holdFailure = error;
+        status.hold = {
+          passed: false,
+          requestedDurationMs: captureHoldMs,
+          error: String(error?.message || error)
+        };
+      }
+      const stopped = await stopPopupCapture(popup.cdp, targetPrefix, pageUrl);
+      Object.assign(status, stopped);
+      if (holdFailure) throw holdFailure;
+    }
     const afterTargets = await httpJson(`http://127.0.0.1:${debugPort}/json/list`);
     log(`after targets ${afterTargets.map((target) => `${target.type}:${target.url}`).join(' | ')}`);
     const offscreenTarget = afterTargets.find((target) => target.url === `chrome-extension://${extensionId}/offscreen/index.html`);
@@ -880,6 +1234,9 @@ async function main() {
       throw new Error(`Audio meter became stale: ${tab.meterFrameAgeMs}`);
     }
     const signalTicks = Number(tab.capture?.signalTickCount || tab.signalTickCount || 0);
+    if (silentSink && tab.silentSink !== true) {
+      throw new Error(`Silent AudioContext sink was not active: ${JSON.stringify({ silentSink: tab.silentSink, captureState: tab.captureState, captureError: tab.captureError })}`);
+    }
     if (!captureOnly && scenario.expect !== 'muted' && signalTicks < scenario.minSignalTicks) {
       throw new Error('capture became active but no input signal was measured');
     }
@@ -945,11 +1302,22 @@ async function main() {
     if (status.stopResponse?.ok !== true) {
       throw new Error(`Capture stop returned an error: ${status.stopResponse?.error || 'unknown'}`);
     }
+    await sleep(150);
+    if (silentSink && nativeAudioOutputOpened) {
+      throw new Error('Native WASAPI output opened during a silent E2E run.');
+    }
     const report = {
       version: manifestVersion,
       generatedAt: new Date().toISOString(),
       passed: true,
       captureOnly,
+      silentSink,
+      nativeAudioOutputOpened,
+      requestedUrl: externalPageUrl || null,
+      finalUrl: externalPlayback?.url || pageUrl,
+      pageTitle: externalPlayback?.title || '',
+      externalPlayback,
+      hold: status.hold || null,
       scenario,
       phase: status.phase,
       stopPhase: status.stopPhase,
@@ -959,8 +1327,13 @@ async function main() {
         captureState: tab.captureState || '',
         capturePipelineMode: tab.capturePipelineMode || '',
         captureContextState: tab.captureContextState || '',
+        silentSink: tab.silentSink === true,
+        captureTrackCount: Number(tab.captureTrackCount || 0),
         captureAudioTrackCount: Number(tab.captureAudioTrackCount || 0),
+        meterMode: tab.meterMode || '',
+        meterFrameAgeMs: tab.meterFrameAgeMs == null ? null : Number(tab.meterFrameAgeMs),
         signalTickCount: Number(tab.signalTickCount || 0),
+        lastSignalAgeMs: tab.lastSignalAgeMs == null ? null : Number(tab.lastSignalAgeMs),
         averageInputDb: tab.averageInputDb ?? null,
         averageOutputDb: tab.averageOutputDb ?? null,
         averageLiftDb: Number(tab.averageLiftDb || 0),
@@ -969,12 +1342,16 @@ async function main() {
         currentLiftDb: Number(tab.currentLiftDb || 0),
         currentReductionDb: Number(tab.currentReductionDb || 0),
         limiterReductionDb: Number(tab.limiterReductionDb || 0),
+        limiterTickCount: Number(tab.limiterTickCount || 0),
+        workletHardClippedSamples: Number(tab.workletHardClippedSamples || 0),
+        workletMaxHardClipOvershoot: Number(tab.workletMaxHardClipOvershoot || 0),
         effectiveMaxLiftDb: Number(tab.effectiveMaxLiftDb || 0),
         playerVolumeLiftCeilingDb: Number(tab.playerVolumeLiftCeilingDb == null ? -31 : tab.playerVolumeLiftCeilingDb),
         averageInputPeak: Number(tab.averageInputPeak || 0),
         averageOutputPeak: Number(tab.averageOutputPeak || 0),
         playerMuted: Boolean(tab.playerMuted),
         playerVolumeCap: Number(tab.playerVolumeCap == null ? 1 : tab.playerVolumeCap),
+        playerVolumeKnown: tab.playerVolumeKnown === true,
         captureError: tab.captureError || ''
       },
       observed: status.observed || {}
@@ -993,7 +1370,9 @@ async function main() {
       log(`chrome stderr tail ${chromeStderr.trim().split(/\r?\n/).slice(-20).join(' || ')}`);
     }
     child.kill();
+    await waitForChildExit(child);
     server.close();
+    cleanupRunDirectories();
   }
 }
 

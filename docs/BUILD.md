@@ -46,6 +46,8 @@ JSON has no comments, so the explicit removal contract lives outside the runtime
 
 The store builder verifies and removes those exact host permissions, removes exact allowlisted paths named in `assets`, and deletes the contract property. The store build fails if the contract is absent, a marker is unbalanced, a listed permission is absent, or any localhost string survives.
 
+The development build also contains a test-only silent-output switch used by isolated Chrome E2E. It routes the offscreen `AudioContext` to `{ type: 'none' }` while keeping the DSP graph live. Every declaration, message field, status field, and storage key for this switch must stay inside the same development markers. The store verifier rejects `e2eSilentSink`, `E2E_SILENT_SINK`, and its storage key if any survive packaging.
+
 ## Main integration checklist
 
 1. In `background.js`, mark all declarations, state, preference loading, option handling, local fetch/timer code, and message branches used only by local diagnostics. Keep general in-extension diagnostics outside the blocks if the store UI still uses them.

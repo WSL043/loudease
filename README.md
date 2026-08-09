@@ -142,6 +142,10 @@ WSL043 maintains the official project. Use [Support](SUPPORT.md) and the GitHub 
 ```bash
 npm test              # contracts, DSP tests, and offline audio graphs
 npm run test:dsp      # focused DSP verification
+npm run test:silent   # isolated live capture with no system audio output
+npm run test:capture  # silent local loud/lift/mute/player-volume/burst matrix
+npm run test:sites    # silent YouTube/Bilibili/Douyin video/live matrix
+npm run test:long     # configurable isolated stability/endurance run
 npm run test:slider   # popup persistence regression
 npm run test:release  # stripped Chrome Web Store package
 npm run audit         # release-readiness evidence audit

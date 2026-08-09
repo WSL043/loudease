@@ -7,8 +7,9 @@ const { spawn } = require('child_process');
 
 const root = path.resolve(__dirname, '..');
 const tmpDir = path.join(root, 'tmp');
-const profileDir = path.join(tmpDir, 'e2e-stability-profile');
-const extensionDir = path.join(tmpDir, 'e2e-stability-extension');
+const runSuffix = `${Date.now()}-${process.pid}`;
+const profileDir = path.join(tmpDir, `e2e-stability-profile-${runSuffix}`);
+const extensionDir = path.join(tmpDir, `e2e-stability-extension-${runSuffix}`);
 const testPagesDir = path.join(root, 'test-pages');
 const longRunReportPath = path.join(tmpDir, 'latest-long-run.json');
 const scenarioPage = process.env.WVB_E2E_PAGE || 'switching-audio.html';
@@ -19,6 +20,7 @@ const cycles = Number(process.env.WVB_E2E_CYCLES || 10);
 const holdMs = Number(process.env.WVB_E2E_HOLD_MS || 0);
 const holdSampleMs = Number(process.env.WVB_E2E_HOLD_SAMPLE_MS || 5000);
 const maxHeapGrowthBytes = Number(process.env.WVB_E2E_MAX_HEAP_GROWTH_MB || 32) * 1024 * 1024;
+const silentSink = process.env.WVB_E2E_SILENT_SINK === '1';
 const MIN_SWITCH_LIFT_DB = 4;
 const manifestVersion = (() => {
   try {
@@ -34,6 +36,36 @@ function log(message) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function reserveFreePort() {
+  return new Promise((resolve, reject) => {
+    const probe = net.createServer();
+    probe.unref();
+    probe.once('error', reject);
+    probe.listen(0, '127.0.0.1', () => {
+      const port = probe.address().port;
+      probe.close((error) => error ? reject(error) : resolve(port));
+    });
+  });
+}
+
+function waitForChildExit(child, timeoutMs = 5000) {
+  if (child.exitCode != null) return Promise.resolve();
+  return Promise.race([
+    new Promise((resolve) => child.once('exit', resolve)),
+    sleep(timeoutMs)
+  ]);
+}
+
+function cleanupRunDirectories() {
+  for (const directory of [profileDir, extensionDir]) {
+    assertInside(tmpDir, directory);
+    fs.rmSync(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    if (fs.existsSync(directory)) {
+      throw new Error(`E2E run directory was not removed: ${directory}`);
+    }
+  }
 }
 
 function writeJson(filePath, value) {
@@ -323,6 +355,26 @@ async function connectTarget(port, predicate) {
   throw new Error('Target not found.');
 }
 
+async function configureSilentSink(debugPort, extensionId, sockets) {
+  if (!silentSink) {
+    return;
+  }
+  const target = await connectTarget(
+    debugPort,
+    (item) => item.url === `chrome-extension://${extensionId}/background.js`
+  );
+  sockets.push(target.cdp);
+  const configured = await evaluateValue(target.cdp, `(${async function setSilentSink(key) {
+    await chrome.storage.local.set({ [key]: true });
+    const stored = await chrome.storage.local.get(key);
+    return stored[key] === true;
+  }})(${JSON.stringify('webVolumeBalancer.e2eSilentSink')})`);
+  if (configured !== true) {
+    throw new Error('Failed to configure the silent AudioContext sink.');
+  }
+  log('silent AudioContext sink configured; DSP remains live without hardware audio output');
+}
+
 async function evaluateValue(cdp, expression, options = {}) {
   const result = await cdp.command('Runtime.evaluate', {
     expression,
@@ -510,6 +562,9 @@ function assertActiveCapture(snapshot, label) {
   if (status.captureError) {
     throw new Error(`${label}: capture error ${status.captureError}`);
   }
+  if (silentSink && status.silentSink !== true) {
+    throw new Error(`${label}: silent AudioContext sink is not active ${JSON.stringify(status)}`);
+  }
 }
 
 async function assertStopped(cdp, targetPrefix, label) {
@@ -575,6 +630,7 @@ async function assertHoldStable(debugPort, extensionId, harnessCdp, targetPrefix
       maxAllowedHeapGrowthBytes: maxHeapGrowthBytes,
       maxObservedOutputPeak,
       finalContextState: latest.captureContextState || '',
+      finalSilentSink: latest.silentSink === true,
       finalAudioTrackCount: Number(latest.captureAudioTrackCount || latest.capture?.audioTrackCount || 0),
       finalTrackCount: Number(latest.captureTrackCount || latest.capture?.trackCount || 0),
       finalOutputPeak: Number(latest.averageOutputPeak || 0),
@@ -695,7 +751,7 @@ async function assertMultiOwnerPersistence({
 }
 
 async function main() {
-  if (process.env.CI !== 'true' && process.env.WVB_E2E_ALLOW_LOCAL_AUDIO !== '1') {
+  if (process.env.CI !== 'true' && process.env.WVB_E2E_ALLOW_LOCAL_AUDIO !== '1' && !silentSink) {
     throw new Error('Local audio E2E is disabled by default because it emits test tones. Set WVB_E2E_ALLOW_LOCAL_AUDIO=1 only when a silent audio endpoint is selected.');
   }
   const chrome = findChrome();
@@ -706,8 +762,8 @@ async function main() {
   stageExtensionForE2e();
 
   const { server, origin } = await startStaticServer();
-  const debugPort = 20233 + Math.floor(Math.random() * 1000);
-    const pageUrl = `${origin}/${scenarioPage}`;
+  const debugPort = await reserveFreePort();
+  const pageUrl = `${origin}/${scenarioPage}`;
   const args = [
     `--user-data-dir=${profileDir}`,
     `--remote-debugging-port=${debugPort}`,
@@ -722,12 +778,22 @@ async function main() {
   if (process.env.WVB_E2E_HEADLESS === '1') {
     args.push('--headless=new');
   }
+  if (silentSink) {
+    args.push('--disable-audio-output');
+  }
 
   log(`launching isolated Chrome profile at ${profileDir}`);
+  if (silentSink) log('silent AudioContext sink requested');
   const child = spawn(chrome, args, { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
   let chromeStderr = '';
+  let stderrProbeTail = '';
+  let nativeAudioOutputOpened = false;
   child.stderr?.on('data', (chunk) => {
-    chromeStderr += chunk.toString('utf8');
+    const next = chunk.toString('utf8');
+    const probe = `${stderrProbeTail}${next}`;
+    nativeAudioOutputOpened ||= /WASAPIAudioOutputStream/i.test(probe);
+    stderrProbeTail = probe.slice(-128);
+    chromeStderr += next;
     if (chromeStderr.length > 12000) {
       chromeStderr = chromeStderr.slice(-12000);
     }
@@ -745,6 +811,7 @@ async function main() {
       throw new Error('Extensions.loadUnpacked did not return an extension id.');
     }
     log(`loaded extension id ${extensionId}`);
+    await configureSilentSink(debugPort, extensionId, sockets);
 
     const createdTab = await browserCdp.command('Target.createTarget', { url: pageUrl, forTab: true });
     const page = await connectTarget(debugPort, (target) => target.type === 'page' && target.url === pageUrl);
@@ -911,6 +978,10 @@ async function main() {
       firstHarnessCdp: harness.cdp,
       sockets
     });
+    await sleep(250);
+    if (silentSink && nativeAudioOutputOpened) {
+      throw new Error('Native WASAPI output opened during a silent stability run.');
+    }
     log('stability smoke passed');
   } finally {
     for (const socket of sockets) {
@@ -920,7 +991,9 @@ async function main() {
       log(`chrome stderr tail ${chromeStderr.trim().split(/\r?\n/).slice(-20).join(' || ')}`);
     }
     child.kill();
+    await waitForChildExit(child);
     server.close();
+    cleanupRunDirectories();
   }
 }
 

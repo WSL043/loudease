@@ -26,7 +26,7 @@
 ## Compatibility
 
 - Tab-wide capture is more resilient than media-element attachment, but site or Chrome changes can still affect authorization, player-volume hints, or playback.
-- Current-version long-duration evidence must be refreshed for YouTube, Bilibili, and Douyin before Chrome Web Store submission.
+- Current `0.7.2` automated evidence covers a six-scenario YouTube/Bilibili/Douyin smoke matrix and one 30-minute Bilibili live endurance run. It does not yet cover the project-defined two-hour mixed-content run or controlled audible A/B. Anonymous headless YouTube unloaded its media element after roughly 45–60 seconds in endurance attempts, so those attempts are recorded as source failures rather than extension passes.
 - DRM/protected media behavior depends on Chrome and the site; no bypass is attempted.
 
 ## Product status
