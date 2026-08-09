@@ -6,7 +6,8 @@ Current source of truth: version `0.7.2`. Runtime evidence must match this versi
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Authorized tab audio is actually rerouted and played | Pass | Isolated Chrome capture E2E and output meter state |
+| Authorized tab audio is rerouted through a live output graph | Pass | Isolated silent Chrome capture E2E and output meter state |
+| Authorized tab audio remains audible and returns to the same baseline after stop | Pending | Requires current-version audible endpoint A/B; silent E2E deliberately cannot prove this |
 | Loud material is reduced | Pass | DSP fixtures, worklet tests, OfflineAudioContext, Chrome E2E |
 | Quiet material can be lifted | Pass | Signal-gated headroom fixtures and Chrome E2E |
 | Silence is not amplified into noise | Pass | Synthetic silence fixture and gate tests |
@@ -19,7 +20,8 @@ Current source of truth: version `0.7.2`. Runtime evidence must match this versi
 | Multiple authorized tabs have independent sessions | Pass | Multi-capture assertions and runtime state model |
 | Popup only claims active processing with fresh signal evidence | Pass | Truthfulness assertions and status TTL checks |
 | Store build removes local diagnostics | Pass | Allowlist build and release verifier |
-| Real-site current-version endurance matrix | Pending | Required before Chrome Web Store submission |
+| Current-version six-site real-site smoke matrix | Pass | Isolated silent Chrome passed YouTube/Bilibili/Douyin video/live 6/6 on 2026-08-10 |
+| Representative 30-minute real-site endurance | Pass | Bilibili live: 360 continuous samples, zero hard clips/native output, bounded heap growth |
 | Controlled listening corpus | Pending | Required before stable `1.0.0` |
 
 ## Architecture acceptance

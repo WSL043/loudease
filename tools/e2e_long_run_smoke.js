@@ -30,8 +30,13 @@ const result = spawnSync(process.execPath, [stabilityScript], {
     ...process.env,
     WVB_E2E_HOLD_MS: durationMs,
     WVB_E2E_CYCLES: cycles,
-    WVB_E2E_HOLD_SAMPLE_MS: sampleMs
+    WVB_E2E_HOLD_SAMPLE_MS: sampleMs,
+    WVB_E2E_SILENT_SINK: process.env.WVB_E2E_SILENT_SINK || '1',
+    WVB_E2E_HEADLESS: process.env.WVB_E2E_HEADLESS || '1'
   }
 });
 
-process.exit(result.status || 0);
+if (result.error) {
+  console.error(`[e2e-long-run] failed to launch: ${result.error.message}`);
+}
+process.exit(Number.isInteger(result.status) ? result.status : 1);

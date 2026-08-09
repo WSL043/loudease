@@ -2,7 +2,7 @@
 
 ## Automated matrix
 
-Local capture E2E emits synthetic audio by design. It is disabled on developer machines unless a silent output endpoint is selected and `WVB_E2E_ALLOW_LOCAL_AUDIO=1` is set. GitHub Actions may run it with `CI=true`.
+Local capture E2E emits synthetic audio by design. The default developer-safe entry points use an isolated Chrome profile, Chrome's fake audio output, and the Web Audio silent sink so the live DSP graph remains measurable without opening the system playback device. Direct audible runs remain gated behind explicit opt-in.
 
 | Layer | Scenarios | Command |
 |---|---|---|
@@ -11,8 +11,10 @@ Local capture E2E emits synthetic audio by design. It is disabled on developer m
 | Limiter | look-ahead delay, ceiling, clustered peaks, dynamic ceiling, stereo ratio, overshoot | `npm run test:dsp` |
 | Offline PCM | legacy reference vs production vs independent v4 model, steady levels, dynamics, onset, player volume, boundaries | `npm run test:dsp` |
 | Offline graph | real AudioWorklet node and AudioContext graph | `npm run test:dsp` |
-| Capture E2E | start/stop, loud cut, quiet lift, mute, player volume, burst, source replacement | `npm test` |
-| Stability E2E | repeated capture, reload, source switching, session cleanup | `npm test` |
+| Capture E2E | start/stop, loud cut, quiet lift, mute, player volume, burst recovery | `npm run test:capture` |
+| Stability E2E | repeated capture, reload, source switching, session cleanup | `npm run test:long -- --duration-ms 30000` |
+| Silent capture E2E | live tabCapture/DSP with no system playback device, plus native-output rejection | `npm run test:silent` |
+| Real-site smoke | YouTube, Bilibili, and Douyin video/live in isolated silent Chrome | `npm run test:sites` |
 | Slider persistence | input/change ordering and saved custom strength | `npm run test:slider` |
 | Store build | allowlist, references, diagnostics stripping, locale catalogs, forbidden code | `npm run test:release` |
 
@@ -22,12 +24,16 @@ The following rows require current `0.7.2` evidence before Chrome Web Store subm
 
 | Scenario | Connect | Fresh signal | Cut/lift evidence | Mute/volume | Source switch | 30 min | 2 h mixed run |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| YouTube video | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
-| YouTube live | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
-| Bilibili video | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
-| Bilibili live | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
-| Douyin video | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
-| Douyin live | Pending | Pending | Pending | Pending | Pending | Pending | Pending |
+| YouTube video | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
+| YouTube live | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Source unloaded after 45–60 s in anonymous headless Chrome | Pending |
+| Bilibili video | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
+| Bilibili live | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Passed 2026-08-10 | Pending |
+| Douyin video | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
+| Douyin live | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
+
+The final 2026-08-10 quick matrix passed all six scenarios with current `0.7.2` development code, fresh isolated profiles, silent output, no native WASAPI output, fresh worklet meters, and zero hard-clipped samples. The input/output readings were: YouTube video `-32.83/-25.83 dB`, YouTube live `-20.52/-23.76 dB`, Bilibili video `-44.86/-35.13 dB`, Bilibili live `-22.18/-25.49 dB`, Douyin short video `-30.13/-33.53 dB`, and Douyin live `-38.75/-35.49 dB`.
+
+The representative Bilibili live endurance run lasted `1,800,011 ms` and collected 360 consecutive five-second samples. Signal ticks advanced `53 -> 90046`, maximum signal age was `91 ms`, offscreen heap growth peaked at `1,195,700 bytes` against a `32 MiB` limit, and hard-clipped samples remained zero. Three attempted anonymous-headless YouTube endurance runs correctly failed when the site unloaded its media element after roughly 45–60 seconds even though the extension capture session remained alive; they are not counted as extension passes. These automated results prove capture and DSP continuity, not audible quality; mute/volume, in-page source switching, controlled listening, and the two-hour mixed run remain separate gates.
 
 ## Core global compatibility matrix
 

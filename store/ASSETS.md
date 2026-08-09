@@ -20,4 +20,4 @@ The generated files in `store/assets/` are submission assets, not extension runt
 - Regenerate and inspect every asset after a material UI or logo change.
 - The optional 1400 x 560 marquee image is intentionally deferred until the listing has proven conversion data.
 
-The source composition is `store/assets-source.html`. Render each `?asset=` route at its declared viewport and validate exact PNG dimensions with `tools/assert_publish_hygiene.js`.
+The source composition is `store/assets-source.html`. Run `npm run assets:store` to render current popup/settings previews and every derived asset at its declared viewport, then validate exact PNG dimensions with `tools/assert_publish_hygiene.js`.

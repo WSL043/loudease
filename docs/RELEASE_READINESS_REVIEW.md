@@ -2,15 +2,15 @@
 
 Review baseline: version `0.7.2`, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
 
-Latest code/package audit: `2026-08-09`. Static, DSP, muted isolated-Chrome slider/capture, release-build, and package checks passed locally. The store ZIP was byte-for-byte reproducible across two consecutive builds and contained 41 verified runtime files. The acceptance audit remains incomplete because current real-site and endurance evidence is missing.
+Latest code/package audit: `2026-08-10`. Static, DSP, isolated silent-Chrome slider/capture, release-build, and package checks passed locally. The store ZIP was byte-for-byte reproducible across two consecutive builds and contained 42 verified runtime files. The current-version six-site smoke matrix passed 6/6, and a representative Bilibili live endurance run passed for 30 minutes with 360 continuous samples, zero native output, zero hard-clipped samples, and bounded heap growth. Silent automation does not replace controlled audible A/B.
 
 ## Decision
 
 | Target | Decision | Reason |
 |---|---|---|
 | Private GitHub beta | Ready | Private prerelease and clean store ZIP exist; this is not a public compatibility claim |
-| Public GitHub beta | Not yet | Needs refreshed real-site, endurance, listening, and feedback evidence |
-| Chrome Web Store | Not yet | Submission copy, privacy fields, and required-size assets are prepared; public URLs and refreshed real-site endurance evidence remain |
+| Public GitHub beta | Technically ready | Source, package, assets, six-site smoke, and representative endurance evidence are current; publishing the private repository remains an explicit maintainer decision |
+| Chrome Web Store | Not yet | Package, copy, privacy fields, and assets are prepared; controlled audible A/B, public privacy/support URLs, permission decision, and dashboard confirmation remain |
 | Version `1.0.0` | Not yet | Requires the stable-release gates in `docs/VERSIONING.md` |
 
 ## Confirmed implementation
@@ -31,6 +31,9 @@ Before every release candidate:
 ```bash
 npm test
 npm run test:dsp
+npm run test:capture
+npm run test:sites
+npm run test:long -- --duration-ms 30000
 npm run test:slider
 npm run test:release
 npm run package:store
@@ -39,7 +42,7 @@ npm run audit
 
 The store verifier must confirm:
 
-- no localhost permission, URL, diagnostics symbol, or development marker;
+- no localhost permission or URL, no diagnostics or silent-E2E symbol, and no development marker;
 - no forbidden source, docs, tests, tools, secrets, archives, or logs;
 - no dynamic evaluation or remote executable code;
 - all manifest, locale, CSS, HTML, worklet, and icon references exist;
@@ -47,16 +50,15 @@ The store verifier must confirm:
 
 ## Remaining Chrome Web Store gates
 
-1. Refresh the unpacked extension and collect current-version evidence for YouTube video/live, Bilibili video/live, and Douyin video/live.
-2. Run at least a two-hour mixed-content endurance session and record capture count, track count, context state, stale status, limiter overshoot, and hard-clipped samples.
-3. Complete controlled A/B listening on dialogue, music, live speech, ads, sparse ambience, and loud transient material.
-4. Reconfirm the permission justifications in `store/PRIVACY_PRACTICES.md` against the final package. The redundant `tabs` permission has been removed and `activeTab` remains as the user-invocation grant for the `tabCapture` target. Before public submission, explicitly decide whether seamless cross-navigation observer recovery justifies persistent `http://*/*` and `https://*/*` host permissions or whether the product should accept reduced recovery in exchange for optional/narrower host access.
-5. Reinspect the required-size assets and copy in `store/`, then make the privacy and support URLs publicly reachable before submission.
-6. Obtain fluent review before publishing any draft in `store/LOCALIZATION_STATUS.md`. English remains the default; unreviewed localized listings stay unpublished and do not block an English-only first release. Do not use keyword lists or compatibility claims unsupported by the matrix.
-7. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
-8. Enable the Chrome Web Store Support Hub or configure a reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.
-9. Record representative global playback evidence before advertising support beyond the baseline matrix; use `docs/TEST_MATRIX.md` as the claim boundary.
-10. Complete the account-owner checklist in `store/ACCOUNT_SETUP.md`; registration fee, agreements, two-step verification, and final submission are manual maintainer actions.
+1. Complete controlled A/B listening on dialogue, music, live speech, ads, sparse ambience, and loud transient material, including enabled-vs-disabled baseline and stop restoration.
+2. Run the project-defined two-hour mixed-content endurance session and record capture count, track count, context state, stale status, limiter overshoot, and hard-clipped samples. The automated 30-minute representative run is complete.
+3. Reconfirm the permission justifications in `store/PRIVACY_PRACTICES.md` against the final package. The redundant `tabs` permission has been removed and `activeTab` remains as the user-invocation grant for the `tabCapture` target. Before public submission, explicitly decide whether seamless cross-navigation observer recovery justifies persistent `http://*/*` and `https://*/*` host permissions or whether the product should accept reduced recovery in exchange for optional/narrower host access.
+4. Reinspect the required-size assets and copy in `store/`, then make the privacy and support URLs publicly reachable before submission.
+5. Obtain fluent review before publishing any draft in `store/LOCALIZATION_STATUS.md`. English remains the default; unreviewed localized listings stay unpublished and do not block an English-only first release. Do not use keyword lists or compatibility claims unsupported by the matrix.
+6. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
+7. Enable the Chrome Web Store Support Hub or configure a reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.
+8. Record representative global playback evidence before advertising support beyond the baseline matrix; use `docs/TEST_MATRIX.md` as the claim boundary.
+9. Complete the account-owner checklist in `store/ACCOUNT_SETUP.md`. The maintainer reports that the one-time registration fee was probably already paid; contact-email verification, agreements, two-step verification, and final submission still require confirmation in the Developer Dashboard.
 
 ## Residual technical risk
 

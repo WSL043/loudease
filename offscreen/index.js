@@ -126,6 +126,9 @@ class CaptureSession {
     this.stream = stream;
     this.settings = normalizeSettings(initialSettings);
     this.context = null;
+    /* WVB_DEV_DIAGNOSTICS_START */
+    this.silentSink = false;
+    /* WVB_DEV_DIAGNOSTICS_END */
     this.source = null;
     this.outputGain = null;
     this.leveler = null;
@@ -243,6 +246,17 @@ class CaptureSession {
       }
 
       this.context = new AudioContext({ latencyHint: 'interactive' });
+      /* WVB_DEV_DIAGNOSTICS_START */
+      const silentSinkRequested = this.silentSink;
+      this.silentSink = false;
+      if (silentSinkRequested) {
+        if (typeof this.context.setSinkId !== 'function') {
+          throw new Error('Silent AudioContext sink is unavailable');
+        }
+        await this.context.setSinkId({ type: 'none' });
+        this.silentSink = true;
+      }
+      /* WVB_DEV_DIAGNOSTICS_END */
       this.context.addEventListener('statechange', () => {
         if (this.destroyed) {
           return;
@@ -969,6 +983,9 @@ class CaptureSession {
       silentTickCount: this.silentTickCount,
       startedAt: this.startedAt,
       contextState: context?.state || 'none',
+      /* WVB_DEV_DIAGNOSTICS_START */
+      silentSink: this.silentSink,
+      /* WVB_DEV_DIAGNOSTICS_END */
       sampleRate: finite(context?.sampleRate, 0),
       baseLatency: finite(context?.baseLatency, 0),
       outputLatency: finite(context?.outputLatency, 0),
@@ -1103,7 +1120,8 @@ class CaptureSession {
   }
 }
 
-async function startCapture({ tabId, streamId, nextSettings, mediaState }) {
+async function startCapture(message) {
+  const { tabId, streamId, nextSettings, mediaState } = message || {};
   const numericTabId = Number(tabId);
   const startToken = nextStartToken += 1;
   startTokens.set(numericTabId, startToken);
@@ -1202,6 +1220,9 @@ async function startCapture({ tabId, streamId, nextSettings, mediaState }) {
       };
     }
     const session = new CaptureSession(numericTabId, stream, sessionSettings);
+    /* WVB_DEV_DIAGNOSTICS_START */
+    session.silentSink = message?.e2eSilentSink === true;
+    /* WVB_DEV_DIAGNOSTICS_END */
     session.applyMediaState(mediaState || {});
     sessions.set(numericTabId, session);
     await session.start();
