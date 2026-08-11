@@ -64,7 +64,7 @@ For implementation details, assumptions, and current gaps, read [Audio DSP](docs
 |---|---|
 | The same DSP, popup, settings, languages, and per-site rules. Localhost diagnostics and contributor-only controls are physically removed from the package. | The complete open-source project, including opt-in local diagnostics, test pages, evidence tools, and reproducible store packaging. |
 
-The store build is smaller for privacy and review compliance; it does not use a weaker balancing algorithm. The exact package boundary is enforced by an allowlist build and verified in CI. Public GitHub Releases attach this same stripped store ZIP; `dist/github-dev` is never a public release artifact. Store copy, permission explanations, privacy fields, and submission assets live in [`store/`](store/).
+The store build is smaller for privacy and review compliance; it does not use a weaker balancing algorithm. Trusted `dist/github-dev` builds additionally contain a maintainer auto-protection mode: when Chrome starts with LoudEase's exact extension ID allowlisted, maintained YouTube, Bilibili, and Douyin tabs—and new tabs opened by an already protected tab—can be captured before playback. It installs no native helper and reuses the same DSP. The store build physically removes this path. Public GitHub Releases still attach the stripped store ZIP; `dist/github-dev` is not an ordinary public installation artifact.
 
 ## Install
 
@@ -97,7 +97,9 @@ Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
 3. A moving waveform and a current dB value confirm live processing.
 4. Adjust **Reduce loud sounds** and **Lift quiet sounds** only when the defaults do not fit.
 
-Chrome requires a user gesture before `tabCapture` starts. A completely new tab cannot be captured silently; after authorization, LoudEase can keep processing while you switch to another tab.
+The public store runtime requires a user gesture before `tabCapture` starts. A completely new store tab cannot be captured silently; after authorization, LoudEase can keep processing while you switch to another tab.
+
+Maintainers can use the [trusted GitHub automatic-protection workflow](docs/INSTALLATION.md#trusted-github-automatic-protection) by adding `--allowlisted-extension-id=<LoudEase ID>` to the normal Chrome shortcut once. This is not a Web Store feature, and Chrome must be fully restarted from that shortcut.
 
 See [Installation](docs/INSTALLATION.md) for the store, packaged-beta, and source-development paths.
 
@@ -144,6 +146,7 @@ npm test              # contracts, DSP tests, and offline audio graphs
 npm run test:dsp      # focused DSP verification
 npm run test:silent   # isolated live capture with no system audio output
 npm run test:capture  # silent local loud/lift/mute/player-volume/burst matrix
+npm run test:auto-capture # GitHub pre-play and new-tab automatic capture
 npm run test:sites    # silent YouTube/Bilibili/Douyin video/live matrix
 npm run test:long     # configurable isolated stability/endurance run
 npm run test:slider   # popup persistence regression

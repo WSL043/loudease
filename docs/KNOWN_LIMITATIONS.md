@@ -2,8 +2,10 @@
 
 ## Browser authorization
 
-- Chrome requires a user invocation before a new tab can start `tabCapture`.
-- The extension cannot silently capture every future tab or guarantee that no unauthorized tab plays first.
+- The public store runtime requires a user invocation before a new tab can start `tabCapture`.
+- The trusted GitHub build can automatically protect the maintained YouTube, Bilibili, and Douyin targets only when Chrome was fully started with the exact LoudEase ID in `--allowlisted-extension-id`.
+- The GitHub mode is a Chromium startup capability, not a standard extension permission. Chrome may change or remove it in a future release, so current-version E2E remains mandatory.
+- Unknown sites that are neither maintained automatic targets nor opened by an already protected tab still require manual capture.
 - Chrome internal pages and other protected surfaces cannot be captured.
 
 ## Player volume
@@ -32,5 +34,5 @@
 ## Product status
 
 - Version `0.7.2` is a beta, not a hearing-protection or medical product.
-- The GitHub build contains optional localhost diagnostics; the store build removes them.
+- The GitHub build contains optional localhost diagnostics and trusted automatic-capture orchestration; the store build removes both.
 - Version `1.0.0` requires the gates documented in `docs/VERSIONING.md`.

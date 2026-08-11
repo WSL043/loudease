@@ -64,7 +64,7 @@ LoudEase 不是简单的音量放大器、均衡器，也不是经过校准的�
 |---|---|
 | 保留相同的 DSP、弹窗、设置、语言和站点规则；本机诊断和贡献者专用入口会从安装包中物理移除。 | 提供完整开源工程，包括默认关闭的本机诊断、测试页、证据工具和可复现的商店打包流程。 |
 
-商店版为了隐私和审核更精简，但不会使用更弱的平衡算法。白名单构建和 CI 会强制验证两种发行边界。公开 GitHub Release 附带的也是同一个已剥离商店 ZIP，`dist/github-dev` 绝不会作为公开发布包。商店文案、权限理由、隐私字段和提交素材统一放在 [`store/`](store/) 中。
+商店版为了隐私和审核更精简，但不会使用更弱的平衡算法。受信任的 `dist/github-dev` 还包含维护者自动保护模式：Chrome 以 LoudEase 的精确扩展 ID 启动授权后，抖音、B站、YouTube 和由已保护标签打开的新标签可在播放前接管。它不安装桌面守护程序，也不建立第二套 DSP；商店构建会物理移除该入口。公开 GitHub Release 附带的仍是已剥离商店 ZIP，`dist/github-dev` 不作为普通公开安装包。
 
 ## 安装
 
@@ -97,7 +97,9 @@ npm run build:dev
 3. 波形开始移动且出现实时 dB 数值，才表示正在处理。
 4. 只有默认听感不合适时，再调整“压大声”和“提小声”。
 
-Chrome 要求 `tabCapture` 由用户手势启动，因此全新标签页不能静默接管；完成授权后，即使切换到其他标签页，LoudEase 仍可继续处理原标签页。
+公开商店构建要求 `tabCapture` 由用户手势启动，因此全新商店标签页不能静默接管；完成授权后，即使切换到其他标签页，LoudEase 仍可继续处理原标签页。
+
+项目维护者可以使用 [GitHub 自动保护安装流程](docs/INSTALLATION.md#trusted-github-automatic-protection)，一次性给 Chrome 快捷方式加入 `--allowlisted-extension-id=<LoudEase ID>`。这不是商店功能；Chrome 必须完全退出并由该快捷方式重新启动。
 
 商店安装、扩展包导入和源码开发的完整区别见 [安装说明](docs/INSTALLATION.md)。
 
@@ -144,6 +146,7 @@ npm test              # 契约、DSP 与离线音频图测试
 npm run test:dsp      # DSP 专项验证
 npm run test:silent   # 不向系统声卡输出的隔离实时接管
 npm run test:capture  # 静默覆盖压大声/提小声/静音/播放器音量/burst
+npm run test:auto-capture # GitHub 自动保护、播放前接管和新标签回归
 npm run test:sites    # 静默运行 YouTube/B站/抖音视频与直播矩阵
 npm run test:long     # 可配置的隔离稳定性/长跑
 npm run test:slider   # 弹窗滑块持久化回归

@@ -29,6 +29,7 @@ const checks = [
   ['legacy content page audio processing is deleted during PoC', !fs.existsSync(path.join(root, 'content', 'engine.js')) && /processedCount: 0/.test(bridge) && !/AudioContext|createMediaElementSource|captureStream/.test(bridge)],
   ['E2E harness requests tabCapture from a click path', /chrome\.tabCapture\.getMediaStreamId/.test(harness) && /addEventListener\('click', start\)/.test(harness)],
   ['E2E smoke uses isolated profile and local test page', /--user-data-dir=/.test(smoke) && /startStaticServer/.test(smoke) && /simple-audio\.html/.test(smoke)],
+  ['E2E staging excludes generated build output', /entry\.name === 'tmp' \|\| entry\.name === 'dist' \|\| entry\.name === '\.git'/.test(smoke)],
   ['E2E smoke writes structured current-version scenario reports', /latest-e2e-poc-\$\{String\(scenario\.expect\)/.test(smoke) && /latest-e2e-poc\.json/.test(smoke) && /version: manifestVersion/.test(smoke) && /writeJson\(scenarioReportPath, report\)/.test(smoke)]
 ];
 

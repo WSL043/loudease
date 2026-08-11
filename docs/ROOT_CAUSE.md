@@ -26,7 +26,7 @@ The dual architecture also created:
 The runtime now has one primary audio path:
 
 ```text
-user gesture -> tabCapture -> offscreen CaptureSession -> programme-leveler-v4 AudioWorklet -> output
+popup gesture or trusted GitHub startup grant -> tabCapture -> offscreen CaptureSession -> programme-leveler-v4 AudioWorklet -> output
 ```
 
 The content bridge is observation-only. It never calls `createMediaElementSource()` and does not patch media prototypes. The offscreen session owns PCM state; the service worker owns orchestration; the popup owns user intent and display.
@@ -37,7 +37,7 @@ The content bridge is observation-only. It never calls `createMediaElementSource
 
 ## Remaining hard boundary
 
-Chrome requires the extension to be invoked by the user before a tab can be captured. No architecture change inside a normal MV3 extension can silently pre-authorize every future tab. The product must state this clearly and make per-tab authorization fast and observable.
+Chrome requires a normal MV3 extension to be invoked by the user before a tab can be captured. The public store runtime must state this clearly and make per-tab authorization fast and observable. The trusted GitHub build can use Chromium's exact-ID browser-startup allowlist to pre-authorize its existing tab-capture path; this is an explicit browser-process configuration, not a second audio architecture, and it is stripped from the store build.
 
 ## Regression rules
 
