@@ -53,6 +53,31 @@ Load `dist/github-dev` through `chrome://extensions` as described above.
 
 The project currently has no external runtime dependencies, so no package-install step is required. Use `npm run build:store` only to inspect the stripped store target. Use `npm run package:store` only when preparing a reviewed release candidate. The optional localhost diagnostics receiver is contributor tooling and is not part of normal installation.
 
+## Trusted GitHub automatic protection
+
+This optional maintainer workflow removes the repeated per-tab click without installing a native helper. It is deliberately absent from `dist/store` and from the public Web Store runtime.
+
+1. Build and load `dist/github-dev` from a permanent path.
+2. Open `chrome://extensions`, enable details for LoudEase, and copy its exact 32-character extension ID.
+3. Edit the Chrome shortcut you normally use. After the closing quote around `chrome.exe`, append a space and:
+
+   ```text
+   --allowlisted-extension-id=your_32_character_extension_id
+   ```
+
+   A typical complete target looks like:
+
+   ```text
+   "C:\Program Files\Google\Chrome\Application\chrome.exe" --allowlisted-extension-id=abcdefghijklmnopqrstuvwxyzabcdef
+   ```
+
+4. Exit every Chrome window so no previous Chrome process remains, then start Chrome with that shortcut. Chrome reads this grant only when the browser process starts; opening the flagged shortcut while an unflagged Chrome process is already running does not retrofit the grant.
+5. Open a maintained YouTube, Bilibili, or Douyin page. LoudEase should enter capture before playback without opening the popup. A new tab opened by an already protected tab inherits early protection.
+
+The switch does not block or disable other extensions. It names one extension ID that Chromium may treat as pre-authorized for tab capture. Only use it with a reviewed unpacked build at a stable path. Removing the argument and fully restarting Chrome restores the normal per-tab click requirement.
+
+The Chrome Web Store package uses the same DSP but physically strips this automatic orchestration. A store extension ID could be written into a local Chrome command line in theory, but LoudEase does not ship or claim that unsupported public workflow.
+
 ## Using the extension
 
 1. Open a normal `http` or `https` page that is playing audio.
@@ -60,4 +85,4 @@ The project currently has no external runtime dependencies, so no package-instal
 3. Confirm that the waveform is moving and a current dB value is shown.
 4. Adjust **Reduce loud sounds** or **Lift quiet sounds** only when the defaults do not fit the material.
 
-Chrome requires a user gesture before `tabCapture` can start on a new tab. After authorization, LoudEase can continue processing that tab while another tab is active.
+Chrome normally requires a user gesture before `tabCapture` can start on a new tab. After authorization, LoudEase can continue processing that tab while another tab is active. The trusted GitHub workflow above is the only maintained no-helper exception and requires the browser-startup allowlist.

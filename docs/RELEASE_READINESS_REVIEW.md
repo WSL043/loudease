@@ -62,7 +62,7 @@ The store verifier must confirm:
 
 ## Residual technical risk
 
-- Chrome still requires a user gesture for a new tab capture.
+- The public store runtime still requires a user gesture for a new tab capture; the GitHub startup-allowlist path must remain absent from the verified store ZIP.
 - Sample-peak limiting does not catch every inter-sample true peak.
 - Full-strength transition protection intentionally applies a short, deep ceiling to newly loud material; deterministic tests close the first-frame leak, but listening tests must confirm that its attack character is acceptable across speech, music, and live streams.
 - Unknown/conflicting player-volume state can reduce quiet-lift availability.
@@ -83,7 +83,7 @@ Allowed statements:
 Do not claim:
 
 - guaranteed hearing protection;
-- automatic capture of every new tab;
+- automatic capture of every new tab in the public store build;
 - standards-compliant broadcast LUFS normalization;
 - compatibility with every website;
 - zero latency, zero distortion, or perfect volume equality.

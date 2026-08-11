@@ -35,6 +35,7 @@ const syntaxTargets = [
   'tools/assert_publish_hygiene.js',
   'tools/assert_license_hygiene.js',
   'tools/assert_tab_hints.js',
+  'tools/assert_github_auto_capture.js',
   'tools/assert_runtime_reload.js',
   'tools/assert_multi_capture.js',
   'tools/assert_site_settings.js',
@@ -52,6 +53,7 @@ const syntaxTargets = [
   'tools/e2e_local_capture_matrix.js',
   'tools/e2e_real_site_matrix.js',
   'tools/e2e_silent_sink.js',
+  'tools/e2e_github_auto_capture.js',
   'tools/dsp_unit_tests.js',
   'tools/programme_leveler_experiment.js',
   'tools/offline_audio_graph_tests.js'
@@ -76,6 +78,7 @@ const scriptTargets = [
   'tools/assert_publish_hygiene.js',
   'tools/assert_license_hygiene.js',
   'tools/assert_tab_hints.js',
+  'tools/assert_github_auto_capture.js',
   'tools/assert_runtime_reload.js',
   'tools/assert_multi_capture.js',
   'tools/assert_site_settings.js',

@@ -20,5 +20,7 @@ jobs:
         run: npm test
       - name: Popup persistence integration
         run: npm run test:slider
+      - name: GitHub automatic capture integration
+        run: npm run test:auto-capture
       - name: Store release build
         run: npm run test:release

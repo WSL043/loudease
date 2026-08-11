@@ -51,6 +51,7 @@ function verify() {
     if (/localhost|127\.0\.0\.1/i.test(text)) fail(`Localhost string remains in ${name}`);
     if (/localDiagnostics|LOCAL_DIAGNOSTICS|WVB_SET_LOCAL_DIAGNOSTICS/.test(text)) fail(`Local diagnostics symbol remains in ${name}`);
     if (/e2eSilentSink|E2E_SILENT_SINK|webVolumeBalancer\.e2eSilentSink/.test(text)) fail(`Silent E2E sink symbol remains in ${name}`);
+    if (/automaticCapture|AUTO_CAPTURE|allowlisted-extension-id/i.test(text)) fail(`GitHub automatic-capture symbol remains in ${name}`);
     if (/\beval\s*\(|\bnew\s+Function\s*\(/.test(text)) fail(`Unsafe eval remains in ${name}`);
     if (/WVB_DEV_DIAGNOSTICS_(?:START|END)/.test(text)) fail(`Development marker remains in ${name}`);
     if (/\.(?:html|css)$/i.test(name)) {

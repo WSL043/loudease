@@ -155,7 +155,7 @@ function startStaticServer() {
 function copyDir(source, destination) {
   fs.mkdirSync(destination, { recursive: true });
   for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
-    if (entry.name === 'tmp' || entry.name === '.git') {
+    if (entry.name === 'tmp' || entry.name === 'dist' || entry.name === '.git') {
       continue;
     }
     if (/\.(zip|crx|pem)$/i.test(entry.name)) {

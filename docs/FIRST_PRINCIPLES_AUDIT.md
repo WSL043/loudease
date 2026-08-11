@@ -7,7 +7,7 @@ Prevent a web tab from alternating between unexpectedly loud and inaudibly quiet
 ## Non-negotiable facts
 
 1. The extension does not know acoustic loudness at the listener's ear.
-2. Chrome requires a user invocation before a new tab can be captured.
+2. Chrome normally requires a user invocation before a new tab can be captured. A browser process started with Chromium's exact-ID allowlist can grant the trusted GitHub build an explicit exception; the store runtime cannot depend on it.
 3. A web page may replace media elements, use live streams, iframes, or Web Audio.
 4. Low RMS does not prove that aggressive amplification is safe.
 5. An enabled preference does not prove that PCM is being processed.
@@ -31,7 +31,8 @@ Prevent a web tab from alternating between unexpectedly loud and inaudibly quiet
 | Player volume is unknown/conflicting | Disable upward lift unless the narrow audible fallback is safe |
 | Player is muted or volume is zero | Output zero |
 | Captured stream ends | Stop and clean the session |
-| New tab has no authorization | Ask for one user invocation; do not claim automatic coverage |
+| Store tab has no authorization | Ask for one user invocation; do not claim automatic coverage |
+| GitHub Chrome process lacks the exact-ID startup allowlist | Record one truthful denial, stop automatic retries, and keep manual capture available |
 | Telemetry is stale | Show waiting/recovery, not active processing |
 | Development diagnostics are not enabled | Send nothing to localhost |
 

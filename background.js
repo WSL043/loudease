@@ -13,6 +13,7 @@ const LOCAL_DIAGNOSTICS_URL = 'http://127.0.0.1:18765/loudease';
 const LOCAL_DIAGNOSTICS_INTERVAL_MS = 1000;
 const LOCAL_DIAGNOSTICS_STORAGE_KEY = 'webVolumeBalancer.localDiagnosticsEnabled';
 const E2E_SILENT_SINK_STORAGE_KEY = 'webVolumeBalancer.e2eSilentSink';
+const AUTOMATIC_CAPTURE_DENIED_ERROR = 'Extension has not been invoked for the current page';
 /* WVB_DEV_DIAGNOSTICS_END */
 const CURRENT_VERSION = chrome.runtime.getManifest().version;
 const OFFSCREEN_MESSAGE_RETRY_MS = 120;
@@ -87,6 +88,8 @@ const diagnosticEvents = [];
 let localDiagnosticsAvailable = false;
 let localDiagnosticsEnabled = false;
 let lastLocalDiagnosticsAt = 0;
+const automaticCaptureRequests = new Map();
+let automaticCaptureUnavailable = false;
 /* WVB_DEV_DIAGNOSTICS_END */
 let offscreenPort = null;
 let offscreenRequestId = 1;
@@ -124,6 +127,97 @@ function unsupportedStatus() {
 function mediaTargetUrl(url) {
   return /(^|\/\/)(www\.)?(douyin|bilibili)\.com\b|(^|\/\/)live\.(douyin|bilibili)\.com\b/i.test(String(url || ''));
 }
+
+/* WVB_DEV_DIAGNOSTICS_START */
+function automaticCaptureTargetUrl(url) {
+  try {
+    const hostname = new URL(String(url || '')).hostname.toLowerCase();
+    return hostname === 'loudease-auto.test'
+      || /(^|\.)(?:douyin\.com|iesdouyin\.com|bilibili\.com|youtube\.com|youtu\.be)$/.test(hostname);
+  } catch (_) {
+    return false;
+  }
+}
+
+function automaticCaptureUrlForTab(tab) {
+  const pendingUrl = String(tab?.pendingUrl || '');
+  const currentUrl = String(tab?.url || '');
+  if (automaticCaptureTargetUrl(pendingUrl)) return pendingUrl;
+  if (automaticCaptureTargetUrl(currentUrl)) return currentUrl;
+  if (!captureStatuses.get(Number(tab?.openerTabId))?.active) return '';
+  if (supportedPage(pendingUrl)) return pendingUrl;
+  if (supportedPage(currentUrl)) return currentUrl;
+  return String(tabHints.get(Number(tab?.openerTabId))?.url || '');
+}
+
+async function requestAutomaticCapture(tabId, tabUrl, reason) {
+  if (automaticCaptureUnavailable) {
+    return { ok: false, skipped: true, error: 'automatic-capture-unavailable' };
+  }
+  if (!Number.isInteger(tabId) || !supportedPage(tabUrl)) {
+    return { ok: false, skipped: true, error: 'unsupported-page' };
+  }
+  const existing = captureStatus(tabId);
+  if (existing?.active) {
+    return { ok: true, skipped: true, alreadyActive: true };
+  }
+  if (automaticCaptureRequests.has(tabId)) {
+    return await automaticCaptureRequests.get(tabId);
+  }
+
+  const request = (async () => {
+    const effective = await readSettingsForUrl(tabUrl);
+    if (effective.enabled === false) {
+      addEvent('capture:auto-skip-disabled', { tabId, reason, url: tabUrl.slice(0, 180) });
+      return { ok: false, skipped: true, error: 'disabled-for-site' };
+    }
+    addEvent('capture:auto-request', { tabId, reason, url: tabUrl.slice(0, 180) });
+    const result = await startTabCapture(tabId, tabUrl);
+    if (!result?.ok) {
+      const error = String(result?.error || 'automatic capture failed');
+      if (error.includes(AUTOMATIC_CAPTURE_DENIED_ERROR)) {
+        automaticCaptureUnavailable = true;
+        addEvent('capture:auto-unavailable', { tabId, reason, error });
+      } else {
+        addEvent('capture:auto-error', { tabId, reason, error });
+      }
+      return result;
+    }
+    addEvent('capture:auto-start', { tabId, reason, url: tabUrl.slice(0, 180) });
+    return result;
+  })();
+  automaticCaptureRequests.set(tabId, request);
+  try {
+    return await request;
+  } finally {
+    if (automaticCaptureRequests.get(tabId) === request) {
+      automaticCaptureRequests.delete(tabId);
+    }
+  }
+}
+
+async function requestAutomaticCaptureForTab(tab, reason) {
+  const tabId = Number(tab?.id);
+  const tabUrl = automaticCaptureUrlForTab(tab);
+  if (!Number.isInteger(tabId) || !tabUrl) {
+    return { ok: false, skipped: true, error: 'not-an-automatic-target' };
+  }
+  rememberTabHint({ ...tab, url: tabUrl });
+  return await requestAutomaticCapture(tabId, tabUrl, reason);
+}
+
+async function requestAutomaticCaptureForOpenTabs(reason) {
+  if (automaticCaptureUnavailable) return [];
+  const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+  const targets = tabs.filter((tab) => automaticCaptureUrlForTab(tab)).slice(0, 16);
+  const results = [];
+  for (const tab of targets) {
+    if (automaticCaptureUnavailable) break;
+    results.push(await requestAutomaticCaptureForTab(tab, reason));
+  }
+  return results;
+}
+/* WVB_DEV_DIAGNOSTICS_END */
 
 function rememberTabHint(tab) {
   const tabId = Number(tab?.id);
@@ -1289,13 +1383,6 @@ async function startTabCapture(tabId, tabUrl, providedStreamId = '', popupStream
     addEvent('capture:start-error', { tabId, stage: 'validate-page', error: 'unsupported-page' });
     return { ok: false, error: '当前页面不能整页接管' };
   }
-  try {
-    await ensureOffscreenDocument();
-  } catch (error) {
-    const message = String(error?.message || error);
-    addEvent('capture:start-error', { tabId, stage: 'ensure-offscreen', error: message });
-    return { ok: false, error: message };
-  }
   let streamId = providedStreamId;
   const popupError = String(popupStreamIdError || '');
   if (!streamId && popupError) {
@@ -1311,6 +1398,13 @@ async function startTabCapture(tabId, tabUrl, providedStreamId = '', popupStream
       rememberCaptureFailure(tabId, 'error', combined, { stage: 'background-get-stream-id' });
       return { ok: false, error: combined };
     }
+  }
+  try {
+    await ensureOffscreenDocument();
+  } catch (error) {
+    const message = String(error?.message || error);
+    addEvent('capture:start-error', { tabId, stage: 'ensure-offscreen', error: message });
+    return { ok: false, error: message };
   }
   let response;
   try {
@@ -1489,12 +1583,28 @@ async function ensureOpenTabsInjected(options = {}) {
 chrome.runtime.onInstalled.addListener(async () => {
   await writeSettings(await readSettings());
   await ensureOpenTabsInjected({ clearStatus: true });
+  /* WVB_DEV_DIAGNOSTICS_START */
+  await requestAutomaticCaptureForOpenTabs('installed');
+  /* WVB_DEV_DIAGNOSTICS_END */
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   await refreshAction(await readSettings());
   await ensureOpenTabsInjected();
+  /* WVB_DEV_DIAGNOSTICS_START */
+  await requestAutomaticCaptureForOpenTabs('startup');
+  /* WVB_DEV_DIAGNOSTICS_END */
 });
+
+/* WVB_DEV_DIAGNOSTICS_START */
+chrome.tabs?.onCreated?.addListener((tab) => {
+  requestAutomaticCaptureForTab(tab, 'created')
+    .catch((error) => addEvent('capture:auto-created-error', {
+      tabId: Number(tab?.id),
+      error: String(error?.message || error)
+    }));
+});
+/* WVB_DEV_DIAGNOSTICS_END */
 
 chrome.tabs?.onRemoved?.addListener((tabId) => {
   frameStatuses.delete(tabId);
@@ -1506,7 +1616,16 @@ chrome.tabs?.onRemoved?.addListener((tabId) => {
   stopTabCapture(tabId).catch(() => {});
 });
 
-chrome.tabs?.onUpdated?.addListener((tabId, changeInfo) => {
+chrome.tabs?.onUpdated?.addListener((tabId, changeInfo, tab) => {
+  /* WVB_DEV_DIAGNOSTICS_START */
+  if (changeInfo?.url || changeInfo?.status === 'loading') {
+    requestAutomaticCaptureForTab({ ...tab, id: tabId }, changeInfo?.url ? 'url-change' : 'loading')
+      .catch((error) => addEvent('capture:auto-update-error', {
+        tabId,
+        error: String(error?.message || error)
+      }));
+  }
+  /* WVB_DEV_DIAGNOSTICS_END */
   if (changeInfo?.url) {
     const navigationRevision = Number(captureNavigationRevisions.get(tabId) || 0) + 1;
     captureNavigationRevisions.set(tabId, navigationRevision);

@@ -21,7 +21,7 @@ The live runtime, current source, tests, and recorded evidence outrank old scree
 - Content scripts observe media and player state. They must not create a second Web Audio processing graph.
 - Page mute and zero player volume are hard boundaries. Quiet lift must never bypass them.
 - A popup label such as **active** requires fresh runtime evidence, not merely an enabled preference.
-- A newly captured tab requires a user gesture because Chrome controls `tabCapture` authorization.
+- The public store runtime requires a user gesture for each newly captured tab. The trusted GitHub build may use Chromium's exact-ID startup allowlist, but that orchestration must be development-only and stripped from the store target.
 - The store build and GitHub development build use the same DSP. The store build removes contributor-only localhost diagnostics.
 - Raw audio, browsing history, URLs, titles, account identifiers, and secrets must not be uploaded or silently collected.
 
