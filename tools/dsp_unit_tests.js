@@ -31,7 +31,7 @@ assert('settings preserve known preset', normalizeSettings({ preset: 'night' }).
 assert('settings classify unknown preset as custom', normalizeSettings({ preset: 'mystery' }).preset === 'custom');
 assert('default settings retain independent full-strength controls', DEFAULT_SETTINGS.cutStrength === 100 && DEFAULT_SETTINGS.liftStrength === 100);
 assert('K-weighting constants remain the BS.1770 biquad approximation', K_WEIGHTING_PARAMS.shelfGainDb > 3.9 && K_WEIGHTING_PARAMS.highpassFrequencyHz > 38);
-assert('programme controller exposes its runtime policy revision', POLICY_REVISION === 'baseline-detail-fast-v1');
+assert('programme controller exposes its runtime policy revision', POLICY_REVISION === 'stable-programme-v1');
 
 const gateOpen = computeSignalGateActive({ wasActive: false, energyDb: -60, peak: 0.001 });
 const gateCloseHeld = computeSignalGateActive({ wasActive: true, energyDb: -65, peak: 0.0003 });
@@ -41,10 +41,10 @@ assert('signal gate uses hysteresis around the noise floor', gateOpen && gateClo
 const estimator = new ProgrammeLoudnessEstimator();
 estimator.addBlock(dbToEnergy(-80));
 assert('absolute gate rejects sub-floor blocks', estimator.snapshot().acceptedBlocks === 0);
-for (let index = 0; index < 9; index += 1) estimator.addBlock(dbToEnergy(-24));
+for (let index = 0; index < 40; index += 1) estimator.addBlock(dbToEnergy(-24));
 assert(
-  'programme confidence ramps from measured blocks and reaches one',
-  estimator.snapshot().acceptedBlocks === 9 && estimator.snapshot().confidence === 1,
+  'programme confidence reaches one only after several seconds of measured blocks',
+  estimator.snapshot().acceptedBlocks === 40 && estimator.snapshot().confidence === 1,
   JSON.stringify(estimator.snapshot())
 );
 assert('steady programme estimate is accurate', close(estimator.snapshot().programmeDb, -24, 0.05), JSON.stringify(estimator.snapshot()));
@@ -93,11 +93,11 @@ assert('quiet programme receives strong upward correction', quiet.targetGainDb >
 const loudMoment = gain({ programmeDb: -20, momentaryDb: -12, fastDb: -12, peakDb: -6 });
 const quietMoment = gain({ programmeDb: -20, momentaryDb: -28, fastDb: -28, peakDb: -18 });
 assert('within-programme loud moments are compressed around the centre', loudMoment.dynamicsCorrectionDb < -4, JSON.stringify(loudMoment));
-assert('within-programme quiet moments are lifted without becoming a second target', quietMoment.dynamicsCorrectionDb > 4 && quietMoment.dynamicsCorrectionDb < 6, JSON.stringify(quietMoment));
+assert('within-programme quiet moments are lifted without becoming a second target', quietMoment.dynamicsCorrectionDb > 4 && quietMoment.dynamicsCorrectionDb < 12, JSON.stringify(quietMoment));
 const liveBed = gain({ programmeDb: -14, momentaryDb: -60, fastDb: -60, peakDb: -52 });
 assert(
   'a loud programme quiet bed cannot become a second full-volume programme',
-  liveBed.dynamicsCorrectionDb <= 6.01 && liveBed.targetGainDb <= 2.01,
+  liveBed.dynamicsCorrectionDb === 0 && liveBed.targetGainDb < 0,
   JSON.stringify(liveBed)
 );
 const coldLoud = gain({ programmeDb: null, confidence: 0, momentaryDb: -10, fastDb: -10, peakDb: -5 });
@@ -110,12 +110,12 @@ assert('lift slider zero leaves only downward policy', gain({ programmeDb: -35, 
 assert('cut slider zero leaves loud programme unattenuated', gain({ programmeDb: -12, momentaryDb: -12, fastDb: -12, peakDb: -6, cutStrength: 0 }).targetGainDb === 0);
 
 assert('adaptive transition defaults to target plus six dB crest', close(computeTransitionCeilingDb({ baseCeilingDb: -3, cutStrength: 100 }), -13));
-assert('learned quiet output peak tightens the transition ceiling', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 100 }), -17));
-assert('transition protection follows cut strength', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 50 }), -10));
+assert('recent quiet output cannot tighten the next onset below the programme safety crest', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 100 }), -13));
+assert('transition protection follows cut strength', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 50 }), -8));
 assert('zero cut keeps the ordinary limiter ceiling', close(computeTransitionCeilingDb({ baseCeilingDb: -3, recentOutputPeakDb: -20, cutStrength: 0 }), -3));
 
 assert('player volume scales the sample limiter ceiling', close(computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: true }, { limiterCeilingDb: -3 }), -15.041, 0.01));
 assert('disabling player-volume safety keeps the base ceiling', computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: false }, { limiterCeilingDb: -3 }) === -3);
-assert('policy bounds are intentionally smaller than the legacy controller', DEFAULT_PARAMS.maxLiftDb === 25 && DEFAULT_PARAMS.maxCutDb === 24 && DEFAULT_PARAMS.liftLimiterBudgetDb === 10 && DEFAULT_PARAMS.maxDynamicsLiftDb === 6);
+assert('policy bounds are intentionally smaller than the legacy controller', DEFAULT_PARAMS.maxLiftDb === 25 && DEFAULT_PARAMS.maxCutDb === 24 && DEFAULT_PARAMS.liftLimiterBudgetDb === 10 && DEFAULT_PARAMS.maxDynamicsLiftDb === 12);
 
 if (process.exitCode) process.exit(process.exitCode);

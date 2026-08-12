@@ -42,7 +42,7 @@ Use verse/chorus, dialogue/effect, transient-rich, sparse-ambience, and loud-liv
 
 The desired result is a smaller disruptive range, not a flat waveform.
 
-A loud programme's quiet bed must not be reclassified as a second quiet programme. At full strength, positive within-programme detail correction is capped at 6 dB and falls to zero below the quiet-detail floor; programme-to-programme correction remains independently capable of lifting an entire genuinely quiet source.
+A loud programme's near-silence must not be reclassified as a second quiet programme. At full strength, clearly audible within-programme detail may receive up to 12 dB and the correction falls to zero below the quiet-detail floor; programme-to-programme correction remains independently capable of lifting an entire genuinely quiet source.
 
 ### Cold start and jumps
 
@@ -92,7 +92,7 @@ The accepted replacement uses:
 ```text
 gated cumulative programme reference
   -> bounded programme baseline
-  + floor-qualified within-programme detail (max +6 dB)
+  + floor-qualified within-programme detail (max +12 dB)
   + independent fast loud protection
   -> one asymmetric smoother
   -> adaptive 5 ms look-ahead limiter
@@ -100,9 +100,9 @@ gated cumulative programme reference
 
 `tools/programme_leveler_experiment.js` retains the same legacy measurements and renders both the production worklet and an independent model. At full strength:
 
-- the selected `-19 dB` centre minimizes worst enabled/bypass error across the two ordinary calibration levels to about `1.25 dB`;
-- five steady programme outputs span about `2.21 dB`;
-- a 12.04 dB internal contrast retains about `3.13 dB` instead of `0.40 dB`;
+- the selected `-19 dB` centre minimizes worst enabled/bypass error across the two ordinary calibration levels to about `1.24 dB`;
+- five steady programme outputs span about `2.34 dB`;
+- a 12.04 dB internal contrast retains about `3.14 dB` instead of `0.40 dB`;
 - the quiet-to-loud first 20 ms changes from the old `-24 dBFS` peak / `-27.75 dB` RMS to about `-13 dBFS` peak / `-18.98 dB` RMS;
 - production and independent-model asserted metrics differ by less than `0.05 dB`;
 - deterministic steady fixtures have zero hard-clipped samples.

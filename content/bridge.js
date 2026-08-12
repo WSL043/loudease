@@ -34,10 +34,8 @@
   let lastFullScanAt = 0;
   let lastProgrammeHref = String(location.href);
   let lastProgrammeKey = '';
-  let nextSourceObjectId = 1;
   const observedRoots = new WeakSet();
   const mediaListeners = new Map();
-  const sourceObjectIds = new WeakMap();
 
   function stillCurrent() {
     return window.__WEB_VOLUME_BALANCER_BRIDGE_TOKEN__ === bridgeToken;
@@ -129,14 +127,7 @@
   }
 
   function programmeSourceIdentity(media) {
-    if (media?.srcObject && (typeof media.srcObject === 'object' || typeof media.srcObject === 'function')) {
-      if (!sourceObjectIds.has(media.srcObject)) {
-        sourceObjectIds.set(media.srcObject, nextSourceObjectId);
-        nextSourceObjectId += 1;
-      }
-      return `srcObject:${sourceObjectIds.get(media.srcObject)}`;
-    }
-    return String(media?.currentSrc || media?.src || mediaSourceKind(media));
+    return sanitizeMediaSource(media?.currentSrc || media?.src) || mediaSourceKind(media);
   }
 
   function programmeKey(media) {

@@ -104,7 +104,7 @@ function steady(processor, fraction = 0.35) {
 function renderSteady(amplitude, media = {}) {
   const processor = new ProcessorClass();
   configure(processor, {}, media);
-  render(processor, 5, amplitude);
+  render(processor, 7, amplitude);
   return { processor, summary: steady(processor) };
 }
 
@@ -200,10 +200,16 @@ assert(
   Math.abs(latest(coldQuiet).currentGainDb || 0) < 0.25,
   JSON.stringify(latest(coldQuiet))
 );
-render(coldQuiet, 1.3, 0.02, Math.round(0.3 * SAMPLE_RATE));
+render(coldQuiet, 1.7, 0.02, Math.round(0.3 * SAMPLE_RATE));
 assert(
-  'quiet lift becomes confident after gated programme blocks accumulate',
-  latest(coldQuiet).programmeConfidence >= 0.99 && latest(coldQuiet).currentGainDb > 8,
+  'a quiet opening cannot establish full programme lift in two seconds',
+  latest(coldQuiet).programmeConfidence < 0.5 && latest(coldQuiet).currentGainDb < 9,
+  JSON.stringify(latest(coldQuiet))
+);
+render(coldQuiet, 3.5, 0.02, Math.round(2 * SAMPLE_RATE));
+assert(
+  'a sustained quiet programme still reaches useful lift after representative evidence',
+  latest(coldQuiet).programmeConfidence >= 0.99 && latest(coldQuiet).currentGainDb > 16,
   JSON.stringify(latest(coldQuiet))
 );
 
@@ -223,8 +229,8 @@ assert(
 );
 const normalOnset = onsetAfter(0.12);
 assert(
-  'active-programme jump is bounded relative to the learned output peak',
-  normalOnset.first20Ms.peakDb <= -13.5,
+  'active-programme jump is bounded by the fixed programme safety crest',
+  normalOnset.first20Ms.peakDb <= -12.9,
   JSON.stringify(normalOnset)
 );
 
@@ -241,7 +247,7 @@ assert('unknown player volume blocks automatic upward gain', unknownVolume.gainD
 
 const highCrest = new ProcessorClass();
 configure(highCrest);
-const highCrestOut = renderGenerated(highCrest, 4, (sampleIndex) => {
+const highCrestOut = renderGenerated(highCrest, 6, (sampleIndex) => {
   const bed = 0.006 * Math.sin(2 * Math.PI * 997 * sampleIndex / SAMPLE_RATE);
   return sampleIndex % Math.round(SAMPLE_RATE * 0.25) === 4000 ? 0.55 : bed;
 });
@@ -272,11 +278,27 @@ assert(
   JSON.stringify(liveReturnStates.slice(0, 4))
 );
 
+const liveDetail = new ProcessorClass();
+configure(liveDetail);
+const liveDetailLead = render(liveDetail, 7, 0.2);
+const liveDetailStart = states(liveDetail).length;
+render(liveDetail, 2, 0.02, liveDetailLead.sampleCount);
+const liveDetailTail = states(liveDetail).slice(liveDetailStart).slice(-5);
+const liveDetailOutputDb = liveDetailTail.reduce(
+  (sum, state) => sum + Number(state.outputMomentaryDb || -120),
+  0
+) / Math.max(1, liveDetailTail.length);
+assert(
+  'audible quiet detail inside a loud programme is brought into a comfortable range',
+  liveDetailOutputDb > -29 && Number(liveDetailTail.at(-1)?.currentGainDb || 0) > 8,
+  JSON.stringify({ liveDetailOutputDb, liveDetailTail })
+);
+
 const boundary = new ProcessorClass();
 configure(boundary, {}, { programmeKey: 'programme-a' });
 const boundaryLead = render(boundary, 5, 0.2);
 configure(boundary, {}, { programmeKey: 'programme-b', configSequence: 2 });
-render(boundary, 5, 0.02, boundaryLead.sampleCount);
+render(boundary, 7, 0.02, boundaryLead.sampleCount);
 assert(
   'explicit programme key change resets cumulative measurement',
   latest(boundary).loudnessResetCount === 1

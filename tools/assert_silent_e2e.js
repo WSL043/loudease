@@ -54,7 +54,7 @@ assert(
     && /Target\.closeTarget/.test(runner)
     && /meterFrameAgeMs:\s*tab\.meterFrameAgeMs/.test(runner)
     && /e2e-profile-\$\{runSuffix\}/.test(runner)
-    && /cleanupRunDirectories\(\)/.test(runner)
+    && /cleanupRunDirectories\(\{\s*tolerateTransientLocks:\s*true\s*\}\)/.test(runner)
     && /capture hold input stopped progressing/.test(runner)
     && /readExternalMediaState/.test(runner)
     && /--disable-background-media-suspend/.test(runner),

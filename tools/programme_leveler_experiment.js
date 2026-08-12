@@ -285,8 +285,6 @@ class ProgrammeCandidateProcessor {
       const futureSample = sample * levelGain;
       this.delay[this.delayIndex] = futureSample;
 
-      const recentOutputPeak = this.maxLast(this.outputPeakHistory, 20);
-      const recentOutputPeakDb = recentOutputPeak > 1e-6 ? linearToDb(recentOutputPeak) : NaN;
       const baseCeilingDb = BASE_CEILING_DB + (
         this.playerVolumeReliable && this.respectPlayerVolume
           ? Math.min(0, linearToDb(this.playerVolumeCap))
@@ -294,7 +292,6 @@ class ProgrammeCandidateProcessor {
       );
       const protectedCeilingDb = computeTransitionCeilingDb({
         baseCeilingDb,
-        recentOutputPeakDb,
         cutStrength: this.cutStrength,
         programmeTargetDb: this.policyParams.programmeTargetDb + (
           this.playerVolumeReliable && this.respectPlayerVolume
@@ -405,7 +402,7 @@ function steadySummary(processor) {
 function renderSteady(ProcessorClass, amplitude, media = {}, policyParams = undefined) {
   const processor = new ProcessorClass(policyParams);
   configure(processor, {}, media);
-  renderInto(processor, 5, sine(amplitude));
+  renderInto(processor, 7, sine(amplitude));
   return steadySummary(processor);
 }
 
@@ -443,7 +440,7 @@ function renderDynamics(ProcessorClass) {
   const segments = [];
   for (const amplitude of [0.05, 0.2, 0.05]) {
     const before = processor.messages.length;
-    const rendered = renderInto(processor, 4, sine(amplitude), cursor);
+    const rendered = renderInto(processor, 6, sine(amplitude), cursor);
     cursor += rendered.sampleCount;
     const states = processor.messages.slice(before).filter((message) => message.type === 'state');
     const steady = states.slice(Math.floor(states.length * 0.75));
@@ -463,7 +460,7 @@ function renderBoundary(resetProgramme) {
   let cursor = renderInto(processor, 12, sine(0.2)).sampleCount;
   if (resetProgramme) processor.resetProgramme();
   const before = processor.messages.length;
-  renderInto(processor, 5, sine(0.02), cursor);
+  renderInto(processor, 7, sine(0.02), cursor);
   const states = processor.messages.slice(before).filter((message) => message.type === 'state');
   const final = states.slice(Math.floor(states.length * 0.7));
   const mean = (field) => final.reduce((sum, state) => sum + Number(state[field] || 0), 0) / Math.max(1, final.length);

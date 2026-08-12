@@ -16,6 +16,15 @@ function readJson(filePath) {
   }
 }
 
+function readPolicyRevision(filePath) {
+  try {
+    const source = fs.readFileSync(filePath, 'utf8');
+    return source.match(/\bPOLICY_REVISION\s*=\s*['"]([^'"]+)['"]/)?.[1] || null;
+  } catch (_) {
+    return null;
+  }
+}
+
 function stat(filePath) {
   try {
     const item = fs.statSync(filePath);
@@ -187,6 +196,7 @@ const diagnostics = readJson(diagnosticsPath);
 const diagnosticsAgeMs = diagnostics?.now ? Date.now() - Number(diagnostics.now) : null;
 const diskVersion = manifest.version || null;
 const diagnosticsVersion = diagnostics.version || null;
+const diskPolicyRevision = readPolicyRevision(path.join(root, 'shared', 'programme-leveler-policy.js'));
 const diagnosticsCurrent = diagnosticsAgeMs != null && diagnosticsAgeMs <= 10000;
 const topDiagnosticTab = Array.isArray(diagnostics?.tabs) ? diagnostics.tabs[0] : null;
 const topDiagnosticUrl = firstFrameUrl(topDiagnosticTab);
@@ -197,6 +207,17 @@ const processingKnownMediaTabs = knownMediaDiagnosticTabs.filter(isAudioProcessi
 const observedUnprocessedMediaTabs = knownMediaDiagnosticTabs.filter((tab) => hasObservedAudibleMedia(tab) && !isAudioProcessing(tab));
 const realAudioProcessingProven = diagnosticsCurrent && processingKnownMediaTabs.length > 0;
 const diagnosticsVersionMatchesManifest = Boolean(diskVersion && diagnosticsVersion && diskVersion === diagnosticsVersion);
+const runtimePolicyTab = processingKnownMediaTabs[0] || knownMediaDiagnosticTab || topDiagnosticTab;
+const runtimePolicyRevision = runtimePolicyTab?.captureControlPolicyRevision
+  || runtimePolicyTab?.capture?.controlPolicyRevision
+  || null;
+const diagnosticsPolicyMatchesDisk = Boolean(
+  diskPolicyRevision && runtimePolicyRevision && diskPolicyRevision === runtimePolicyRevision
+);
+const reloadExtensionRequired = Boolean(
+  (diagnosticsVersion && diskVersion && diagnosticsVersion !== diskVersion)
+  || (diagnosticsCurrent && diskPolicyRevision && runtimePolicyRevision && !diagnosticsPolicyMatchesDisk)
+);
 const diagnosticsFromKnownMediaTarget = Boolean(knownMediaDiagnosticTab);
 const receiver = diagnosticsReceiverState();
 const report = {
@@ -225,6 +246,9 @@ const report = {
     receiver,
     version: diagnostics.version || null,
     versionMatchesManifest: diagnosticsVersionMatchesManifest,
+    diskPolicyRevision,
+    runtimePolicyRevision,
+    policyMatchesDisk: diagnosticsPolicyMatchesDisk,
     localDiagnosticsAvailable: Boolean(diagnostics.localDiagnosticsAvailable),
     ageMs: diagnosticsAgeMs,
     stale: !diagnosticsCurrent,
@@ -240,20 +264,24 @@ const report = {
   interpretation: {
     diskVersion,
     runtimeDiagnosticsVersion: diagnosticsVersion,
+    diskPolicyRevision,
+    runtimePolicyRevision,
     diagnosticsIsCurrent: diagnosticsCurrent,
     diagnosticsVersionMatchesManifest,
-    reloadExtensionRequired: Boolean(diagnosticsVersion && diskVersion && diagnosticsVersion !== diskVersion),
+    diagnosticsPolicyMatchesDisk,
+    reloadExtensionRequired,
     localDiagnosticsReceiverListening: receiver.listening,
     diagnosticsFromKnownMediaTarget,
     realAudioProcessingProven,
     observedKnownMediaWithoutProcessing: diagnosticsCurrent && observedUnprocessedMediaTabs.length > 0,
     codexChromeLikelyEnabled: extensionState(securePreferences, codexChromeExtensionId).disableReasons.length === 0,
     userChromeRuntimeVersionProven: diagnosticsCurrent && diagnosticsVersionMatchesManifest,
+    userChromeRuntimePolicyProven: diagnosticsCurrent && diagnosticsPolicyMatchesDisk,
     userChromeTargetTabProven: diagnosticsCurrent && diagnosticsFromKnownMediaTarget,
     nextAction: !receiver.listening
       ? `Start tools/diagnostics_receiver.py on http://127.0.0.1:${diagnosticsPort}/loudease, then re-run this audit.`
-      : diagnosticsVersion && diskVersion && diagnosticsVersion !== diskVersion
-        ? `Reload the unpacked extension in chrome://extensions/?id=${primaryLoudEase?.id || '<LoudEase extension id>'}; disk=${diskVersion}, runtime=${diagnosticsVersion}`
+      : reloadExtensionRequired
+        ? `Reload the unpacked extension in chrome://extensions/?id=${primaryLoudEase?.id || '<LoudEase extension id>'}; disk=${diskVersion}/${diskPolicyRevision || 'unknown'}, runtime=${diagnosticsVersion}/${runtimePolicyRevision || 'unknown'}`
         : diagnosticsCurrent && !diagnosticsFromKnownMediaTarget
           ? 'Open or activate the actual Douyin/Bilibili tab, then check whether it appears as a knownMediaTab.'
           : diagnosticsCurrent && processingKnownMediaTabs.length === 0 && observedUnprocessedMediaTabs.length > 0
@@ -271,6 +299,9 @@ const report = {
       : '',
     diagnosticsVersion && diskVersion && diagnosticsVersion !== diskVersion
       ? `Runtime diagnostics version ${diagnosticsVersion} does not match disk version ${diskVersion}.`
+      : '',
+    diagnosticsCurrent && diskPolicyRevision && runtimePolicyRevision && !diagnosticsPolicyMatchesDisk
+      ? `Runtime DSP policy ${runtimePolicyRevision} does not match disk policy ${diskPolicyRevision}.`
       : '',
     diagnosticsCurrent && !diagnosticsFromKnownMediaTarget
       ? `Fresh diagnostics point to ${topDiagnosticUrl || 'an unknown/non-media tab'}, not Douyin/Bilibili.`

@@ -26,7 +26,7 @@
     const CUT_ATTACK_SECONDS = 0.02;
     const CUT_RELEASE_SECONDS = 0.25;
     const LIFT_ATTACK_SECONDS = 0.18;
-    const LIFT_RELEASE_SECONDS = 0.6;
+    const LIFT_RELEASE_SECONDS = 0.12;
     const MAX_GAIN_INCREASE_STEP_DB = 3;
     const MOMENTARY_HISTORY_FRAMES = 20;
     const MAX_HISTORY_FRAMES = 150;
@@ -55,14 +55,14 @@
       const samples = [];
       const segments = {};
       segments.silence = appendSamples(samples, 0.6, () => 0);
-      segments.quietVoice = appendSamples(samples, 2.0, (time) => (
+      segments.quietVoice = appendSamples(samples, 6.0, (time) => (
         sine(180, 0.004)(time)
         + sine(360, 0.0024, 0.2)(time)
         + sine(2400, 0.0009, 0.5)(time)
       ));
-      segments.loudTone = appendSamples(samples, 1.0, sine(1000, 0.18));
+      segments.loudTone = appendSamples(samples, 5.0, sine(1000, 0.18));
       segments.burst = appendSamples(samples, 0.36, sine(1000, 0.65));
-      segments.recovery = appendSamples(samples, 1.0, (time) => (
+      segments.recovery = appendSamples(samples, 6.0, (time) => (
         sine(220, 0.009)(time)
         + sine(440, 0.0025, 0.3)(time)
       ));
@@ -376,14 +376,14 @@
         Object.entries(fixture.segments).map(([name, segment]) => [
           name,
           segmentMetrics(fixture.samples, output, {
-            start: Math.min(segment.end, segment.start + Math.round(0.2 * SAMPLE_RATE)),
+            start: Math.max(segment.start, segment.end - Math.round(1.0 * SAMPLE_RATE)),
             end: segment.end
           })
         ])
       );
       const outputPeak = maxAbs(output);
       const gainStep = gainStepSummary(schedule);
-      const recoveryStart = segmentFrameSummary(schedule, fixture.segments.recovery, 0.8);
+      const recoveryStart = segmentFrameSummary(schedule, fixture.segments.recovery, 2.0);
       const quietLoudGapDb = Math.abs(settledMetrics.quietVoice.outputDb - settledMetrics.loudTone.outputDb);
       const checks = {
         graphRendered: rendered.length === fixture.samples.length,
@@ -395,7 +395,10 @@
         outputNotClipped: outputPeak < 0.999,
         gainSmooth: gainStep.maxIncrease <= MAX_GAIN_INCREASE_STEP_DB + 0.1 && gainStep.maxDecrease < MAX_CUT_DB + 1,
         recoveryAudible: metrics.recovery.outputDb > -45,
-        recoveryLiftStartsFast: recoveryStart.maxGainDb > 0.5 && recoveryStart.firstPositiveAtMs != null && recoveryStart.firstPositiveAtMs <= 600
+        recoveryLiftBuildsFromEvidence: recoveryStart.maxGainDb > 0.5
+          && recoveryStart.maxGainDb < 9
+          && recoveryStart.firstPositiveAtMs >= 500
+          && recoveryStart.firstPositiveAtMs <= 1500
       };
       const passed = Object.values(checks).every(Boolean);
       return {

@@ -269,9 +269,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       }
     }
 
-    const recentOutputPeak = this.maxLast(this.outputPeakHistory, MOMENTARY_FRAMES);
     this.transitionInput.baseCeilingDb = this.baseCeilingDb();
-    this.transitionInput.recentOutputPeakDb = recentOutputPeak > 1e-6 ? linearToDb(recentOutputPeak) : NaN;
     this.transitionInput.cutStrength = this.cutStrength;
     this.transitionInput.programmeTargetDb = PROGRAMME_PARAMS.programmeTargetDb + volumeDb;
     this.adaptiveTransitionCeilingDb = computeTransitionCeilingDb(this.transitionInput);
