@@ -4,7 +4,7 @@
   }
 
   const DB_FLOOR_ENERGY = 1e-12;
-  const POLICY_REVISION = 'stable-programme-v2';
+  const POLICY_REVISION = 'uniform-shortform-v1';
   const DEFAULT_PARAMS = Object.freeze({
     programmeTargetDb: -19,
     absoluteGateDb: -70,
@@ -14,8 +14,8 @@
     histogramBinDb: 0.5,
     programmeDeadbandDb: 1,
     dynamicsDeadbandDb: 1,
-    dynamicsAmount: 0.72,
-    maxDynamicsLiftDb: 12,
+    dynamicsAmount: 0.86,
+    maxDynamicsLiftDb: 16,
     dynamicsLiftFloorDb: -48,
     dynamicsLiftFloorKneeDb: 8,
     fastCutMarginDb: 3,
@@ -23,7 +23,7 @@
     maxLiftDb: 25,
     liftLimiterBudgetDb: 10,
     confidenceStartBlocks: 1,
-    confidenceFullBlocks: 40,
+    confidenceFullBlocks: 12,
     transitionDefaultCrestDb: 6
   });
 

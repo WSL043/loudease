@@ -16,7 +16,7 @@ const checks = [
   ['programme estimator uses absolute and relative gating', /absoluteGateDb: -70/.test(policy) && /relativeGateDb: 10/.test(policy) && /relativeThresholdDb/.test(policy)],
   ['programme measurement is constant-memory cumulative state', /Uint32Array\(this\.binCount\)/.test(policy) && /Float64Array\(this\.binCount\)/.test(policy) && /acceptedBlocks/.test(policy)],
   ['programme and within-programme corrections share one gain target', /programmeCorrectionDb \+ dynamicsCorrectionDb/.test(policy) && /targetGainDb/.test(policy)],
-  ['cold-start lift requires several seconds of representative programme evidence', /confidenceStartBlocks: 1/.test(policy) && /confidenceFullBlocks: 40/.test(policy) && /\* confidence/.test(policy)],
+  ['short-form lift requires representative evidence without a multi-second wait', /confidenceStartBlocks: 1/.test(policy) && /confidenceFullBlocks: 12/.test(policy) && /\* confidence/.test(policy)],
   ['fast loud protection does not wait for programme confidence', /fastCutMarginDb: 3/.test(policy) && /fastProtectionDb = fastExcessDb \* cutScale/.test(policy)],
   ['lift and cut strength remain independent and zero-safe', /scaleByDirection/.test(policy) && /Math\.max\(cutScale, liftScale\) <= 0/.test(policy)],
   ['upward gain is bounded by peak headroom and limiter budget', /rawHeadroomDb/.test(policy) && /liftLimiterBudgetDb: 10/.test(policy) && /maxLiftDb: 25/.test(policy)],

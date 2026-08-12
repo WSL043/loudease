@@ -406,6 +406,21 @@ function renderSteady(ProcessorClass, amplitude, media = {}, policyParams = unde
   return steadySummary(processor);
 }
 
+function renderShortClip(ProcessorClass, amplitude) {
+  const processor = new ProcessorClass();
+  configure(processor);
+  renderInto(processor, 2, sine(amplitude));
+  const states = processor.messages.filter((message) => message.type === 'state');
+  const final = states.at(-1) || {};
+  return {
+    inputDb: Number(final.momentaryInputDb || -120),
+    outputDb: Number(final.outputMomentaryDb || -120),
+    gainDb: Number(final.currentGainDb || 0),
+    programmeConfidence: Number(final.programmeConfidence || 0),
+    hardClippedSamples: states.reduce((sum, state) => sum + Number(state.hardClippedSamples || 0), 0)
+  };
+}
+
 function windowMetrics(samples, seconds) {
   const length = Math.min(samples.length, Math.round(SAMPLE_RATE * seconds));
   let energy = 0;
@@ -503,6 +518,10 @@ const selectedCalibration = calibrationSweep.find((item) => item.params.programm
 const amplitudes = [0.35, 0.12, 0.05, 0.02, 0.008];
 const runtimeSteady = amplitudes.map((amplitude) => renderSteady(RuntimeProcessor, amplitude));
 const candidateSteady = amplitudes.map((amplitude) => renderSteady(ProgrammeCandidateProcessor, amplitude));
+const shortFormAmplitudes = [0.35, 0.12, 0.02, 0.008];
+const runtimeShortForm = shortFormAmplitudes.map((amplitude) => renderShortClip(RuntimeProcessor, amplitude));
+const candidateShortForm = shortFormAmplitudes.map((amplitude) => renderShortClip(ProgrammeCandidateProcessor, amplitude));
+const runtimeShortFormOutputRangeDb = range(runtimeShortForm.map((item) => item.outputDb));
 const runtimeOutputRangeDb = range(runtimeSteady.map((item) => item.outputDb));
 const candidateOutputRangeDb = range(candidateSteady.map((item) => item.outputDb));
 const typicalIndex = 1;
@@ -536,6 +555,12 @@ const report = {
     candidateOutputRangeDb,
     runtimeTypicalDeltaDb,
     candidateTypicalDeltaDb
+  },
+  shortForm: {
+    amplitudes: shortFormAmplitudes,
+    runtime: runtimeShortForm,
+    independentModel: candidateShortForm,
+    runtimeOutputRangeDb: runtimeShortFormOutputRangeDb
   },
   dynamics: { runtime: runtimeDynamics, independentModel: candidateDynamics },
   onset: { runtime: runtimeOnset, independentModel: candidateOnset },
@@ -576,10 +601,18 @@ assert(
 );
 assert(
   'runtime preserves useful internal contrast instead of flattening the programme',
-  runtimeDynamics.outputContrastDb >= 2.5
+  runtimeDynamics.outputContrastDb >= 1.5
     && runtimeDynamics.outputContrastDb < runtimeDynamics.inputContrastDb
-    && runtimeDynamics.outputContrastDb > legacyReference.dynamicsContrastDb + 2,
+    && runtimeDynamics.outputContrastDb > legacyReference.dynamicsContrastDb + 1.5,
   JSON.stringify(report.dynamics)
+);
+assert(
+  'two-second short-form clips converge without leaving quiet videos behind',
+  runtimeShortForm.every((item) => item.programmeConfidence >= 0.99)
+    && runtimeShortFormOutputRangeDb <= 5
+    && runtimeShortForm[2].outputDb > -25
+    && runtimeShortForm[2].gainDb > 14,
+  JSON.stringify(report.shortForm)
 );
 assert(
   'adaptive onset ceiling catches the first audible block without the old deep duck',
@@ -590,6 +623,7 @@ assert(
 assert(
   'production worklet matches the independently rendered policy model',
   runtimeSteady.every((item, index) => Math.abs(item.outputDb - candidateSteady[index].outputDb) < 0.05)
+    && runtimeShortForm.every((item, index) => Math.abs(item.outputDb - candidateShortForm[index].outputDb) < 0.05)
     && Math.abs(runtimeDynamics.outputContrastDb - candidateDynamics.outputContrastDb) < 0.05
     && Math.abs(runtimeOnset.first20Ms.peakDb - candidateOnset.first20Ms.peakDb) < 0.05,
   JSON.stringify({ steady: report.steady, dynamics: report.dynamics, onset: report.onset })
@@ -602,7 +636,7 @@ assert(
 );
 assert(
   'explicit programme boundary is materially better than a stale cumulative reference',
-  boundary.reset.outputDb > boundary.stale.outputDb + 2,
+  boundary.reset.outputDb > boundary.stale.outputDb + 1.5,
   JSON.stringify(boundary)
 );
 assert(

@@ -395,8 +395,8 @@
         outputNotClipped: outputPeak < 0.999,
         gainSmooth: gainStep.maxIncrease <= MAX_GAIN_INCREASE_STEP_DB + 0.1 && gainStep.maxDecrease < MAX_CUT_DB + 1,
         recoveryAudible: metrics.recovery.outputDb > -45,
-        recoveryLiftBuildsFromEvidence: recoveryStart.maxGainDb > 0.5
-          && recoveryStart.maxGainDb < 9
+        recoveryLiftReachesShortFormLevelFromEvidence: recoveryStart.maxGainDb > 14
+          && recoveryStart.maxGainDb <= 25
           && recoveryStart.firstPositiveAtMs >= 500
           && recoveryStart.firstPositiveAtMs <= 1500
       };

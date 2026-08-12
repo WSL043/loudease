@@ -42,13 +42,13 @@ Use verse/chorus, dialogue/effect, transient-rich, sparse-ambience, and loud-liv
 
 The desired result is a smaller disruptive range, not a flat waveform.
 
-A loud programme's near-silence must not be reclassified as a second quiet programme. At full strength, clearly audible within-programme detail may receive up to 12 dB and the correction falls to zero below the quiet-detail floor; programme-to-programme correction remains independently capable of lifting an entire genuinely quiet source.
+A loud programme's near-silence must not be reclassified as a second quiet programme. At full strength, clearly audible within-programme detail may receive up to 16 dB and the correction falls to zero below the quiet-detail floor; programme-to-programme correction remains independently capable of lifting an entire genuinely quiet source.
 
 ### Cold start and jumps
 
 Use silence-to-loud, quiet-to-loud, normal-to-loud, and source-boundary transitions. Record the first 5, 20, and 40 ms; limiter samples; hard clips; and recovery trajectory.
 
-Downward protection must act before upward programme confidence exists. Upward normalization must not guess from the first samples.
+Downward protection must act before upward programme confidence exists. Upward normalization must not guess from the first samples, but continuous accepted signal in a short-form clip must reach full confidence in about 1.5 seconds. A two-second multi-level sweep must keep its output range within 5 dB, bring the quiet reference above -25 dB, and remain onset-safe.
 
 ### Quiet lift and noise
 
@@ -92,7 +92,7 @@ The accepted replacement uses:
 ```text
 gated cumulative programme reference
   -> bounded programme baseline
-  + floor-qualified within-programme detail (max +12 dB)
+  + floor-qualified within-programme detail (max +16 dB)
   + independent fast loud protection
   -> one asymmetric smoother
   -> adaptive 5 ms look-ahead limiter
@@ -101,9 +101,10 @@ gated cumulative programme reference
 `tools/programme_leveler_experiment.js` retains the same legacy measurements and renders both the production worklet and an independent model. At full strength:
 
 - the selected `-19 dB` centre minimizes worst enabled/bypass error across the two ordinary calibration levels to about `1.24 dB`;
-- five steady programme outputs span about `2.34 dB`;
-- a 12.04 dB internal contrast retains about `3.14 dB` instead of `0.40 dB`;
-- the quiet-to-loud first 20 ms changes from the old `-24 dBFS` peak / `-27.75 dB` RMS to about `-13 dBFS` peak / `-18.98 dB` RMS;
+- five steady programme outputs span about `2.21 dB`;
+- two-second short-form inputs spanning about `32.82 dB` converge to about `3.97 dB` of output variation;
+- a 12.04 dB internal contrast retains about `2.30 dB` instead of `0.40 dB`;
+- the quiet-to-loud first 20 ms changes from the old `-24 dBFS` peak / `-27.75 dB` RMS to about `-13 dBFS` peak / `-17.10 dB` RMS;
 - production and independent-model asserted metrics differ by less than `0.05 dB`;
 - deterministic steady fixtures have zero hard-clipped samples.
 

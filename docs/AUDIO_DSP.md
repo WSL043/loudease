@@ -57,11 +57,11 @@ The controller forms a stable baseline and a smaller within-programme term:
 
 ```text
 programme correction = T - P
-dynamic correction   = -0.72 * (M - P)
+dynamic correction   = -0.86 * (M - P)
 target gain          = programme correction + dynamic correction
 ```
 
-Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre and is retained as the baseline through silence. Positive dynamic correction is a detail aid, not a second normalizer: it is capped at `12 dB` at full lift strength and fades from full eligibility at `-40 dB` to zero at `-48 dB`. The larger audible-detail allowance closes more of the gap inside a loud programme without granting any positive detail correction to near-silence. The negative dynamic term and the independent fast path may still reduce loud material.
+Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre and is retained as the baseline through silence. Positive dynamic correction is a detail aid, not a second normalizer: it is capped at `16 dB` at full lift strength and fades from full eligibility at `-40 dB` to zero at `-48 dB`. The larger audible-detail allowance closes more of the gap inside a loud programme without granting any positive detail correction to near-silence. The negative dynamic term and the independent fast path may still reduce loud material.
 
 The distinction matters on live streams. Before this bound, a programme measured near `-14 dB` followed by a `-60 dB` quiet bed could request the global `+25 dB` maximum, then reverse when speech or effects returned. The resulting 30-plus-decibel gain travel was heard as a long loud/quiet wave. With the current policy, that bed receives no positive detail term; only the stable programme baseline remains. An entire genuinely quiet programme can still receive the full bounded programme correction.
 
@@ -75,10 +75,10 @@ Upward gain is asymmetric by design:
 
 - before the first 400 ms programme block, upward gain is zero;
 - confidence ramps across accepted blocks;
-- confidence reaches 1 after 40 blocks, at roughly 4.3 seconds for continuous signal;
+- confidence reaches 1 after 12 accepted blocks, at roughly 1.5 seconds for continuous signal;
 - downward fast protection does not wait for confidence.
 
-Perfect first-frame upward normalization is impossible without metadata or pre-analysis: a quiet opening can be either an under-mastered programme or intentional dynamics. LoudEase therefore protects immediately, but waits for evidence before lifting.
+Perfect first-frame upward normalization is impossible without metadata or pre-analysis: a quiet opening can be either an under-mastered programme or intentional dynamics. LoudEase therefore protects immediately, but waits for evidence before lifting. The shorter ramp is intentionally calibrated for short-form feeds; the quiet-content floor, peak budget, and limiter remain unchanged safety boundaries.
 
 ## Fast protection and limiter
 

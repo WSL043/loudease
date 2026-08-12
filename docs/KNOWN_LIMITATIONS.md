@@ -22,7 +22,7 @@
 - There is no speech/music classifier, source separation, denoising, or multiband compression.
 - Equal perceived loudness across all content is impossible without sacrificing dynamics and introducing artifacts.
 - Full-strength quiet lift can use up to `10 dB` of bounded limiter allowance, so high-crest music may sound intentionally denser and source noise may become more audible.
-- Within a loud programme, positive moment-to-moment detail correction is capped at `12 dB` and fades out below the quiet-content floor. This prevents near-silence from becoming a second full-volume programme, but it also means LoudEase will not make every whisper or ambience bed exactly as loud as foreground content.
+- Within a loud programme, positive moment-to-moment detail correction is capped at `16 dB` and fades out below the quiet-content floor. This prevents near-silence from becoming a second full-volume programme, but it also means LoudEase will not make every whisper or ambience bed exactly as loud as foreground content.
 - A site that changes programmes without changing page or media identity can leave the cumulative reference stale; LoudEase deliberately does not use a rolling target that would chase ordinary programme sections.
 - Synthetic fixtures do not prove universal listening preference.
 

@@ -18,7 +18,7 @@ const checks = [
   ['worklet owns measurement gain smoothing and lookahead limiting', /finishFrame\(\)/.test(worklet) && /computeTargetGainDb/.test(worklet) && /currentGainDb/.test(worklet) && /limiterGain/.test(worklet)],
   ['programme reference is gated cumulative state rather than a rolling target', /ProgrammeLoudnessEstimator/.test(policy) && /relativeThresholdDb/.test(policy) && !/rolling|medianLast/.test(policy)],
   ['cold-start upward gain waits for confidence while fast cut remains immediate', /confidence/.test(policy) && /fastProtectionDb/.test(policy) && /if \(fastProtectionDb > 0\)/.test(policy)],
-  ['one gain law combines programme correction and internal dynamics', /programmeCorrectionDb \+ dynamicsCorrectionDb/.test(policy) && /dynamicsAmount: 0\.72/.test(policy)],
+  ['one gain law combines programme correction and internal dynamics', /programmeCorrectionDb \+ dynamicsCorrectionDb/.test(policy) && /dynamicsAmount: 0\.86/.test(policy)],
   ['onset protection uses a stable relative crest and lookahead', /computeTransitionCeilingDb/.test(worklet) && /transitionDefaultCrestDb/.test(policy) && !/recentOutputPeakDb/.test(policy) && /LOOKAHEAD_SAMPLES/.test(worklet) && /TRANSITION_PROTECTION_SECONDS = 0\.04/.test(worklet)],
   ['strong lift and cut remain explicitly bounded', /maxLiftDb: 25/.test(policy) && /maxCutDb: 24/.test(policy) && /liftLimiterBudgetDb: 10/.test(policy)],
   ['player-volume compensation stays in source-domain measurement only', /sourceCompensation/.test(worklet) && /controlInput\.limiterCeilingDb = this\.baseCeilingDb\(\)/.test(worklet) && /controlInput\.peakDb = linearToDb\(this\.inputPeak\)/.test(worklet)],

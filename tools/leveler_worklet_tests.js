@@ -202,8 +202,10 @@ assert(
 );
 render(coldQuiet, 1.7, 0.02, Math.round(0.3 * SAMPLE_RATE));
 assert(
-  'a quiet opening cannot establish full programme lift in two seconds',
-  latest(coldQuiet).programmeConfidence < 0.5 && latest(coldQuiet).currentGainDb < 9,
+  'a short quiet video reaches a comfortable level within two seconds',
+  latest(coldQuiet).programmeConfidence >= 0.99
+    && latest(coldQuiet).currentGainDb > 14
+    && latest(coldQuiet).outputMomentaryDb > -25,
   JSON.stringify(latest(coldQuiet))
 );
 render(coldQuiet, 3.5, 0.02, Math.round(2 * SAMPLE_RATE));
@@ -290,8 +292,19 @@ const liveDetailOutputDb = liveDetailTail.reduce(
 ) / Math.max(1, liveDetailTail.length);
 assert(
   'audible quiet detail inside a loud programme is brought into a comfortable range',
-  liveDetailOutputDb > -29 && Number(liveDetailTail.at(-1)?.currentGainDb || 0) > 8,
+  liveDetailOutputDb > -25 && Number(liveDetailTail.at(-1)?.currentGainDb || 0) > 12,
   JSON.stringify({ liveDetailOutputDb, liveDetailTail })
+);
+
+const liftedQuietOnset = new ProcessorClass();
+configure(liftedQuietOnset);
+const liftedQuietLead = render(liftedQuietOnset, 2, 0.02);
+const liftedQuietJump = render(liftedQuietOnset, 0.08, 0.35, liftedQuietLead.sampleCount, true);
+const liftedQuietFirst20Ms = windowMetrics(liftedQuietJump.outputSamples, 0.02);
+assert(
+  'fast protection catches a loud next scene after accelerated quiet-video lift',
+  liftedQuietFirst20Ms.peakDb <= -12.9 && liftedQuietFirst20Ms.rmsDb < -16,
+  JSON.stringify(liftedQuietFirst20Ms)
 );
 
 const boundary = new ProcessorClass();

@@ -39,7 +39,7 @@ The old page-level `createMediaElementSource()` engine is no longer part of the 
 
 The offscreen document is the source of truth for active audio sessions. Each authorized tab has one `CaptureSession` containing the stream, `AudioContext`, worklet node, player-volume gain, output analyser, state counters, and cleanup listeners.
 
-`offscreen/leveler-worklet.js` is the normal processing path. It performs continuous measurement, gated programme estimation, stable programme-baseline correction, floor-qualified quiet-detail correction capped at 12 dB, independent fast loud protection, linked gain smoothing, mute/player-volume enforcement, and sample-peak look-ahead limiting on the audio render thread. `shared/programme-leveler-policy.js` is loaded into both the AudioWorklet scope and fallback page so the control law has one source of truth.
+`offscreen/leveler-worklet.js` is the normal processing path. It performs continuous measurement, gated programme estimation, stable programme-baseline correction, floor-qualified quiet-detail correction capped at 16 dB, independent fast loud protection, linked gain smoothing, mute/player-volume enforcement, and sample-peak look-ahead limiting on the audio render thread. `shared/programme-leveler-policy.js` is loaded into both the AudioWorklet scope and fallback page so the control law has one source of truth.
 
 If the unified worklet cannot load, `offscreen/index.js` falls back to the older meter/controller/limiter graph. The fallback is intentionally conservative and is reported in diagnostics.
 
