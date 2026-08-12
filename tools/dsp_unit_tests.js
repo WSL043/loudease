@@ -31,7 +31,7 @@ assert('settings preserve known preset', normalizeSettings({ preset: 'night' }).
 assert('settings classify unknown preset as custom', normalizeSettings({ preset: 'mystery' }).preset === 'custom');
 assert('default settings retain independent full-strength controls', DEFAULT_SETTINGS.cutStrength === 100 && DEFAULT_SETTINGS.liftStrength === 100);
 assert('K-weighting constants remain the BS.1770 biquad approximation', K_WEIGHTING_PARAMS.shelfGainDb > 3.9 && K_WEIGHTING_PARAMS.highpassFrequencyHz > 38);
-assert('programme controller exposes its runtime policy revision', POLICY_REVISION === 'stable-programme-v1');
+assert('programme controller exposes its runtime policy revision', POLICY_REVISION === 'stable-programme-v2');
 
 const gateOpen = computeSignalGateActive({ wasActive: false, energyDb: -60, peak: 0.001 });
 const gateCloseHeld = computeSignalGateActive({ wasActive: true, energyDb: -65, peak: 0.0003 });
