@@ -4,7 +4,7 @@
   }
 
   const DB_FLOOR_ENERGY = 1e-12;
-  const POLICY_REVISION = 'stable-programme-v1';
+  const POLICY_REVISION = 'stable-programme-v2';
   const DEFAULT_PARAMS = Object.freeze({
     programmeTargetDb: -19,
     absoluteGateDb: -70,
