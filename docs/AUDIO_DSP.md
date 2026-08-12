@@ -38,7 +38,7 @@ This measurement continues for the programme, but it is not a 10–30 second rol
 
 ## Programme boundaries
 
-`content/bridge.js` hashes the current page URL and active media-source identity locally. Only the short fingerprint is forwarded as `programmeKey`; the URL or source is not exposed as the key. The last active identity is retained while media is paused, so pause/resume does not create a false boundary. A navigation or a genuinely different active source changes the key. When that happens, the estimator, momentary history, inherited gain, and limiter state are reset before the new programme is learned.
+`content/bridge.js` hashes the current page URL and audible media-source identity locally. Muted and zero-volume helper elements are excluded because they do not contribute to captured programme audio. Only the short fingerprint is forwarded as `programmeKey`; the URL or source is not exposed as the key. The last audible identity is retained while media is paused or muted, so pause/resume and temporary helper overlays do not create a false boundary. A navigation or a genuinely different audible source changes the key. When that happens, the estimator, momentary history, inherited gain, and limiter state are reset before the new programme is learned.
 
 Resetting inherited gain is important. Carrying a large lift from a quiet video into the next loud video creates exactly the first-block leak that the controller is meant to prevent.
 

@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Muted Helper Stability Test</title>
+</head>
+<body>
+  <h1>Muted Helper Stability Test</h1>
+  <button id="start">Start programme with muted helper</button>
+  <script>
+    document.getElementById('start').addEventListener('click', async () => {
+      const context = new AudioContext();
+      await context.resume();
+      const oscillator = context.createOscillator();
+      const output = context.createGain();
+      oscillator.frequency.value = 230;
+      output.gain.value = 0.04;
+      oscillator.connect(output).connect(context.destination);
+      oscillator.start();
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 16;
+      canvas.height = 16;
+      const helper = document.createElement('video');
+      helper.muted = true;
+      helper.volume = 0;
+      helper.style.display = 'none';
+      helper.srcObject = canvas.captureStream(10);
+
+      setTimeout(async () => {
+        document.body.appendChild(helper);
+        await helper.play();
+      }, 1500);
+      setTimeout(() => {
+        helper.pause();
+        helper.srcObject?.getTracks().forEach((track) => track.stop());
+        helper.remove();
+      }, 4500);
+    }, { once: true });
+  </script>
+</body>
+</html>

@@ -38,6 +38,8 @@ Two later defects were found at those ownership boundaries:
 
 A current Bilibili live trace then exposed three related control-boundary defects. In 58 seconds the programme reset counter moved from 10 to 16 because transient `blob:` media identities were treated as new programmes. Each reset returned gain to unity and rebuilt full upward confidence from only nine accepted blocks. At the same time, a quiet recent output peak could lower the next transition ceiling far below the programme safety crest, producing up to about 13 dB of limiter reduction. The resulting reset, relearn, and limiter-release cycle sounded like alternating small and large sections even though the steady controller reduced the measured middle-80% range.
 
+A follow-up trace with the revised policy found another boundary source: the live player periodically inserted an invisible, muted, zero-volume three-second MP4 helper beside the audible `blob:` stream. Hashing every playing element alternated the programme key between `1b1379c0` and `3016b425`, causing one reset when the helper appeared and another when it disappeared. Programme identity now includes only audible elements; player-volume safety continues to inspect all active elements separately.
+
 Programme identity now normalizes ephemeral `blob:` and `srcObject` sources within one page, upward baseline confidence takes 40 accepted blocks, and transition protection uses one fixed programme-relative crest. Clearly audible quiet detail may use up to 12 dB, while the existing quiet floor still gives near-silence zero positive detail correction.
 
 ## Why this fixes source switching
@@ -57,6 +59,7 @@ Chrome requires a normal MV3 extension to be invoked by the user before a tab ca
 - Do not call offscreen-document creation outside the shared lifecycle.
 - Do not let moment-to-moment quiet detail consume the full programme-normalization range.
 - Do not reset a live programme because an ephemeral blob URL or `srcObject` instance changed.
+- Do not let muted or zero-volume helper media participate in programme identity.
 - Do not let recent quiet output lower the next onset ceiling below the fixed programme safety crest.
 - Do not ship localhost diagnostics in the store target.
 - Do not add broad permissions without an implemented feature and public justification.
