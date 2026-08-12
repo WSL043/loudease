@@ -29,6 +29,7 @@ const scenario = {
   minLiftDb: Number(process.env.WVB_E2E_MIN_LIFT_DB || 1),
   minLiftOutputDeltaDb: Number(process.env.WVB_E2E_MIN_LIFT_OUTPUT_DELTA_DB || 3),
   maxHoldGainDb: Number(process.env.WVB_E2E_MAX_HOLD_GAIN_DB || 1.5),
+  maxProgrammeResets: Number(process.env.WVB_E2E_MAX_PROGRAMME_RESETS || 0),
   playerVolume: Number.isFinite(playerVolume) ? Math.max(0, Math.min(1, playerVolume)) : null,
   minSignalTicks: Number(process.env.WVB_E2E_MIN_SIGNAL_TICKS || (
     scenarioExpect === 'burst'
@@ -1307,6 +1308,12 @@ async function main() {
       }
       if (status.recoveryVerified !== true) {
         throw new Error(`burst scenario did not return near unity during a quiet interval: ${tab.currentGainDb}`);
+      }
+    }
+    if (!captureOnly && scenario.expect === 'stable-programme') {
+      const resetCount = Number(tab.loudnessResetCount) || 0;
+      if (resetCount > scenario.maxProgrammeResets) {
+        throw new Error(`muted helper changed the programme boundary: resets=${resetCount}`);
       }
     }
     if (!captureOnly && (scenario.expect === 'muted' || scenario.expect === 'muted-during-capture')) {

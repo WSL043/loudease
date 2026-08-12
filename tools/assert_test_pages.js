@@ -12,6 +12,7 @@ const requiredPages = [
   'iframe-video.html',
   'multi-video.html',
   'live-like-audio.html',
+  'muted-helper.html',
   'burst-volume.html',
   'quiet-dialog.html',
   'switching-audio.html',

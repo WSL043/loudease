@@ -23,6 +23,7 @@ The live runtime, current source, tests, and recorded evidence outrank old scree
 - Page mute and zero player volume are hard boundaries. Quiet lift must never bypass them.
 - A quiet bed inside a loud programme is not a new programme. Positive within-programme correction stays bounded and floor-qualified; full lift belongs to programme-to-programme correction.
 - Ephemeral `blob:` URLs and `srcObject` instances are transport identities, not programme boundaries. A real navigation or stable source-path change may reset the estimator.
+- Muted or zero-volume helper media must not participate in programme identity; only sources that contribute audible programme audio may trigger a source boundary.
 - Upward programme confidence requires several seconds of representative signal; fast downward protection does not wait.
 - Transition limiting uses a fixed programme-relative safety crest and must not chase recent quiet output peaks.
 - A popup label such as **active** requires fresh runtime evidence, not merely an enabled preference.

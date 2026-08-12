@@ -6,6 +6,7 @@ All notable public changes to LoudEase are recorded here.
 
 - Split real-time control into a stable programme baseline, floor-qualified quiet-detail correction capped at 12 dB, and independent fast loud protection. This prevents a loud live programme's near-silence from producing +20 to +25 dB gain waves while giving clearly audible quiet detail materially more lift.
 - Stabilized programme identity across transient `blob:` and `srcObject` replacement, slowed upward baseline confidence to about four seconds, and replaced recent-output-dependent onset limiting with one fixed programme safety crest. This removes repeated live-stream resets and quiet-peak-driven limiter pumping.
+- Excluded muted and zero-volume helper media from programme identity, preventing short invisible Bilibili overlay clips from resetting the live-stream loudness reference when they appear and disappear.
 - Made the runtime audit compare the live DSP policy revision as well as the manifest version, so same-version development updates can no longer be mistaken for a successfully reloaded extension.
 - Serialized offscreen-document creation so concurrently restored or opened protected tabs share one creation attempt instead of racing Chrome's single-offscreen-document limit.
 - Made local diagnostics distinguish "sending enabled" from an actually reachable receiver and probe immediately when enabled.

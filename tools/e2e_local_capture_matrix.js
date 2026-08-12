@@ -67,6 +67,14 @@ const scenarios = [
     report: 'latest-e2e-poc-burst.json',
     minSignalTicks: 220,
     minReductionDb: 3
+  },
+  {
+    id: 'muted-helper-stability',
+    page: 'muted-helper.html',
+    expect: 'stable-programme',
+    report: 'latest-e2e-poc-stable-programme.json',
+    minSignalTicks: 320,
+    maxProgrammeResets: 0
   }
 ];
 
@@ -102,6 +110,7 @@ for (const scenario of scenarios) {
       WVB_E2E_MIN_LIFT_DB: String(scenario.minLiftDb || 1),
       WVB_E2E_MIN_LIFT_OUTPUT_DELTA_DB: String(scenario.minLiftOutputDeltaDb || 3),
       WVB_E2E_MAX_HOLD_GAIN_DB: String(scenario.maxHoldGainDb || 1.5),
+      WVB_E2E_MAX_PROGRAMME_RESETS: String(scenario.maxProgrammeResets || 0),
       WVB_E2E_REQUIRE_POPUP_AUTOCAPTURE: '1',
       WVB_E2E_SILENT_SINK: '1',
       WVB_E2E_HEADLESS: process.env.WVB_E2E_HEADLESS || '1',

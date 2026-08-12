@@ -74,7 +74,7 @@ assert(
     && /nativeAudioOutputOpened\s*===\s*false/.test(matrix),
   'real-site matrix always requests silent output and rejects native audio output'
 );
-for (const id of ['loud-cut', 'quiet-lift', 'low-volume-source-lift', 'low-player-hold', 'mute-boundary', 'burst-recovery']) {
+for (const id of ['loud-cut', 'quiet-lift', 'low-volume-source-lift', 'low-player-hold', 'mute-boundary', 'burst-recovery', 'muted-helper-stability']) {
   assert(localMatrix.includes(`id: '${id}'`), `local capture matrix includes ${id}`);
 }
 

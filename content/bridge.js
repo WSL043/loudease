@@ -131,14 +131,16 @@
   }
 
   function programmeKey(media) {
-    const activeSources = media
-      .filter(isActiveMedia)
+    const audibleSources = media
+      // Playing helper videos are common on live sites. A muted or zero-volume
+      // element contributes no programme audio and must not redefine it.
+      .filter(isAudible)
       .map(programmeSourceIdentity)
       .sort();
     const href = String(location.href);
-    if (activeSources.length > 0) {
+    if (audibleSources.length > 0) {
       lastProgrammeHref = href;
-      lastProgrammeKey = stableFingerprint(`${href}\n${activeSources.join('\n')}`);
+      lastProgrammeKey = stableFingerprint(`${href}\n${audibleSources.join('\n')}`);
     } else if (!lastProgrammeKey || href !== lastProgrammeHref) {
       lastProgrammeHref = href;
       lastProgrammeKey = stableFingerprint(href);
