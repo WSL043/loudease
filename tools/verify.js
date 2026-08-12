@@ -180,6 +180,9 @@ if (/function getTabCaptureStreamId\(tabId\)/.test(popup) && /const options = \{
 
 const runtimeAudit = fs.readFileSync(path.join(root, 'tools/current_runtime_audit.js'), 'utf8');
 if (/diagnosticsVersionMatchesManifest/.test(runtimeAudit)
+  && /diskPolicyRevision/.test(runtimeAudit)
+  && /runtimePolicyRevision/.test(runtimeAudit)
+  && /diagnosticsPolicyMatchesDisk/.test(runtimeAudit)
   && /reloadExtensionRequired/.test(runtimeAudit)
   && /diagnosticsFromKnownMediaTarget/.test(runtimeAudit)
   && /localDiagnosticsReceiverListening/.test(runtimeAudit)

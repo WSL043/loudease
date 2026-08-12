@@ -61,13 +61,13 @@ dynamic correction   = -0.72 * (M - P)
 target gain          = programme correction + dynamic correction
 ```
 
-Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre and is retained as the baseline through silence. Positive dynamic correction is a detail aid, not a second normalizer: it is capped at `6 dB` at full lift strength and fades from full eligibility at `-40 dB` to zero at `-48 dB`. The negative dynamic term and the independent fast path may still reduce loud material.
+Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre and is retained as the baseline through silence. Positive dynamic correction is a detail aid, not a second normalizer: it is capped at `12 dB` at full lift strength and fades from full eligibility at `-40 dB` to zero at `-48 dB`. The larger audible-detail allowance closes more of the gap inside a loud programme without granting any positive detail correction to near-silence. The negative dynamic term and the independent fast path may still reduce loud material.
 
 The distinction matters on live streams. Before this bound, a programme measured near `-14 dB` followed by a `-60 dB` quiet bed could request the global `+25 dB` maximum, then reverse when speech or effects returned. The resulting 30-plus-decibel gain travel was heard as a long loud/quiet wave. With the current policy, that bed receives no positive detail term; only the stable programme baseline remains. An entire genuinely quiet programme can still receive the full bounded programme correction.
 
 The fast protector independently limits the result when a 20 ms/100 ms measurement exceeds `T + 3 dB`. These decisions feed one target and one linked stereo envelope, so there are not separate compressors fighting each other.
 
-The `-19 dB` centre is a LoudEase product calibration, not an EBU or platform mandate. A reproducible sweep compares `-20`, `-19`, `-18`, and `-16 dB` centres with the lift needed to keep the same quiet boundary. Across two ordinary reference levels, `-19 dB` minimizes the worst enabled/bypass error at about `1.25 dB`; `-20 dB` reaches about `2.19 dB` and `-18 dB` about `2.25 dB`. Any future change to `T` must beat this sweep and a controlled listening corpus rather than being inferred from the first seconds of one programme.
+The `-19 dB` centre is a LoudEase product calibration, not an EBU or platform mandate. A reproducible sweep compares `-20`, `-19`, `-18`, and `-16 dB` centres with the lift needed to keep the same quiet boundary. Across two ordinary reference levels, `-19 dB` minimizes the worst enabled/bypass error at about `1.24 dB`; `-20 dB` reaches about `2.18 dB` and `-18 dB` about `2.23 dB`. Any future change to `T` must beat this sweep and a controlled listening corpus rather than being inferred from the first seconds of one programme.
 
 ## Cold start and confidence
 
@@ -75,7 +75,7 @@ Upward gain is asymmetric by design:
 
 - before the first 400 ms programme block, upward gain is zero;
 - confidence ramps across accepted blocks;
-- confidence reaches 1 after nine blocks, at roughly 1.2 seconds for continuous signal;
+- confidence reaches 1 after 40 blocks, at roughly 4.3 seconds for continuous signal;
 - downward fast protection does not wait for confidence.
 
 Perfect first-frame upward normalization is impossible without metadata or pre-analysis: a quiet opening can be either an under-mastered programme or intentional dynamics. LoudEase therefore protects immediately, but waits for evidence before lifting.
@@ -84,12 +84,7 @@ Perfect first-frame upward normalization is impossible without metadata or pre-a
 
 The 20 ms fast path cuts material above `T + 3 dB` even before programme confidence exists.
 
-The sample-rate limiter has 5 ms look-ahead. During a detected onset or programme jump, its temporary ceiling is derived from the quieter of:
-
-- `T + 6 dB`, and
-- the recent output peak plus 3 dB.
-
-The temporary ceiling follows the cut slider and lasts 40 ms. This replaces the old absolute `-24 dBFS` transition ceiling, which prevented a leak by audibly collapsing the first block. The ordinary sample ceiling remains `-3 dBFS`, adjusted downward when reliable player volume is below 100%.
+The sample-rate limiter has 5 ms look-ahead. During a detected onset or programme jump, its temporary ceiling is fixed at `T + 6 dB`, follows the cut slider, and lasts 40 ms. It deliberately does not follow the recent output peak: a quiet preceding passage must not pull the next onset ceiling downward and create limiter pumping. This replaces both the old absolute `-24 dBFS` transition ceiling and the later recent-peak-dependent variant. The ordinary sample ceiling remains `-3 dBFS`, adjusted downward when reliable player volume is below 100%.
 
 The controller bounds downward gain to 24 dB and upward gain to 25 dB. Upward gain is additionally limited by captured-domain peak headroom plus a 10 dB limiter allowance. Hard clipping remains a last-resort guard and is expected to stay at zero in deterministic tests.
 
@@ -115,9 +110,9 @@ The same source therefore receives approximately the same DSP gain decision at f
 
 `tools/programme_leveler_experiment.js` compares the production worklet with an independent implementation of the same policy and retains the measured legacy reference:
 
-- worst enabled/bypass delta across the two ordinary calibration levels: about `1.25 dB` (the old controller's retained typical reference was `-7.76 dB`);
-- five steady input levels: v4 output range about `2.21 dB`;
-- 12.04 dB internal contrast: old about `0.40 dB`, v4 about `3.13 dB`;
+- worst enabled/bypass delta across the two ordinary calibration levels: about `1.24 dB` (the old controller's retained typical reference was `-7.76 dB`);
+- five steady input levels: v4 output range about `2.34 dB`;
+- 12.04 dB internal contrast: old about `0.40 dB`, v4 about `3.14 dB`;
 - quiet-to-loud first 20 ms: old peak `-24 dBFS` and RMS `-27.75 dB`; v4 peak about `-13 dBFS` and RMS about `-18.98 dB`;
 - production and independent model differ by less than `0.05 dB` on the asserted steady, dynamics, and onset metrics;
 - deterministic steady fixtures report zero hard-clipped samples.

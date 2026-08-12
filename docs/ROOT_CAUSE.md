@@ -36,6 +36,10 @@ Two later defects were found at those ownership boundaries:
 - concurrent restored tabs could both observe "no offscreen document" and call `chrome.offscreen.createDocument()`, although Chrome permits only one; all callers now await one shared creation promise;
 - within-programme positive dynamics treated a live programme's near-silence as a fully quiet programme, producing measured gain travel from about `+23 dB` to `-11 dB`; programme baseline, bounded detail lift, and fast protection are now distinct decisions in one policy.
 
+A current Bilibili live trace then exposed three related control-boundary defects. In 58 seconds the programme reset counter moved from 10 to 16 because transient `blob:` media identities were treated as new programmes. Each reset returned gain to unity and rebuilt full upward confidence from only nine accepted blocks. At the same time, a quiet recent output peak could lower the next transition ceiling far below the programme safety crest, producing up to about 13 dB of limiter reduction. The resulting reset, relearn, and limiter-release cycle sounded like alternating small and large sections even though the steady controller reduced the measured middle-80% range.
+
+Programme identity now normalizes ephemeral `blob:` and `srcObject` sources within one page, upward baseline confidence takes 40 accepted blocks, and transition protection uses one fixed programme-relative crest. Clearly audible quiet detail may use up to 12 dB, while the existing quiet floor still gives near-silence zero positive detail correction.
+
 ## Why this fixes source switching
 
 `tabCapture` follows the tab's mixed output rather than a specific `<video>` node. When Bilibili, Douyin, YouTube, or another SPA replaces media elements, the capture stream remains attached to the tab. The bridge may update player-volume hints, but the DSP graph does not need to reconnect to the new element.
@@ -52,5 +56,7 @@ Chrome requires a normal MV3 extension to be invoked by the user before a tab ca
 - Do not claim processing from a preference flag alone.
 - Do not call offscreen-document creation outside the shared lifecycle.
 - Do not let moment-to-moment quiet detail consume the full programme-normalization range.
+- Do not reset a live programme because an ephemeral blob URL or `srcObject` instance changed.
+- Do not let recent quiet output lower the next onset ceiling below the fixed programme safety crest.
 - Do not ship localhost diagnostics in the store target.
 - Do not add broad permissions without an implemented feature and public justification.

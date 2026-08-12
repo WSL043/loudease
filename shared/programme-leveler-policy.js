@@ -4,7 +4,7 @@
   }
 
   const DB_FLOOR_ENERGY = 1e-12;
-  const POLICY_REVISION = 'baseline-detail-fast-v1';
+  const POLICY_REVISION = 'stable-programme-v1';
   const DEFAULT_PARAMS = Object.freeze({
     programmeTargetDb: -19,
     absoluteGateDb: -70,
@@ -15,7 +15,7 @@
     programmeDeadbandDb: 1,
     dynamicsDeadbandDb: 1,
     dynamicsAmount: 0.72,
-    maxDynamicsLiftDb: 6,
+    maxDynamicsLiftDb: 12,
     dynamicsLiftFloorDb: -48,
     dynamicsLiftFloorKneeDb: 8,
     fastCutMarginDb: 3,
@@ -23,8 +23,7 @@
     maxLiftDb: 25,
     liftLimiterBudgetDb: 10,
     confidenceStartBlocks: 1,
-    confidenceFullBlocks: 9,
-    transitionAllowanceDb: 3,
+    confidenceFullBlocks: 40,
     transitionDefaultCrestDb: 6
   });
 
@@ -233,13 +232,9 @@
     if (cutScale <= 0) {
       return baseCeilingDb;
     }
-    const recentOutputPeakDb = Number(input.recentOutputPeakDb);
     const programmeTargetDb = finite(input.programmeTargetDb, options.programmeTargetDb);
     const programmePeakDb = programmeTargetDb + options.transitionDefaultCrestDb;
-    const learnedPeakDb = Number.isFinite(recentOutputPeakDb)
-      ? recentOutputPeakDb + options.transitionAllowanceDb
-      : programmePeakDb;
-    const protectedCeilingDb = Math.min(baseCeilingDb, programmePeakDb, learnedPeakDb);
+    const protectedCeilingDb = Math.min(baseCeilingDb, programmePeakDb);
     return baseCeilingDb + ((protectedCeilingDb - baseCeilingDb) * cutScale);
   }
 

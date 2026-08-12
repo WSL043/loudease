@@ -546,7 +546,6 @@ class CaptureSession {
     this.fastProtectionDb = gain.fastProtectionDb;
     this.adaptiveTransitionCeilingDb = computeTransitionCeilingDb({
       baseCeilingDb: limiterCeilingDb,
-      recentOutputPeakDb: this.lastOutputPeak > 1e-6 ? linearToDb(this.lastOutputPeak) : NaN,
       cutStrength: this.settings.cutStrength,
       programmeTargetDb: PROGRAMME_PARAMS.programmeTargetDb + volumeDb
     });

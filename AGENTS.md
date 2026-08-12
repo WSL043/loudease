@@ -22,6 +22,9 @@ The live runtime, current source, tests, and recorded evidence outrank old scree
 - Content scripts observe media and player state. They must not create a second Web Audio processing graph.
 - Page mute and zero player volume are hard boundaries. Quiet lift must never bypass them.
 - A quiet bed inside a loud programme is not a new programme. Positive within-programme correction stays bounded and floor-qualified; full lift belongs to programme-to-programme correction.
+- Ephemeral `blob:` URLs and `srcObject` instances are transport identities, not programme boundaries. A real navigation or stable source-path change may reset the estimator.
+- Upward programme confidence requires several seconds of representative signal; fast downward protection does not wait.
+- Transition limiting uses a fixed programme-relative safety crest and must not chase recent quiet output peaks.
 - A popup label such as **active** requires fresh runtime evidence, not merely an enabled preference.
 - The public store runtime requires a user gesture for each newly captured tab. The trusted GitHub build may use Chromium's exact-ID startup allowlist, but that orchestration must be development-only and stripped from the store target.
 - The store build and GitHub development build use the same DSP. The store build removes contributor-only localhost diagnostics.

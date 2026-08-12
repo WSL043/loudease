@@ -87,11 +87,23 @@ function waitForChildExit(child, timeoutMs = 5000) {
   ]);
 }
 
-function cleanupRunDirectories() {
+function cleanupRunDirectories({ tolerateTransientLocks = false } = {}) {
   for (const directory of [profileDir, extensionDir]) {
     assertInside(tmpDir, directory);
-    fs.rmSync(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    try {
+      fs.rmSync(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    } catch (error) {
+      if (tolerateTransientLocks && ['EBUSY', 'EPERM'].includes(error?.code)) {
+        log(`deferred cleanup for Windows-locked run directory ${path.basename(directory)}`);
+        continue;
+      }
+      throw error;
+    }
     if (fs.existsSync(directory)) {
+      if (tolerateTransientLocks) {
+        log(`deferred cleanup for run directory ${path.basename(directory)}`);
+        continue;
+      }
       throw new Error(`E2E run directory was not removed: ${directory}`);
     }
   }
@@ -1381,7 +1393,11 @@ async function main() {
     child.kill();
     await waitForChildExit(child);
     server.close();
-    cleanupRunDirectories();
+    // Chromium can briefly retain a profile lock after its parent process has
+    // exited on Windows. Each run uses unique directories, so a transient
+    // cleanup lock must not turn an otherwise valid audio result into a test
+    // failure.
+    cleanupRunDirectories({ tolerateTransientLocks: true });
   }
 }
 

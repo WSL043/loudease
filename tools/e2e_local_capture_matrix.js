@@ -28,7 +28,10 @@ const scenarios = [
     expect: 'lift',
     report: 'latest-e2e-poc-lift-low-volume.json',
     playerVolume: 0.25,
-    minSignalTicks: 60,
+    // Upward gain now needs about four seconds of continuous evidence. Measure
+    // the settled lift instead of treating the deliberately cautious startup
+    // phase as the final result.
+    minSignalTicks: 260,
     minLiftDb: 8,
     minLiftOutputDeltaDb: 8
   },
