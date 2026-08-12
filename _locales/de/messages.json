@@ -186,10 +186,10 @@
     "message": "Warten auf Einstellungen"
   },
   "localDiagnosticsLabel": {
-    "message": "Lokaler Diagnoseempfänger"
+    "message": "An lokalen Diagnoseempfänger senden"
   },
   "localDiagnosticsHelp": {
-    "message": "Schreibt Debug-Snapshots nur in 127.0.0.1. Standardmäßig deaktiviert."
+    "message": "Erfordert tools/diagnostics_receiver.py auf 127.0.0.1. Standardmäßig deaktiviert."
   },
   "resetAllSettings": {
     "message": "Alle Einstellungen zurücksetzen"
@@ -267,10 +267,10 @@
     "message": "Alle globalen Einstellungen und Site-Standardeinstellungen zurücksetzen?"
   },
   "diagnosticsOn": {
-    "message": "Lokale Diagnose aktiviert"
+    "message": "Empfänger verbunden"
   },
   "diagnosticsOff": {
-    "message": "Lokale Diagnose deaktiviert"
+    "message": "Empfänger nicht verbunden"
   },
   "diagnosticsCopied": {
     "message": "Diagnose JSON kopiert"

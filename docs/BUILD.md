@@ -11,6 +11,8 @@ The repository has two deterministic, allowlist-based targets:
 
 Only `manifest.json`, `background.js`, the release notices (`LICENSE`, `NOTICE`, `TRADEMARKS.md`), and runtime files below `assets`, `content`, `monitor`, `offscreen`, `popup`, `shared`, and `_locales` are eligible. Tests, temporary output, tools, other documentation, source-only files, logs, archives, keys, secrets, and Git metadata are never copied.
 
+`Enable-LoudEase-AutoProtection.cmd` and `tools/enable_auto_protection.ps1` are reviewed source-maintainer setup tools. They are intentionally outside both extension packages, install no resident component, and never become Chrome Web Store runtime code.
+
 ## Development-only marker contract
 
 Store removal is explicit. The build does not infer development-only code from names or arbitrary regular expressions. The existing marker name is retained for compatibility, but it now encloses both contributor diagnostics and the GitHub-only automatic-capture orchestration.

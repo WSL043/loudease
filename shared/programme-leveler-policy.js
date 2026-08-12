@@ -4,6 +4,7 @@
   }
 
   const DB_FLOOR_ENERGY = 1e-12;
+  const POLICY_REVISION = 'baseline-detail-fast-v1';
   const DEFAULT_PARAMS = Object.freeze({
     programmeTargetDb: -19,
     absoluteGateDb: -70,
@@ -14,6 +15,9 @@
     programmeDeadbandDb: 1,
     dynamicsDeadbandDb: 1,
     dynamicsAmount: 0.72,
+    maxDynamicsLiftDb: 6,
+    dynamicsLiftFloorDb: -48,
+    dynamicsLiftFloorKneeDb: 8,
     fastCutMarginDb: 3,
     maxCutDb: 24,
     maxLiftDb: 25,
@@ -146,6 +150,7 @@
       output.fastProtectionDb = 0;
       output.confidence = 0;
       output.liftBudgetDb = 0;
+      output.programmeBaselineGainDb = 0;
       output.programmeDb = options.programmeTargetDb;
       output.momentaryDb = options.programmeTargetDb;
       output.fastDb = options.programmeTargetDb;
@@ -173,11 +178,22 @@
       -(momentaryDb - programmeDb),
       options.dynamicsDeadbandDb
     );
-    const dynamicsCorrectionDb = scaleByDirection(
+    let dynamicsCorrectionDb = scaleByDirection(
       dynamicsErrorDb * options.dynamicsAmount,
       cutScale,
       liftScale
     ) * confidence;
+    if (dynamicsCorrectionDb > 0) {
+      const liftFloorConfidence = clamp(
+        (momentaryDb - options.dynamicsLiftFloorDb) / Math.max(0.1, options.dynamicsLiftFloorKneeDb),
+        0,
+        1
+      );
+      dynamicsCorrectionDb = Math.min(
+        dynamicsCorrectionDb,
+        options.maxDynamicsLiftDb * liftScale * liftFloorConfidence
+      );
+    }
 
     const fastExcessDb = Math.max(0, fastDb - (options.programmeTargetDb + options.fastCutMarginDb));
     const fastProtectionDb = fastExcessDb * cutScale;
@@ -190,6 +206,11 @@
     const maximumLiftDb = input.canLift === false ? 0 : options.maxLiftDb * liftScale;
     const rawHeadroomDb = limiterCeilingDb - peakDb - 0.5;
     const liftBudgetDb = Math.max(0, rawHeadroomDb + (options.liftLimiterBudgetDb * liftScale));
+    const programmeBaselineGainDb = clamp(
+      programmeCorrectionDb,
+      -maximumCutDb,
+      Math.min(maximumLiftDb, liftBudgetDb)
+    );
     targetGainDb = clamp(targetGainDb, -maximumCutDb, Math.min(maximumLiftDb, liftBudgetDb));
 
     output.targetGainDb = targetGainDb;
@@ -198,6 +219,7 @@
     output.fastProtectionDb = fastProtectionDb;
     output.confidence = confidence;
     output.liftBudgetDb = liftBudgetDb;
+    output.programmeBaselineGainDb = programmeBaselineGainDb;
     output.programmeDb = programmeDb;
     output.momentaryDb = momentaryDb;
     output.fastDb = fastDb;
@@ -222,6 +244,7 @@
   }
 
   const api = Object.freeze({
+    POLICY_REVISION,
     DEFAULT_PARAMS,
     ProgrammeLoudnessEstimator,
     applyDeadband,

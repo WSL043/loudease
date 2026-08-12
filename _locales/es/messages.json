@@ -186,10 +186,10 @@
     "message": "Esperando configuración"
   },
   "localDiagnosticsLabel": {
-    "message": "Receptor de diagnóstico local"
+    "message": "Enviar al receptor de diagnóstico local"
   },
   "localDiagnosticsHelp": {
-    "message": "Escribe instantáneas de depuración solo en 127.0.0.1. Desactivado de forma predeterminada."
+    "message": "Requiere tools/diagnostics_receiver.py ejecutándose en 127.0.0.1. Desactivado de forma predeterminada."
   },
   "resetAllSettings": {
     "message": "Restablecer todas las configuraciones"
@@ -267,10 +267,10 @@
     "message": "¿Restablecer todas las configuraciones globales y los valores predeterminados del sitio?"
   },
   "diagnosticsOn": {
-    "message": "Diagnóstico local habilitado"
+    "message": "Receptor conectado"
   },
   "diagnosticsOff": {
-    "message": "Diagnóstico local deshabilitado"
+    "message": "Receptor no conectado"
   },
   "diagnosticsCopied": {
     "message": "Diagnóstico JSON copiado"

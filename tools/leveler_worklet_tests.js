@@ -250,6 +250,28 @@ const highCrestHardClips = highCrestStates.reduce((sum, state) => sum + Number(s
 assert('high-crest material receives useful but bounded lift', steady(highCrest).gainDb > 15, JSON.stringify(steady(highCrest)));
 assert('lookahead limiter keeps high-crest output sample-safe', highCrestOut.peak <= 10 ** (-3 / 20) + 1e-6 && highCrestHardClips === 0, JSON.stringify({ highCrestOut, highCrestHardClips }));
 
+const liveProgramme = new ProcessorClass();
+configure(liveProgramme);
+let liveCursor = render(liveProgramme, 6, 0.2).sampleCount;
+const liveQuietStart = states(liveProgramme).length;
+liveCursor += render(liveProgramme, 3, 0.0015, liveCursor).sampleCount;
+const liveQuietStates = states(liveProgramme).slice(liveQuietStart);
+const liveQuietMaxGainDb = Math.max(...liveQuietStates.map((state) => Number(state.currentGainDb || 0)));
+const liveReturnStart = states(liveProgramme).length;
+render(liveProgramme, 1, 0.2, liveCursor);
+const liveReturnStates = states(liveProgramme).slice(liveReturnStart);
+assert(
+  'live quiet beds cannot drive a programme-scale upward gain wave',
+  liveQuietMaxGainDb <= 3.5,
+  JSON.stringify({ liveQuietMaxGainDb, lastQuiet: liveQuietStates.at(-1) })
+);
+assert(
+  'gain leaves a quiet bed before the loud programme resumes',
+  Number(liveReturnStates.at(0)?.currentGainDb || 0) <= 3.5
+    && Number(liveReturnStates.at(-1)?.currentGainDb || 0) < 0,
+  JSON.stringify(liveReturnStates.slice(0, 4))
+);
+
 const boundary = new ProcessorClass();
 configure(boundary, {}, { programmeKey: 'programme-a' });
 const boundaryLead = render(boundary, 5, 0.2);

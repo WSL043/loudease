@@ -27,7 +27,7 @@ const LIMITER_LOOKAHEAD_MS = 5;
 const CUT_ATTACK_SECONDS = 0.02;
 const CUT_RELEASE_SECONDS = 0.25;
 const LIFT_ATTACK_SECONDS = 0.18;
-const LIFT_RELEASE_SECONDS = 0.6;
+const LIFT_RELEASE_SECONDS = 0.12;
 const MAX_GAIN_INCREASE_STEP_DB = 3;
 const MOMENTARY_HISTORY_FRAMES = 20;
 const SHORT_TERM_HISTORY_FRAMES = 150;
@@ -50,6 +50,7 @@ const {
 } = globalThis.WebVolumeBalancerCore;
 
 const {
+  POLICY_REVISION,
   DEFAULT_PARAMS: PROGRAMME_PARAMS,
   ProgrammeLoudnessEstimator,
   computeTargetGainDb,
@@ -95,6 +96,7 @@ function sendCaptureStatus(status) {
     status: {
       engineVersion: ENGINE_VERSION,
       pipelineMode: PIPELINE_MODE,
+      controlPolicyRevision: POLICY_REVISION,
       ...status
     }
   }).catch(() => {});
@@ -177,6 +179,7 @@ class CaptureSession {
     this.programmeConfidence = 0;
     this.acceptedProgrammeBlocks = 0;
     this.programmeCorrectionDb = 0;
+    this.programmeBaselineGainDb = 0;
     this.dynamicsCorrectionDb = 0;
     this.fastProtectionDb = 0;
     this.lastPeak = 0;
@@ -433,9 +436,9 @@ class CaptureSession {
       this.silenceFrames += 1;
       this.silentTickCount += 1;
       if (this.silenceFrames > SILENCE_HOLD_FRAMES) {
-        this.targetGainDb = 0;
-        this.targetLiftDb = 0;
-        this.targetReductionDb = 0;
+        this.targetGainDb = this.programmeBaselineGainDb;
+        this.targetLiftDb = Math.max(0, this.targetGainDb);
+        this.targetReductionDb = Math.max(0, -this.targetGainDb);
       }
       this.smoothGain(this.targetGainDb, this.currentGainDb < 0 ? CUT_RELEASE_SECONDS : LIFT_RELEASE_SECONDS);
     }
@@ -538,6 +541,7 @@ class CaptureSession {
     this.programmeConfidence = this.programmeState.confidence;
     this.acceptedProgrammeBlocks = this.programmeState.acceptedBlocks;
     this.programmeCorrectionDb = gain.programmeCorrectionDb;
+    this.programmeBaselineGainDb = gain.programmeBaselineGainDb;
     this.dynamicsCorrectionDb = gain.dynamicsCorrectionDb;
     this.fastProtectionDb = gain.fastProtectionDb;
     this.adaptiveTransitionCeilingDb = computeTransitionCeilingDb({
@@ -685,6 +689,7 @@ class CaptureSession {
     this.programmeConfidence = 0;
     this.acceptedProgrammeBlocks = 0;
     this.programmeCorrectionDb = 0;
+    this.programmeBaselineGainDb = 0;
     this.dynamicsCorrectionDb = 0;
     this.fastProtectionDb = 0;
     this.quietDeficitDb = 0;

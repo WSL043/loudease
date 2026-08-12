@@ -44,7 +44,7 @@
 
 | 压住突兀的大声 | 安全提起小声细节 | 尊重原有控制 |
 |---|---|---|
-| 快速增益衰减与前视限幅共同接住持续大声和短促峰值。 | 满档时把真实小声推向与大声相同的受控目标；较低设置保留更多原始动态。 | 静音和播放器零音量始终是硬边界；只有收到新鲜运行证据时，界面才显示“生效中”。 |
+| 快速增益衰减与前视限幅共同接住持续大声和短促峰值。 | 节目基线负责抬起整体偏小的来源；节目内部的小声细节最多额外提升 6 dB，近静音底噪不会被追着放大。 | 静音和播放器零音量始终是硬边界；只有收到新鲜运行证据时，界面才显示“生效中”。 |
 
 LoudEase 不是简单的音量放大器、均衡器，也不是经过校准的听力保护设备。它通过随强度缩放的有限峰值压缩预算来缩小干扰听感的音量差。
 
@@ -54,7 +54,7 @@ LoudEase 不是简单的音量放大器、均衡器，也不是经过校准的�
   <img src="docs/processing-flow.png" width="960" alt="忽大忽小的输入经过响度测量、增益平衡和峰值保护后，变成保留层次但范围更窄的输出">
 </p>
 
-用户授权后，LoudEase 会把标签页作为一条完整音频流捕获，并在本机 `AudioWorklet` 中处理。K-weighted 门控节目响度只驱动一条以节目基线为中心的增益规则：向上提升要等待持续证据，快速保护与 5 ms 前视限幅则负责接住突然的大声。原始音频不会上传。
+用户授权后，LoudEase 会把标签页作为一条完整音频流捕获，并在本机 `AudioWorklet` 中处理。K-weighted 门控节目响度建立稳定基线；有声门槛与 6 dB 上限只补充真实小声细节；独立快速保护与 5 ms 前视限幅接住突然的大声。三者共享一条增益包络，不建立会互相打架的多套 DSP。原始音频不会上传。
 
 实现细节、算法假设和当前缺口见 [声音算法](docs/AUDIO_DSP.md)、[架构](docs/ARCHITECTURE.md) 与 [已知限制](docs/KNOWN_LIMITATIONS.md)。
 
@@ -99,7 +99,9 @@ npm run build:dev
 
 公开商店构建要求 `tabCapture` 由用户手势启动，因此全新商店标签页不能静默接管；完成授权后，即使切换到其他标签页，LoudEase 仍可继续处理原标签页。
 
-项目维护者可以使用 [GitHub 自动保护安装流程](docs/INSTALLATION.md#trusted-github-automatic-protection)，一次性给 Chrome 快捷方式加入 `--allowlisted-extension-id=<LoudEase ID>`。这不是商店功能；Chrome 必须完全退出并由该快捷方式重新启动。
+项目维护者可以使用 [GitHub 自动保护安装流程](docs/INSTALLATION.md#trusted-github-automatic-protection)。Windows 源码目录可直接双击 `Enable-LoudEase-AutoProtection.cmd`，它只会一次性更新当前用户的 Chrome 快捷方式，不安装常驻进程，并可用 `-Disable` 撤销。这不是商店功能；Chrome 必须完全退出并由更新后的快捷方式重新启动。
+
+LoudEase 不发布 Tampermonkey、Violentmonkey 或 Greasy Fork 核心版本。用户脚本只能在网页上下文尽早运行，不能获得扩展的 `chrome.tabCapture`、offscreen 文档和完整标签页混音，因此会重新出现 iframe、Web Audio、受保护播放器和播放前漏声缺口。只有未来出现独立的站点界面辅助需求时，才值得维护一个不处理音频的配套脚本。
 
 商店安装、扩展包导入和源码开发的完整区别见 [安装说明](docs/INSTALLATION.md)。
 

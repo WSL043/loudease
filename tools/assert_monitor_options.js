@@ -32,6 +32,8 @@ const checks = [
   ['background validates site keys before options writes', /function normalizeSiteKey\(input = ''\)/.test(background) && /\/\[\^a-z0-9\.-\]\//.test(background)],
   ['background exposes options state without injection side effects', /WVB_GET_OPTIONS_STATE/.test(background) && /async function optionsState\(\)/.test(background)],
   ['background supports site save delete reset and local diagnostics messages', ['WVB_SAVE_SITE_SETTINGS', 'WVB_DELETE_SITE_SETTINGS', 'WVB_RESET_SETTINGS', 'WVB_SET_LOCAL_DIAGNOSTICS'].every((type) => background.includes(type))],
+  ['local diagnostics distinguish sender preference from receiver availability', /localDiagnosticsEnabled[\s\S]*?localDiagnosticsAvailable/.test(background) && monitorHtml.includes('id="localDiagnosticsState"') && /localDiagnosticsAvailable/.test(monitorJs)],
+  ['enabling local diagnostics immediately probes the receiver', /async function setLocalDiagnosticsFromOptions[\s\S]*?lastLocalDiagnosticsAt\s*=\s*0[\s\S]*?await pushLocalDiagnostics\(\)/.test(background)],
   ['options reset applies defaults and clears site settings', /resetAllSettingsFromOptions/.test(background) && /\[STORAGE_KEY\]: normalizeSettings\(DEFAULT_SETTINGS\)/.test(background) && /\[SITE_SETTINGS_KEY\]: \{\}/.test(background)],
   ['monitor options DOM has all required controls', requiredIds.every((id) => monitorHtml.includes(`id="${id}"`))],
   ['monitor saves only custom strength overrides for each site', /type: 'WVB_SAVE_SITE_SETTINGS'/.test(monitorJs) && /preset: 'custom'/.test(monitorJs) && /cutStrength: clampPercent\(els\.siteCut\.value\)/.test(monitorJs) && /liftStrength: clampPercent\(els\.siteLift\.value\)/.test(monitorJs)],

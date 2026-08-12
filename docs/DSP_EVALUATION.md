@@ -38,9 +38,11 @@ Do not demand that every individual source have zero enabled/bypass delta. That 
 
 ### Internal dynamics
 
-Use verse/chorus, dialogue/effect, transient-rich, and sparse-ambience sequences. Record input and output contrast, gain distribution, transient attenuation, and recovery.
+Use verse/chorus, dialogue/effect, transient-rich, sparse-ambience, and loud-live-programme/near-silence sequences. Record input and output contrast, gain distribution, transient attenuation, and recovery.
 
 The desired result is a smaller disruptive range, not a flat waveform.
+
+A loud programme's quiet bed must not be reclassified as a second quiet programme. At full strength, positive within-programme detail correction is capped at 6 dB and falls to zero below the quiet-detail floor; programme-to-programme correction remains independently capable of lifting an entire genuinely quiet source.
 
 ### Cold start and jumps
 
@@ -89,8 +91,9 @@ The accepted replacement uses:
 
 ```text
 gated cumulative programme reference
-  -> programme correction
-  + relative within-programme correction
+  -> bounded programme baseline
+  + floor-qualified within-programme detail (max +6 dB)
+  + independent fast loud protection
   -> one asymmetric smoother
   -> adaptive 5 ms look-ahead limiter
 ```

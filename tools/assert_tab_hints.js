@@ -48,3 +48,6 @@ ok(background.includes('const lastProgrammeKeys = new Map();') && background.inc
 ok(audit.includes('knownMediaDiagnosticTab'), 'runtime audit searches all diagnostic tabs for media targets');
 ok(audit.includes('live\\.(douyin|bilibili)'), 'runtime audit recognizes live Douyin and live Bilibili hosts');
 ok(audit.includes("['leveler-worklet', 'worklet', 'analyser-fallback']"), 'runtime audit accepts the primary v4 leveler meter mode');
+ok(!/const webVolumeExtensionId\s*=/.test(audit), 'runtime audit does not hardcode a stale LoudEase extension ID');
+ok(/loudEaseCandidates/.test(audit), 'runtime audit discovers LoudEase candidates from current extension registration state');
+ok(audit.includes('captureControlPolicyRevision'), 'runtime audit distinguishes a reloaded controller from stale same-version code');

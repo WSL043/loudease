@@ -132,7 +132,7 @@
             <summary><span><strong data-i18n="technicalDiagnostics">Technical diagnostics</strong><small data-i18n="technicalDiagnosticsHelp">Live connection details for troubleshooting.</small></span></summary>
             <div class="technicalBody">
               <!-- WVB_DEV_DIAGNOSTICS_START -->
-              <label class="toggleRow developerToggle"><span><strong data-i18n="localDiagnosticsLabel">Local diagnostics receiver</strong><small data-i18n="localDiagnosticsHelp">Writes debug snapshots only to 127.0.0.1. Off by default.</small></span><input id="localDiagnostics" type="checkbox"></label>
+              <label class="toggleRow developerToggle"><span><strong data-i18n="localDiagnosticsLabel">Send to local diagnostics receiver</strong><small data-i18n="localDiagnosticsHelp">Requires tools/diagnostics_receiver.py to be running on 127.0.0.1. Off by default.</small><small id="localDiagnosticsState" class="receiverState" role="status" aria-live="polite">Receiver not connected</small></span><input id="localDiagnostics" type="checkbox"></label>
               <!-- WVB_DEV_DIAGNOSTICS_END -->
               <section class="diagnosticSection"><header><h2 data-i18n="pageStatusHeading">Page status</h2></header><div id="tabs" class="tabs"></div></section>
               <section class="diagnosticSection"><header><h2 data-i18n="recentEventsHeading">Recent events</h2><span data-i18n="backgroundLogLabel">Background log</span></header><div id="events" class="events"></div></section>

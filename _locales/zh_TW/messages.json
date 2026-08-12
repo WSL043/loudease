@@ -186,10 +186,10 @@
     "message": "等待設定"
   },
   "localDiagnosticsLabel": {
-    "message": "本地診斷接收器"
+    "message": "傳送到本地診斷接收器"
   },
   "localDiagnosticsHelp": {
-    "message": "僅將偵錯快照寫入 127.0.0.1。預設關閉。"
+    "message": "僅當 tools/diagnostics_receiver.py 正在 127.0.0.1 執行時才會寫入偵錯快照。預設關閉。"
   },
   "resetAllSettings": {
     "message": "重置所有設定"
@@ -267,10 +267,10 @@
     "message": "重置所有全域設定和網站預設設定？"
   },
   "diagnosticsOn": {
-    "message": "啟用本地診斷"
+    "message": "接收器已連線"
   },
   "diagnosticsOff": {
-    "message": "本地診斷已禁用"
+    "message": "接收器未連線"
   },
   "diagnosticsCopied": {
     "message": "診斷 JSON 已複製"

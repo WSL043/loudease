@@ -6,15 +6,15 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 
 | Layer | Scenarios | Command |
 |---|---|---|
-| Pure policy | settings, gate hysteresis, gated programme estimate, confidence, strength zero, player-volume bounds | `npm test` |
-| Unified worklet | baseline neutrality, programme convergence, cold start, adaptive onset, dynamics, mute, player cap, source reset | `npm run test:dsp` |
+| Pure policy | settings, gate hysteresis, gated programme estimate, confidence, strength zero, player-volume bounds, live quiet-bed cap | `npm test` |
+| Unified worklet | baseline neutrality, programme convergence, cold start, adaptive onset, bounded quiet-bed recovery, dynamics, mute, player cap, source reset | `npm run test:dsp` |
 | Limiter | look-ahead delay, ceiling, clustered peaks, dynamic ceiling, stereo ratio, overshoot | `npm run test:dsp` |
 | Offline PCM | legacy reference vs production vs independent v4 model, steady levels, dynamics, onset, player volume, boundaries | `npm run test:dsp` |
 | Offline graph | real AudioWorklet node and AudioContext graph | `npm run test:dsp` |
 | Capture E2E | start/stop, loud cut, quiet lift, mute, player volume, burst recovery | `npm run test:capture` |
 | Stability E2E | repeated capture, reload, source switching, session cleanup | `npm run test:long -- --duration-ms 30000` |
 | Silent capture E2E | live tabCapture/DSP with no system playback device, plus native-output rejection | `npm run test:silent` |
-| GitHub automatic capture | normal-Chrome denial, allowlisted pre-play capture, and a second new tab with real PCM and no native output | `npm run test:auto-capture` |
+| GitHub automatic capture | normal-Chrome denial plus two concurrently opened allowlisted tabs with pre-play capture, real PCM, one offscreen lifecycle, and no native output | `npm run test:auto-capture` |
 | Real-site smoke | YouTube, Bilibili, and Douyin video/live in isolated silent Chrome | `npm run test:sites` |
 | Slider persistence | input/change ordering and saved custom strength | `npm run test:slider` |
 | Store build | allowlist, references, diagnostics stripping, locale catalogs, forbidden code | `npm run test:release` |
