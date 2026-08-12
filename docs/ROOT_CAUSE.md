@@ -40,7 +40,9 @@ A current Bilibili live trace then exposed three related control-boundary defect
 
 A follow-up trace with the revised policy found another boundary source: the live player periodically inserted an invisible, muted, zero-volume three-second MP4 helper beside the audible `blob:` stream. Hashing every playing element alternated the programme key between `1b1379c0` and `3016b425`, causing one reset when the helper appeared and another when it disappeared. Programme identity now includes only audible elements; player-volume safety continues to inspect all active elements separately.
 
-Programme identity now normalizes ephemeral `blob:` and `srcObject` sources within one page, upward baseline confidence takes 40 accepted blocks, and transition protection uses one fixed programme-relative crest. Clearly audible quiet detail may use up to 12 dB, while the existing quiet floor still gives near-silence zero positive detail correction.
+Programme identity now normalizes ephemeral `blob:` and `srcObject` sources within one page, and transition protection uses one fixed programme-relative crest. Clearly audible quiet detail may use up to 16 dB, while the existing quiet floor still gives near-silence zero positive detail correction.
+
+A later short-form report showed the remaining cross-video failure: protection could cut immediately, but upward programme confidence still required 40 accepted blocks, roughly 4.3 seconds. A two-second quiet fixture therefore reached only `0.385` confidence, about `+5.7 dB` gain, and `-32.9 dB` output. Short-form programme boundaries make that cold start recur much more often than on a long video. The same estimator now reaches full confidence after 12 accepted blocks, roughly 1.5 seconds, and the one shared control law corrects 86% of qualified within-programme deviation with a 16 dB detail cap. In the deterministic two-second sweep, about 32.82 dB of input variation converges to about 3.97 dB of output variation; the loud-onset ceiling remains -13 dBFS and hard clips remain zero.
 
 ## Why this fixes source switching
 

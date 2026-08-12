@@ -44,7 +44,7 @@ Web audio rarely agrees on one comfortable level. Dialogue disappears, effects j
 
 | Calm sudden loudness | Recover quiet detail | Respect your controls |
 |---|---|---|
-| Fast gain reduction and a look-ahead limiter catch uncomfortable jumps and short peaks. | A programme baseline lifts sources that are quiet overall; clearly audible within-programme detail gets at most 12 dB extra lift, while near-silence is not chased. | Mute and zero player volume are hard boundaries. The UI only says **active** when fresh runtime evidence exists. |
+| Fast gain reduction and a look-ahead limiter catch uncomfortable jumps and short peaks. | A programme baseline lifts sources that are quiet overall; clearly audible within-programme detail gets at most 16 dB extra lift, while near-silence is not chased. | Mute and zero player volume are hard boundaries. The UI only says **active** when fresh runtime evidence exists. |
 
 LoudEase is not a simple volume booster, an equalizer, or a calibrated hearing-protection device. It narrows disruptive level differences with a strength-scaled, bounded peak-compression budget.
 
@@ -54,7 +54,7 @@ LoudEase is not a simple volume booster, an equalizer, or a calibrated hearing-p
   <img src="docs/processing-flow.png" width="960" alt="Uneven input is measured, balanced, and peak limited into a narrower output range while retaining variation">
 </p>
 
-The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted gated measurement establishes a stable programme baseline, a floor-qualified 12 dB detail term handles clearly audible quiet passages, and independent fast protection plus a 5 ms look-ahead limiter catch loud onsets. Transient blob or `srcObject` replacement inside one page does not reset the programme, and upward baseline confidence takes several seconds rather than trusting a quiet opening. No raw audio is uploaded.
+The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted gated measurement establishes a stable programme baseline, a floor-qualified 16 dB detail term handles clearly audible quiet passages, and independent fast protection plus a 5 ms look-ahead limiter catch loud onsets. Transient blob or `srcObject` replacement inside one page does not reset the programme. Upward lift still waits for representative signal, but now reaches full confidence after about 1.5 seconds of continuous accepted audio so short quiet videos are not left behind. No raw audio is uploaded.
 
 For implementation details, assumptions, and current gaps, read [Audio DSP](docs/AUDIO_DSP.md), [Architecture](docs/ARCHITECTURE.md), and [Known limitations](docs/KNOWN_LIMITATIONS.md).
 
