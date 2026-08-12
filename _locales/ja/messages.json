@@ -186,10 +186,10 @@
     "message": "設定待ち"
   },
   "localDiagnosticsLabel": {
-    "message": "ローカル診断受信機"
+    "message": "ローカル診断受信機へ送信"
   },
   "localDiagnosticsHelp": {
-    "message": "デバッグ スナップショットを 127.0.0.1 にのみ書き込みます。デフォルトではオフです。"
+    "message": "127.0.0.1 で tools/diagnostics_receiver.py が実行中の場合のみ送信します。デフォルトではオフです。"
   },
   "resetAllSettings": {
     "message": "すべての設定をリセットする"
@@ -267,10 +267,10 @@
     "message": "すべてのグローバル設定とサイトのデフォルトをリセットしますか?"
   },
   "diagnosticsOn": {
-    "message": "ローカル診断が有効になっています"
+    "message": "受信機に接続済み"
   },
   "diagnosticsOff": {
-    "message": "ローカル診断が無効になっています"
+    "message": "受信機に未接続"
   },
   "diagnosticsCopied": {
     "message": "診断 JSON がコピーされました"

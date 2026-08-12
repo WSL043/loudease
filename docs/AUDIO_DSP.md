@@ -14,7 +14,7 @@ The controller is intentionally not a broadcast normalizer and does not claim ex
 tabCapture
   -> K-weighted and raw measurement
   -> gated programme estimator
-  -> one programme-centred gain law
+  -> programme baseline + bounded detail + fast protection
   -> one linked gain smoother
   -> 5 ms look-ahead adaptive limiter
   -> player mute boundary
@@ -44,7 +44,7 @@ Resetting inherited gain is important. Carrying a large lift from a quiet video 
 
 When a site hides programme changes behind an unchanged URL and media identity, the estimator cannot know that a boundary occurred. That remains an explicit limitation rather than a reason to make the programme baseline continuously chase the audio.
 
-## Single gain law
+## One policy with three bounded decisions
 
 Let:
 
@@ -53,7 +53,7 @@ Let:
 - `M` be 400 ms momentary loudness;
 - `C` and `L` be the normalized cut and lift slider strengths.
 
-The controller forms two terms:
+The controller forms a stable baseline and a smaller within-programme term:
 
 ```text
 programme correction = T - P
@@ -61,7 +61,11 @@ dynamic correction   = -0.72 * (M - P)
 target gain          = programme correction + dynamic correction
 ```
 
-Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre. The dynamic term reduces disruptive contrast inside a programme without forcing every moment to exactly `T`.
+Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre and is retained as the baseline through silence. Positive dynamic correction is a detail aid, not a second normalizer: it is capped at `6 dB` at full lift strength and fades from full eligibility at `-40 dB` to zero at `-48 dB`. The negative dynamic term and the independent fast path may still reduce loud material.
+
+The distinction matters on live streams. Before this bound, a programme measured near `-14 dB` followed by a `-60 dB` quiet bed could request the global `+25 dB` maximum, then reverse when speech or effects returned. The resulting 30-plus-decibel gain travel was heard as a long loud/quiet wave. With the current policy, that bed receives no positive detail term; only the stable programme baseline remains. An entire genuinely quiet programme can still receive the full bounded programme correction.
+
+The fast protector independently limits the result when a 20 ms/100 ms measurement exceeds `T + 3 dB`. These decisions feed one target and one linked stereo envelope, so there are not separate compressors fighting each other.
 
 The `-19 dB` centre is a LoudEase product calibration, not an EBU or platform mandate. A reproducible sweep compares `-20`, `-19`, `-18`, and `-16 dB` centres with the lift needed to keep the same quiet boundary. Across two ordinary reference levels, `-19 dB` minimizes the worst enabled/bypass error at about `1.25 dB`; `-20 dB` reaches about `2.19 dB` and `-18 dB` about `2.25 dB`. Any future change to `T` must beat this sweep and a controlled listening corpus rather than being inferred from the first seconds of one programme.
 
@@ -96,10 +100,10 @@ One linked gain envelope is used for all channels:
 - cut attack: 20 ms;
 - cut release: 250 ms;
 - lift attack: 180 ms;
-- lift release: 600 ms;
+- lift release: 120 ms;
 - maximum upward movement: 3 dB per 20 ms frame.
 
-Signal-gate hysteresis opens near `-62 dB` and closes near `-68 dB`. Gain is held through pauses up to one second so speech gaps do not reset the first following syllable; after that it returns toward unity without erasing the programme estimate.
+Signal-gate hysteresis opens near `-62 dB` and closes near `-68 dB`. Gain is held through pauses up to one second so speech gaps do not reset the first following syllable; after that dynamic movement returns toward the bounded programme baseline rather than unity. This avoids changing the average enabled baseline merely because a stream contained silence.
 
 ## Player-volume boundary
 
@@ -119,6 +123,8 @@ The same source therefore receives approximately the same DSP gain decision at f
 - deterministic steady fixtures report zero hard-clipped samples.
 
 These results prove implementation invariants and the claimed structural improvement. They do not replace randomized listening tests on real dialogue, music, live speech, advertisements, and ambience.
+
+The live quiet-bed regression first establishes a loud programme, then renders three seconds near the signal floor and returns to loud content. It rejects the former `+25 dB` rise and verifies that the gain leaves the detail state before the loud programme resumes.
 
 ## Deliberately excluded
 

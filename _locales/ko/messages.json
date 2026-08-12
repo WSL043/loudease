@@ -186,10 +186,10 @@
     "message": "설정을 기다리는 중"
   },
   "localDiagnosticsLabel": {
-    "message": "로컬 진단 수신기"
+    "message": "로컬 진단 수신기로 보내기"
   },
   "localDiagnosticsHelp": {
-    "message": "127.0.0.1에만 디버그 스냅샷을 씁니다. 기본적으로 꺼져 있습니다."
+    "message": "127.0.0.1에서 tools/diagnostics_receiver.py가 실행 중일 때만 전송합니다. 기본적으로 꺼져 있습니다."
   },
   "resetAllSettings": {
     "message": "모든 설정 재설정"
@@ -267,10 +267,10 @@
     "message": "모든 전역 설정과 사이트 기본값을 재설정하시겠습니까?"
   },
   "diagnosticsOn": {
-    "message": "로컬 진단 활성화됨"
+    "message": "수신기 연결됨"
   },
   "diagnosticsOff": {
-    "message": "로컬 진단이 비활성화되었습니다."
+    "message": "수신기 연결 안 됨"
   },
   "diagnosticsCopied": {
     "message": "진단 JSON 복사됨"

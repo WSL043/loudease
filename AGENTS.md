@@ -18,8 +18,10 @@ The live runtime, current source, tests, and recorded evidence outrank old scree
 ## Product invariants
 
 - The only audio-processing path is `tabCapture -> offscreen document -> AudioWorklet -> destination`.
+- All tab sessions share one serialized offscreen-document creation lifecycle; concurrent tabs must not race `chrome.offscreen.createDocument()`.
 - Content scripts observe media and player state. They must not create a second Web Audio processing graph.
 - Page mute and zero player volume are hard boundaries. Quiet lift must never bypass them.
+- A quiet bed inside a loud programme is not a new programme. Positive within-programme correction stays bounded and floor-qualified; full lift belongs to programme-to-programme correction.
 - A popup label such as **active** requires fresh runtime evidence, not merely an enabled preference.
 - The public store runtime requires a user gesture for each newly captured tab. The trusted GitHub build may use Chromium's exact-ID startup allowlist, but that orchestration must be development-only and stripped from the store target.
 - The store build and GitHub development build use the same DSP. The store build removes contributor-only localhost diagnostics.

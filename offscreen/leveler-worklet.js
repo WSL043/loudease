@@ -15,7 +15,7 @@ const TRANSITION_PROTECTION_SECONDS = 0.04;
 const CUT_ATTACK_SECONDS = 0.02;
 const CUT_RELEASE_SECONDS = 0.25;
 const LIFT_ATTACK_SECONDS = 0.18;
-const LIFT_RELEASE_SECONDS = 0.6;
+const LIFT_RELEASE_SECONDS = 0.12;
 const MAX_GAIN_INCREASE_STEP_DB = 3;
 
 const ProgrammePolicy = globalThis.LoudEaseProgrammePolicy;
@@ -264,7 +264,9 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     } else {
       this.silenceFrames += 1;
       this.silentTickCount += 1;
-      if (this.silenceFrames > SILENCE_HOLD_FRAMES) this.targetGainDb = 0;
+      if (this.silenceFrames > SILENCE_HOLD_FRAMES) {
+        this.targetGainDb = this.lastControl?.programmeBaselineGainDb || 0;
+      }
     }
 
     const recentOutputPeak = this.maxLast(this.outputPeakHistory, MOMENTARY_FRAMES);

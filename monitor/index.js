@@ -24,6 +24,7 @@ const els = {
   globalLiftValue: document.getElementById('globalLiftValue'),
   /* WVB_DEV_DIAGNOSTICS_START */
   localDiagnostics: document.getElementById('localDiagnostics'),
+  localDiagnosticsState: document.getElementById('localDiagnosticsState'),
   /* WVB_DEV_DIAGNOSTICS_END */
   resetSettings: document.getElementById('resetSettings'),
   siteForm: document.getElementById('siteForm'),
@@ -55,7 +56,8 @@ let previewState = {
   settings: { enabled: true, respectPlayerVolume: true, preset: 'custom', cutStrength: 100, liftStrength: 100 },
   siteSettings: {},
   /* WVB_DEV_DIAGNOSTICS_START */
-  localDiagnosticsEnabled: false
+  localDiagnosticsEnabled: false,
+  localDiagnosticsAvailable: false
   /* WVB_DEV_DIAGNOSTICS_END */
 };
 
@@ -233,6 +235,16 @@ function renderSiteList(siteSettings = {}) {
     <button class="siteRow" type="button" data-site="${escapeHtml(siteKey)}"><strong>${escapeHtml(siteKey)}</strong><span>${t('reductionLabel', undefined, 'Reduction')} ${clampPercent(settings.cutStrength)}</span><span>${t('liftLabel', undefined, 'Lift')} ${clampPercent(settings.liftStrength)}</span></button>`).join('');
 }
 
+/* WVB_DEV_DIAGNOSTICS_START */
+function renderLocalDiagnosticsState(enabled, available) {
+  const connected = enabled === true && available === true;
+  els.localDiagnosticsState.dataset.connected = String(connected);
+  els.localDiagnosticsState.textContent = connected
+    ? t('diagnosticsOn', undefined, 'Receiver connected')
+    : t('diagnosticsOff', undefined, 'Receiver not connected');
+}
+/* WVB_DEV_DIAGNOSTICS_END */
+
 function renderOptionsState(state, options = {}) {
   lastOptionsState = state || {};
   const settings = lastOptionsState.settings || {};
@@ -244,6 +256,7 @@ function renderOptionsState(state, options = {}) {
   setRange(els.globalLift, els.globalLiftValue, settings.liftStrength);
   /* WVB_DEV_DIAGNOSTICS_START */
   els.localDiagnostics.checked = lastOptionsState.localDiagnosticsEnabled === true;
+  renderLocalDiagnosticsState(lastOptionsState.localDiagnosticsEnabled, lastOptionsState.localDiagnosticsAvailable);
   /* WVB_DEV_DIAGNOSTICS_END */
   renderSiteList(sites);
   if (!options.preserveEditor && !els.siteKey.value) fillSiteForm('', settings);
@@ -331,6 +344,9 @@ function renderDiagnostics(snapshot) {
   els.sourceCount.textContent = String(tabs.reduce((sum, tab) => sum + (tab.captureConnected === true || Number(tab.activeProcessorCount) > 0 ? 1 : 0), 0));
   els.updatedAt.textContent = new Date(snapshot.now || Date.now()).toLocaleTimeString();
   els.health.textContent = tabs.some((tab) => tab.staleEngine) ? t('staleEngineFound', undefined, 'Outdated runtime found') : t('liveRefresh', undefined, 'Refreshing live');
+  /* WVB_DEV_DIAGNOSTICS_START */
+  renderLocalDiagnosticsState(snapshot.localDiagnosticsEnabled, snapshot.localDiagnosticsAvailable);
+  /* WVB_DEV_DIAGNOSTICS_END */
   els.reportJson.textContent = JSON.stringify(supportReport(snapshot), null, 2);
   renderTabs(tabs);
   renderEvents(snapshot.events || []);

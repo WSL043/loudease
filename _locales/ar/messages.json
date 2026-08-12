@@ -186,10 +186,10 @@
     "message": "في انتظار الإعدادات"
   },
   "localDiagnosticsLabel": {
-    "message": "استقبال التشخيص المحلي"
+    "message": "إرسال إلى مستقبل التشخيص المحلي"
   },
   "localDiagnosticsHelp": {
-    "message": "يكتب لقطات التصحيح فقط إلى 127.0.0.1. إيقاف بشكل افتراضي."
+    "message": "يتطلب تشغيل tools/diagnostics_receiver.py على 127.0.0.1. متوقف افتراضيًا."
   },
   "resetAllSettings": {
     "message": "إعادة ضبط جميع الإعدادات"
@@ -267,10 +267,10 @@
     "message": "هل تريد إعادة تعيين كافة الإعدادات العامة والإعدادات الافتراضية للموقع؟"
   },
   "diagnosticsOn": {
-    "message": "تم تمكين التشخيص المحلي"
+    "message": "المستقبل متصل"
   },
   "diagnosticsOff": {
-    "message": "تم تعطيل التشخيص المحلي"
+    "message": "المستقبل غير متصل"
   },
   "diagnosticsCopied": {
     "message": "تم نسخ بيانات التشخيص JSON"

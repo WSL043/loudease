@@ -27,7 +27,7 @@ The old page-level `createMediaElementSource()` engine is no longer part of the 
 
 - receives the user gesture from the popup;
 - obtains a one-use `tabCapture` stream ID;
-- creates or reuses the offscreen document;
+- creates or reuses the offscreen document through one shared creation promise, so concurrent tabs cannot race Chrome's single-document limit;
 - tracks independent capture sessions by tab ID;
 - aggregates lightweight page telemetry with offscreen DSP state;
 - stores global and per-site settings;
@@ -39,7 +39,7 @@ The old page-level `createMediaElementSource()` engine is no longer part of the 
 
 The offscreen document is the source of truth for active audio sessions. Each authorized tab has one `CaptureSession` containing the stream, `AudioContext`, worklet node, player-volume gain, output analyser, state counters, and cleanup listeners.
 
-`offscreen/leveler-worklet.js` is the normal processing path. It performs continuous measurement, gated programme estimation, the single programme-centred gain law, linked gain smoothing, mute/player-volume enforcement, and sample-peak look-ahead limiting on the audio render thread. `shared/programme-leveler-policy.js` is loaded into both the AudioWorklet scope and fallback page so the control law has one source of truth.
+`offscreen/leveler-worklet.js` is the normal processing path. It performs continuous measurement, gated programme estimation, stable programme-baseline correction, floor-qualified quiet-detail correction capped at 6 dB, independent fast loud protection, linked gain smoothing, mute/player-volume enforcement, and sample-peak look-ahead limiting on the audio render thread. `shared/programme-leveler-policy.js` is loaded into both the AudioWorklet scope and fallback page so the control law has one source of truth.
 
 If the unified worklet cannot load, `offscreen/index.js` falls back to the older meter/controller/limiter graph. The fallback is intentionally conservative and is reported in diagnostics.
 
@@ -67,7 +67,7 @@ The two strength controls are independent:
 
 ### Monitor and options (`monitor/`)
 
-The options page contains advanced settings, diagnostics export, and the development-only localhost receiver switch. It is not part of the normal listening workflow.
+The options page contains advanced settings, diagnostics export, and the development-only localhost sender switch. It separately reports whether the receiver actually answered, so a checked box is not presented as a live receiver. It is not part of the normal listening workflow.
 
 ## Session lifecycle
 
@@ -81,7 +81,7 @@ The options page contains advanced settings, diagnostics export, and the develop
 
 ## Multi-tab behavior
 
-Captured tabs have independent sessions and settings views. Switching focus does not stop an existing captured tab. In the store runtime, a never-authorized tab remains outside the extension until the user invokes it there. In the allowlisted GitHub runtime, maintained media-site tabs and inherited new tabs are captured automatically before playback when Chrome exposes the startup grant.
+Captured tabs have independent sessions and settings views. Switching focus does not stop an existing captured tab. Concurrent startup requests await one offscreen-document creation and then create separate sessions. In the store runtime, a never-authorized tab remains outside the extension until the user invokes it there. In the allowlisted GitHub runtime, maintained media-site tabs and inherited new tabs are captured automatically before playback when Chrome exposes the startup grant.
 
 ## Player-volume boundary
 

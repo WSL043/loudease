@@ -5,7 +5,6 @@ const { execFileSync } = require('child_process');
 const root = path.resolve(__dirname, '..');
 const chromeUserData = path.join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'User Data');
 const defaultProfile = path.join(chromeUserData, 'Default');
-const webVolumeExtensionId = 'fpkfdbclggjngebblaaphefkhmefmlig';
 const codexChromeExtensionId = 'hehggadaopoacecdllhhajmbjkdcmajg';
 const diagnosticsPort = 18765;
 
@@ -49,6 +48,28 @@ function extensionState(preferences, id) {
   };
 }
 
+function loudEaseCandidates(sources) {
+  const candidates = new Map();
+  for (const [sourceName, source] of Object.entries(sources)) {
+    const settings = source?.extensions?.settings || {};
+    for (const id of Object.keys(settings)) {
+      const state = extensionState(source, id);
+      const identity = [state.path, state.manifestName].join('\n');
+      if (!/(loudease|web[ _-]*volume[ _-]*balancer|audio-normalization-followup)/i.test(identity)) {
+        continue;
+      }
+      const candidate = candidates.get(id) || { id, sources: {} };
+      candidate.sources[sourceName] = state;
+      candidates.set(id, candidate);
+    }
+  }
+  return Array.from(candidates.values()).sort((left, right) => {
+    const enabled = (candidate) => Object.values(candidate.sources)
+      .some((state) => state.exists && state.disableReasons.length === 0);
+    return Number(enabled(right)) - Number(enabled(left));
+  });
+}
+
 function summarizeTab(tab) {
   if (!tab) {
     return null;
@@ -69,6 +90,7 @@ function summarizeTab(tab) {
     captureActive: tab.captureActive,
     captureState: tab.captureState,
     capturePipelineMode: tab.capturePipelineMode,
+    captureControlPolicyRevision: tab.captureControlPolicyRevision || '',
     captureContextState: tab.captureContextState,
     captureAudioTrackCount: tab.captureAudioTrackCount,
     captureError: tab.captureError || ''
@@ -157,6 +179,8 @@ const manifestPath = path.join(root, 'manifest.json');
 const manifest = readJson(manifestPath);
 const preferences = readJson(path.join(defaultProfile, 'Preferences'));
 const securePreferences = readJson(path.join(defaultProfile, 'Secure Preferences'));
+const discoveredLoudEaseCandidates = loudEaseCandidates({ preferences, securePreferences });
+const primaryLoudEase = discoveredLoudEaseCandidates[0] || null;
 const diagnosticsPath = path.join(root, 'tmp', 'latest-diagnostics.json');
 const diagnostics = readJson(diagnosticsPath);
 
@@ -191,8 +215,7 @@ const report = {
     defaultProfile,
     preferencesStat: stat(path.join(defaultProfile, 'Preferences')),
     securePreferencesStat: stat(path.join(defaultProfile, 'Secure Preferences')),
-    webVolumeInPreferences: extensionState(preferences, webVolumeExtensionId),
-    webVolumeInSecurePreferences: extensionState(securePreferences, webVolumeExtensionId),
+    loudEaseCandidates: discoveredLoudEaseCandidates,
     codexChromeInPreferences: extensionState(preferences, codexChromeExtensionId),
     codexChromeInSecurePreferences: extensionState(securePreferences, codexChromeExtensionId)
   },
@@ -230,7 +253,7 @@ const report = {
     nextAction: !receiver.listening
       ? `Start tools/diagnostics_receiver.py on http://127.0.0.1:${diagnosticsPort}/loudease, then re-run this audit.`
       : diagnosticsVersion && diskVersion && diagnosticsVersion !== diskVersion
-        ? `Reload the unpacked extension in chrome://extensions/?id=${webVolumeExtensionId}; disk=${diskVersion}, runtime=${diagnosticsVersion}`
+        ? `Reload the unpacked extension in chrome://extensions/?id=${primaryLoudEase?.id || '<LoudEase extension id>'}; disk=${diskVersion}, runtime=${diagnosticsVersion}`
         : diagnosticsCurrent && !diagnosticsFromKnownMediaTarget
           ? 'Open or activate the actual Douyin/Bilibili tab, then check whether it appears as a knownMediaTab.'
           : diagnosticsCurrent && processingKnownMediaTabs.length === 0 && observedUnprocessedMediaTabs.length > 0

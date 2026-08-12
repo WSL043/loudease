@@ -44,7 +44,7 @@ Web audio rarely agrees on one comfortable level. Dialogue disappears, effects j
 
 | Calm sudden loudness | Recover quiet detail | Respect your controls |
 |---|---|---|
-| Fast gain reduction and a look-ahead limiter catch uncomfortable jumps and short peaks. | At full strength, genuine quiet passages move toward the same bounded target; lower settings retain more original dynamics. | Mute and zero player volume are hard boundaries. The UI only says **active** when fresh runtime evidence exists. |
+| Fast gain reduction and a look-ahead limiter catch uncomfortable jumps and short peaks. | A programme baseline lifts sources that are quiet overall; within-programme detail gets at most 6 dB extra lift, while near-silence is not chased. | Mute and zero player volume are hard boundaries. The UI only says **active** when fresh runtime evidence exists. |
 
 LoudEase is not a simple volume booster, an equalizer, or a calibrated hearing-protection device. It narrows disruptive level differences with a strength-scaled, bounded peak-compression budget.
 
@@ -54,7 +54,7 @@ LoudEase is not a simple volume booster, an equalizer, or a calibrated hearing-p
   <img src="docs/processing-flow.png" width="960" alt="Uneven input is measured, balanced, and peak limited into a narrower output range while retaining variation">
 </p>
 
-The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted gated programme measurement drives one programme-centred gain law: upward gain waits for sustained evidence, while fast protection and a 5 ms look-ahead limiter catch loud onsets. No raw audio is uploaded.
+The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted gated measurement establishes a stable programme baseline, a floor-qualified 6 dB detail term handles wanted quiet passages, and independent fast protection plus a 5 ms look-ahead limiter catch loud onsets. The three decisions share one gain envelope rather than competing DSP chains. No raw audio is uploaded.
 
 For implementation details, assumptions, and current gaps, read [Audio DSP](docs/AUDIO_DSP.md), [Architecture](docs/ARCHITECTURE.md), and [Known limitations](docs/KNOWN_LIMITATIONS.md).
 
@@ -99,7 +99,9 @@ Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**,
 
 The public store runtime requires a user gesture before `tabCapture` starts. A completely new store tab cannot be captured silently; after authorization, LoudEase can keep processing while you switch to another tab.
 
-Maintainers can use the [trusted GitHub automatic-protection workflow](docs/INSTALLATION.md#trusted-github-automatic-protection) by adding `--allowlisted-extension-id=<LoudEase ID>` to the normal Chrome shortcut once. This is not a Web Store feature, and Chrome must be fully restarted from that shortcut.
+Maintainers can use the [trusted GitHub automatic-protection workflow](docs/INSTALLATION.md#trusted-github-automatic-protection). On Windows, double-click `Enable-LoudEase-AutoProtection.cmd` in the source tree to update the current-user Chrome shortcuts once; it installs no resident process and supports `-Disable`. This is not a Web Store feature, and Chrome must be fully restarted from an updated shortcut.
+
+LoudEase does not publish a Tampermonkey, Violentmonkey, or Greasy Fork core edition. A userscript cannot access the extension-only `chrome.tabCapture` and offscreen-document pipeline or the complete tab mix, so it would reintroduce iframe, Web Audio, protected-player, and pre-play gaps. A non-audio site-UI companion would only be considered if it later has a distinct use case.
 
 See [Installation](docs/INSTALLATION.md) for the store, packaged-beta, and source-development paths.
 

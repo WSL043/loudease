@@ -186,10 +186,10 @@
     "message": "Waiting for settings"
   },
   "localDiagnosticsLabel": {
-    "message": "Local diagnostics receiver"
+    "message": "Send to local diagnostics receiver"
   },
   "localDiagnosticsHelp": {
-    "message": "Writes debug snapshots only to 127.0.0.1. Off by default."
+    "message": "Requires tools/diagnostics_receiver.py to be running on 127.0.0.1. Off by default."
   },
   "resetAllSettings": {
     "message": "Reset all settings"
@@ -267,10 +267,10 @@
     "message": "Reset all global settings and site defaults?"
   },
   "diagnosticsOn": {
-    "message": "Local diagnostics enabled"
+    "message": "Receiver connected"
   },
   "diagnosticsOff": {
-    "message": "Local diagnostics disabled"
+    "message": "Receiver not connected"
   },
   "diagnosticsCopied": {
     "message": "Diagnostics JSON copied"

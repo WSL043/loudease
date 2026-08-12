@@ -4,6 +4,10 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Split real-time control into a stable programme baseline, floor-qualified quiet-detail correction capped at 6 dB, and independent fast loud protection. This prevents a loud live programme's near-silence from producing +20 to +25 dB gain waves while retaining full programme-to-programme normalization.
+- Serialized offscreen-document creation so concurrently restored or opened protected tabs share one creation attempt instead of racing Chrome's single-offscreen-document limit.
+- Made local diagnostics distinguish "sending enabled" from an actually reachable receiver and probe immediately when enabled.
+- Added a reversible, no-resident Windows shortcut setup tool for trusted automatic protection and runtime discovery that no longer hardcodes an obsolete unpacked extension ID.
 - Added trusted GitHub-build automatic protection using Chromium's exact-extension-ID startup allowlist, with pre-play capture for the maintained media-site matrix, inherited new-tab protection, truthful no-allowlist fallback, and complete store-build stripping.
 - Replaced the accumulated fixed-target loud/quiet controller with one programme-centred gain law shared by the primary AudioWorklet and fallback path.
 - Added constant-memory gated programme loudness estimation that persists through pause/resume and resets when the active media programme changes.

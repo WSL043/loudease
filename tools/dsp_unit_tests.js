@@ -7,6 +7,7 @@ const {
   normalizeSettings
 } = globalThis.WebVolumeBalancerCore;
 const {
+  POLICY_REVISION,
   DEFAULT_PARAMS,
   ProgrammeLoudnessEstimator,
   computeTargetGainDb,
@@ -30,6 +31,7 @@ assert('settings preserve known preset', normalizeSettings({ preset: 'night' }).
 assert('settings classify unknown preset as custom', normalizeSettings({ preset: 'mystery' }).preset === 'custom');
 assert('default settings retain independent full-strength controls', DEFAULT_SETTINGS.cutStrength === 100 && DEFAULT_SETTINGS.liftStrength === 100);
 assert('K-weighting constants remain the BS.1770 biquad approximation', K_WEIGHTING_PARAMS.shelfGainDb > 3.9 && K_WEIGHTING_PARAMS.highpassFrequencyHz > 38);
+assert('programme controller exposes its runtime policy revision', POLICY_REVISION === 'baseline-detail-fast-v1');
 
 const gateOpen = computeSignalGateActive({ wasActive: false, energyDb: -60, peak: 0.001 });
 const gateCloseHeld = computeSignalGateActive({ wasActive: true, energyDb: -65, peak: 0.0003 });
@@ -92,6 +94,12 @@ const loudMoment = gain({ programmeDb: -20, momentaryDb: -12, fastDb: -12, peakD
 const quietMoment = gain({ programmeDb: -20, momentaryDb: -28, fastDb: -28, peakDb: -18 });
 assert('within-programme loud moments are compressed around the centre', loudMoment.dynamicsCorrectionDb < -4, JSON.stringify(loudMoment));
 assert('within-programme quiet moments are lifted without becoming a second target', quietMoment.dynamicsCorrectionDb > 4 && quietMoment.dynamicsCorrectionDb < 6, JSON.stringify(quietMoment));
+const liveBed = gain({ programmeDb: -14, momentaryDb: -60, fastDb: -60, peakDb: -52 });
+assert(
+  'a loud programme quiet bed cannot become a second full-volume programme',
+  liveBed.dynamicsCorrectionDb <= 6.01 && liveBed.targetGainDb <= 2.01,
+  JSON.stringify(liveBed)
+);
 const coldLoud = gain({ programmeDb: null, confidence: 0, momentaryDb: -10, fastDb: -10, peakDb: -5 });
 const coldQuiet = gain({ programmeDb: null, confidence: 0, momentaryDb: -35, fastDb: -35, peakDb: -24 });
 assert('cold-start fast cut acts before programme confidence', coldLoud.targetGainDb <= -6, JSON.stringify(coldLoud));
@@ -108,6 +116,6 @@ assert('zero cut keeps the ordinary limiter ceiling', close(computeTransitionCei
 
 assert('player volume scales the sample limiter ceiling', close(computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: true }, { limiterCeilingDb: -3 }), -15.041, 0.01));
 assert('disabling player-volume safety keeps the base ceiling', computePlayerVolumeLimiterCeilingDb({ playerVolumeCap: 0.25, respectPlayerVolume: false }, { limiterCeilingDb: -3 }) === -3);
-assert('policy bounds are intentionally smaller than the legacy controller', DEFAULT_PARAMS.maxLiftDb === 25 && DEFAULT_PARAMS.maxCutDb === 24 && DEFAULT_PARAMS.liftLimiterBudgetDb === 10);
+assert('policy bounds are intentionally smaller than the legacy controller', DEFAULT_PARAMS.maxLiftDb === 25 && DEFAULT_PARAMS.maxCutDb === 24 && DEFAULT_PARAMS.liftLimiterBudgetDb === 10 && DEFAULT_PARAMS.maxDynamicsLiftDb === 6);
 
 if (process.exitCode) process.exit(process.exitCode);

@@ -31,6 +31,11 @@ popup gesture or trusted GitHub startup grant -> tabCapture -> offscreen Capture
 
 The content bridge is observation-only. It never calls `createMediaElementSource()` and does not patch media prototypes. The offscreen session owns PCM state; the service worker owns orchestration; the popup owns user intent and display.
 
+Two later defects were found at those ownership boundaries:
+
+- concurrent restored tabs could both observe "no offscreen document" and call `chrome.offscreen.createDocument()`, although Chrome permits only one; all callers now await one shared creation promise;
+- within-programme positive dynamics treated a live programme's near-silence as a fully quiet programme, producing measured gain travel from about `+23 dB` to `-11 dB`; programme baseline, bounded detail lift, and fast protection are now distinct decisions in one policy.
+
 ## Why this fixes source switching
 
 `tabCapture` follows the tab's mixed output rather than a specific `<video>` node. When Bilibili, Douyin, YouTube, or another SPA replaces media elements, the capture stream remains attached to the tab. The bridge may update player-volume hints, but the DSP graph does not need to reconnect to the new element.
@@ -45,5 +50,7 @@ Chrome requires a normal MV3 extension to be invoked by the user before a tab ca
 - Do not use page-supplied version values to reload the extension.
 - Do not make status reads mutate or repair runtime state.
 - Do not claim processing from a preference flag alone.
+- Do not call offscreen-document creation outside the shared lifecycle.
+- Do not let moment-to-moment quiet detail consume the full programme-normalization range.
 - Do not ship localhost diagnostics in the store target.
 - Do not add broad permissions without an implemented feature and public justification.

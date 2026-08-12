@@ -94,6 +94,7 @@ let automaticCaptureUnavailable = false;
 let offscreenPort = null;
 let offscreenRequestId = 1;
 const offscreenRequests = new Map();
+let offscreenCreationPromise = null;
 let offscreenCloseTimer = null;
 let offscreenCloseGeneration = 0;
 
@@ -482,7 +483,8 @@ async function optionsState() {
     settings: await readSettings(),
     siteSettings: await readSiteSettings(),
     /* WVB_DEV_DIAGNOSTICS_START */
-    localDiagnosticsEnabled
+    localDiagnosticsEnabled,
+    localDiagnosticsAvailable
     /* WVB_DEV_DIAGNOSTICS_END */
   };
 }
@@ -527,6 +529,12 @@ async function setLocalDiagnosticsFromOptions(enabled) {
   localDiagnosticsEnabled = enabled === true;
   await chrome.storage.local.set({ [LOCAL_DIAGNOSTICS_STORAGE_KEY]: localDiagnosticsEnabled });
   addEvent('diagnostics:local-options-toggle', { enabled: localDiagnosticsEnabled });
+  lastLocalDiagnosticsAt = 0;
+  if (localDiagnosticsEnabled) {
+    await pushLocalDiagnostics();
+  } else {
+    localDiagnosticsAvailable = false;
+  }
   return { ok: true, state: await optionsState() };
 }
 /* WVB_DEV_DIAGNOSTICS_END */
@@ -762,6 +770,7 @@ function aggregateStatus(tabId) {
         captureAvailable: true,
         captureState: capture.state || 'processing',
         capturePipelineMode: capture.pipelineMode || '',
+        captureControlPolicyRevision: capture.controlPolicyRevision || '',
         captureContextState: capture.contextState || '',
         /* WVB_DEV_DIAGNOSTICS_START */
         silentSink: capture.silentSink === true,
@@ -839,6 +848,7 @@ function aggregateStatus(tabId) {
       captureAvailable: true,
       captureState: capture?.state || 'idle',
       capturePipelineMode: capture?.pipelineMode || '',
+      captureControlPolicyRevision: capture?.controlPolicyRevision || '',
       captureContextState: capture?.contextState || '',
       captureTrackCount: Number(capture?.trackCount) || 0,
       captureAudioTrackCount: Number(capture?.audioTrackCount) || 0,
@@ -982,6 +992,7 @@ function aggregateStatus(tabId) {
     captureAvailable: true,
     captureState: capture?.state || 'idle',
     capturePipelineMode: capture?.pipelineMode || '',
+    captureControlPolicyRevision: capture?.controlPolicyRevision || '',
     captureContextState: capture?.contextState || '',
     /* WVB_DEV_DIAGNOSTICS_START */
     silentSink: capture?.silentSink === true,
@@ -1198,15 +1209,35 @@ async function offscreenDocumentExists() {
 
 async function ensureOffscreenDocument() {
   cancelOffscreenIdleClose();
-  if (await offscreenDocumentExists()) {
-    return;
+  if (!offscreenCreationPromise) {
+    const creation = (async () => {
+      if (await offscreenDocumentExists()) {
+        return;
+      }
+      try {
+        await chrome.offscreen.createDocument({
+          url: 'offscreen/index.html',
+          reasons: ['USER_MEDIA'],
+          justification: 'Process the current tab audio for volume balancing after the user starts full-tab capture.'
+        });
+        addEvent('offscreen:created');
+      } catch (error) {
+        const message = String(error?.message || error);
+        if (/Only a single offscreen document may be created/i.test(message) && await offscreenDocumentExists()) {
+          addEvent('offscreen:creation-reused');
+          return;
+        }
+        throw error;
+      }
+    })();
+    offscreenCreationPromise = creation;
+    creation.finally(() => {
+      if (offscreenCreationPromise === creation) {
+        offscreenCreationPromise = null;
+      }
+    }).catch(() => {});
   }
-  await chrome.offscreen.createDocument({
-    url: 'offscreen/index.html',
-    reasons: ['USER_MEDIA'],
-    justification: 'Process the current tab audio for volume balancing after the user starts full-tab capture.'
-  });
-  addEvent('offscreen:created');
+  await offscreenCreationPromise;
 }
 
 function cancelOffscreenIdleClose() {

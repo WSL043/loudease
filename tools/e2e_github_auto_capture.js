@@ -279,9 +279,9 @@ async function runPhase({ chromePath, extensionId, origin, allowlisted }) {
     if (loaded.id !== extensionId) throw new Error(`Extension ID mismatch: expected ${extensionId}, got ${loaded.id}`);
     const monitor = await openMonitor(runtime, debugPort, extensionId);
     const firstUrl = `${origin}/first`;
-    const firstPage = await createPage(runtime, debugPort, firstUrl);
 
     if (!allowlisted) {
+      const firstPage = await createPage(runtime, debugPort, firstUrl);
       const denied = await waitForStatus(
         monitor,
         firstUrl,
@@ -299,6 +299,11 @@ async function runPhase({ chromePath, extensionId, origin, allowlisted }) {
       };
     }
 
+    const secondUrl = `${origin}/second`;
+    const [firstPage, secondPage] = await Promise.all([
+      createPage(runtime, debugPort, firstUrl),
+      createPage(runtime, debugPort, secondUrl)
+    ]);
     const firstPrePlay = await waitForStatus(
       monitor,
       firstUrl,
@@ -315,8 +320,6 @@ async function runPhase({ chromePath, extensionId, origin, allowlisted }) {
       'first tab captured signal'
     );
 
-    const secondUrl = `${origin}/second`;
-    const secondPage = await createPage(runtime, debugPort, secondUrl);
     const secondPrePlay = await waitForStatus(
       monitor,
       secondUrl,
@@ -333,6 +336,17 @@ async function runPhase({ chromePath, extensionId, origin, allowlisted }) {
       'new tab captured signal'
     );
 
+    const diagnostics = await evaluate(monitor, `(async () => {
+      return await chrome.runtime.sendMessage({ type: 'WVB_GET_DIAGNOSTICS' });
+    })()`);
+    const offscreenCreationErrors = (diagnostics?.events || []).filter((event) => (
+      event?.type === 'capture:auto-error'
+      && /Only a single offscreen document may be created/i.test(String(event?.detail?.error || ''))
+    ));
+    if (offscreenCreationErrors.length > 0) {
+      throw new Error(`Concurrent automatic capture raced offscreen creation: ${JSON.stringify(offscreenCreationErrors)}`);
+    }
+
     const summarize = (item) => ({
       tabId: item.tabId,
       captureActive: item.status.captureActive,
@@ -345,6 +359,7 @@ async function runPhase({ chromePath, extensionId, origin, allowlisted }) {
     });
     const result = {
       browserVersion: runtime.browserVersion,
+      concurrentPrePlayCapture: true,
       firstPrePlay: summarize(firstPrePlay),
       firstSignal: summarize(firstSignal),
       secondPrePlay: summarize(secondPrePlay),

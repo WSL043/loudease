@@ -186,10 +186,10 @@
     "message": "En attente des paramètres"
   },
   "localDiagnosticsLabel": {
-    "message": "Récepteur de diagnostic local"
+    "message": "Envoyer au récepteur de diagnostic local"
   },
   "localDiagnosticsHelp": {
-    "message": "Écrit des instantanés de débogage uniquement sur 127.0.0.1. Désactivé par défaut."
+    "message": "Nécessite tools/diagnostics_receiver.py en cours d’exécution sur 127.0.0.1. Désactivé par défaut."
   },
   "resetAllSettings": {
     "message": "Réinitialiser tous les paramètres"
@@ -267,10 +267,10 @@
     "message": "Réinitialiser tous les paramètres globaux et les valeurs par défaut du site ?"
   },
   "diagnosticsOn": {
-    "message": "Diagnostics locaux activés"
+    "message": "Récepteur connecté"
   },
   "diagnosticsOff": {
-    "message": "Diagnostic local désactivé"
+    "message": "Récepteur non connecté"
   },
   "diagnosticsCopied": {
     "message": "Diagnostic JSON copié"

@@ -107,6 +107,10 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .summary span { display: block; color: var(--muted); font-size: 10px; }
 .summary strong { display: block; margin-block-start: 4px; font-size: 17px; }
 .developerToggle { border-block-end: 1px solid var(--line); }
+/* WVB_DEV_DIAGNOSTICS_START */
+.receiverState { color: var(--danger); font-weight: 650; }
+.receiverState[data-connected="true"] { color: var(--input); }
+/* WVB_DEV_DIAGNOSTICS_END */
 .technicalDetails > summary { min-block-size: 58px; display: flex; align-items: center; padding: 12px 20px; cursor: pointer; list-style-position: outside; }
 .technicalDetails > summary span { display: inline-grid; gap: 3px; margin-inline-start: 6px; }
 .technicalDetails > summary strong { font-size: 12px; }
