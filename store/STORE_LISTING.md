@@ -1,16 +1,16 @@
 # Chrome Web Store Listing
 
-This document contains copy-ready fields for the LoudEase store submission. The repository remains private during beta, so public URLs must be verified before submission.
+This document contains copy-ready fields for the LoudEase store submission. During private preparation, public URLs must be verified before submission.
 
 ## Default listing
 
 **Product name**
 
-LoudEase
+LoudEase Beta
 
 **Summary**
 
-Balances loud and quiet web audio locally while respecting mute and player volume.
+Public beta that balances loud and quiet web audio locally while respecting mute and player volume.
 
 **Single purpose**
 
@@ -22,7 +22,7 @@ Accessibility
 
 **Detailed description**
 
-LoudEase makes uneven web audio easier to listen to.
+LoudEase Beta makes uneven web audio easier to listen to while the first public release gathers compatibility and listening feedback.
 
 Open the extension on a tab to authorize local audio balancing. LoudEase then analyzes that tab's audio in real time, reduces sudden loud sections, and lifts genuine quiet passages according to the selected strength. Lower settings preserve more original dynamics; full strength targets closer program-level consistency.
 
@@ -41,6 +41,8 @@ Chrome requires a user gesture before a new tab can be captured. Open LoudEase o
 To respect in-player mute and volume and recover an authorized session after navigation, a lightweight local observer handles the page URL plus media playback, mute, and volume state only in audible, recognized-media, captured, or explicitly opened HTTP(S) tabs. Merely being active is not enough. It does not read page text, forms, cookies, or credentials. Browsing and audio data are not sent to the developer.
 
 Audio quality varies with source material and listening equipment. LoudEase is a listening-comfort tool, not hearing protection or a medical device.
+
+This is a public beta. Core capture, mute, player-volume, multi-tab, source-switching, limiter, and baseline site paths are covered by automated release checks, but site behavior and listening preference still vary. Please use the support route to report compatibility or audio-quality issues without including private URLs or browsing data.
 
 ## URLs
 

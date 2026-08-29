@@ -4,7 +4,7 @@ Review status: Draft - fluent review required before publishing
 
 ## 產品名稱
 
-LoudEase
+LoudEase Beta
 
 ## 摘要
 

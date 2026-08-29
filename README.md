@@ -42,6 +42,8 @@
 
 Web audio rarely agrees on one comfortable level. Dialogue disappears, effects jump out, ads arrive hot, and the next creator or stream can sound completely different. A normal volume slider moves everything together; LoudEase works on the difference between moments.
 
+Use the website player or operating-system volume to choose the overall listening level. The two LoudEase controls only set how strongly loud passages are reduced and quiet detail is lifted. LoudEase intentionally does not add a separate master-volume slider: moving every sound together would duplicate existing volume controls without improving source-to-source balance.
+
 | Calm sudden loudness | Recover quiet detail | Respect your controls |
 |---|---|---|
 | Fast gain reduction and a look-ahead limiter catch uncomfortable jumps and short peaks. | A programme baseline lifts sources that are quiet overall; clearly audible within-programme detail gets at most 16 dB extra lift, while near-silence is not chased. | Mute and zero player volume are hard boundaries. The UI only says **active** when fresh runtime evidence exists. |

@@ -293,6 +293,12 @@ const dynamicVideoSwitchReady = latestSwitchReports.dynamicVideoReplace?.passed 
   && latestSwitchReports.dynamicVideoReplace?.tab?.capturePipelineMode === 'programme-leveler-v4'
   && Number(latestSwitchReports.dynamicVideoReplace?.tab?.lastSignalAgeMs ?? Infinity) < 2500
   && Number(latestSwitchReports.dynamicVideoReplace?.pageStateAfter?.switchCount || 0) >= 1;
+const popupTruthReady = dynamicVideoSwitchReady
+  && latestSwitchReports.dynamicVideoReplace?.popupState?.appState === 'working'
+  && latestSwitchReports.dynamicVideoReplace?.popupState?.levelActive === true
+  && latestSwitchReports.dynamicVideoReplace?.popupState?.captureButtonHidden === true
+  && latestSwitchReports.dynamicVideoReplace?.popupState?.statusLabel === 'Active'
+  && Boolean(latestSwitchReports.dynamicVideoReplace?.popupState?.stateTitle);
 const pocEvidence = [
   `reduce=${pocReduceReady ? 'pass' : 'missing'}`,
   `lift=${pocLiftReady ? 'pass' : 'missing'}`,
@@ -560,8 +566,10 @@ const hardRequirements = [
   ),
   hardRequirement(
     'popup 显示真实状态',
-    /captureActive/.test(readText('popup/index.js')) && /captureState/.test(readText('popup/index.js')) && /extensionReloadRequired/.test(readText('popup/index.js')),
-    'popup renders capture state and runtime mismatch flags'
+    popupTruthReady,
+    popupTruthReady
+      ? `live popup E2E matched active runtime: state=${latestSwitchReports.dynamicVideoReplace.popupState.appState}, title=${latestSwitchReports.dynamicVideoReplace.popupState.stateTitle}`
+      : 'live popup state has not yet been matched to a current active capture report'
   ),
   hardRequirement(
     '有诊断日志',

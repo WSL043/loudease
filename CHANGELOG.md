@@ -4,6 +4,8 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+## 0.8.0-beta.1 - 2026-08-29
+
 - Split real-time control into a stable programme baseline, floor-qualified quiet-detail correction capped at 16 dB, and independent fast loud protection. This prevents a loud live programme's near-silence from producing +20 to +25 dB gain waves while bringing clearly audible quiet detail closer to the programme centre.
 - Made the programme estimator reach full upward confidence after about 1.5 seconds of continuous accepted signal instead of about 4.3 seconds, so short quiet videos no longer spend most of their duration far below the loudness centre. A deterministic two-second sweep now requires 32.8 dB of input variation to converge to less than 4 dB of output variation while preserving the existing onset ceiling.
 - Stabilized programme identity across transient `blob:` and `srcObject` replacement, retained evidence-gated upward lift, and replaced recent-output-dependent onset limiting with one fixed programme safety crest. This removes repeated live-stream resets and quiet-peak-driven limiter pumping.

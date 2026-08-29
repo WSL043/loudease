@@ -19,6 +19,8 @@ const agentGuide = fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8');
 const installation = fs.readFileSync(path.join(root, 'docs', 'INSTALLATION.md'), 'utf8');
 const publishing = fs.readFileSync(path.join(root, 'docs', 'PUBLISHING.md'), 'utf8');
 const accountSetup = fs.readFileSync(path.join(root, 'store', 'ACCOUNT_SETUP.md'), 'utf8');
+const testInstructions = fs.readFileSync(path.join(root, 'store', 'TEST_INSTRUCTIONS.md'), 'utf8');
+const submissionChecklist = fs.readFileSync(path.join(root, 'store', 'SUBMISSION_CHECKLIST.md'), 'utf8');
 const localizationStatus = fs.readFileSync(path.join(root, 'store', 'LOCALIZATION_STATUS.md'), 'utf8');
 const buildGuide = fs.readFileSync(path.join(root, 'docs', 'BUILD.md'), 'utf8');
 const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
@@ -68,6 +70,8 @@ const checks = [
   ['GitHub and store releases use one stripped archive', /npm run package:store/.test(publishing) && /exact same ZIP to the Chrome Web Store/.test(publishing) && /only installable release archive/.test(buildGuide) && /Never attach `dist\/github-dev`/.test(publishing)],
   ['source instructions do not create an unrelated lockfile', !englishReadme.includes('npm install') && !readme.includes('npm install') && !installation.includes('npm install')],
   ['Chrome Web Store account checklist is documented', /one-time developer registration fee/.test(accountSetup) && /two-step verification/.test(accountSetup) && /never automated/.test(publishing)],
+  ['Chrome Web Store reviewer instructions are complete', /No account or credentials are required/.test(testInstructions) && /Stop balancing/.test(testInstructions) && /Expected limitations/.test(testInstructions) && /LoudEase Beta/.test(testInstructions)],
+  ['Chrome Web Store submission checklist covers account package listing privacy and review', ['Developer contact email', 'two-step verification', 'SHA-256', 'Website content', 'Web history', 'Submit for review'].every((text) => submissionChecklist.includes(text))],
   ['localized store drafts and status table agree on fluent review', /English remains the default listing/.test(localizationStatus) && storeLocaleDrafts.every((locale) => {
     const file = path.join(root, 'store', 'locales', `${locale}.md`);
     return fs.existsSync(file)

@@ -21,20 +21,20 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 
 ## Real-site release baseline
 
-The following rows require current `0.7.2` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate.
+The following rows require current `0.8.0` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate.
 
 | Scenario | Connect | Fresh signal | Cut/lift evidence | Mute/volume | Source switch | 30 min | 2 h mixed run |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| YouTube video | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
-| YouTube live | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Source unloaded after 45–60 s in anonymous headless Chrome | Pending |
-| Bilibili video | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
-| Bilibili live | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Passed 2026-08-10 | Pending |
-| Douyin video | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
-| Douyin live | Passed 2026-08-10 | Passed 2026-08-10 | Observed 2026-08-10 | Pending | Pending | Pending | Pending |
+| YouTube video | Passed 2026-08-29 | Passed 2026-08-29 | Observed 2026-08-29 | Capture fixture passed | Capture fixture passed | Pending | Pending |
+| YouTube live | Passed 2026-08-29 | Passed 2026-08-29 | Observed 2026-08-29 | Capture fixture passed | Capture fixture passed | Source unloaded after 45–60 s in anonymous headless Chrome | Pending |
+| Bilibili video | Passed 2026-08-29 | Passed 2026-08-29 | Observed 2026-08-29 | Capture fixture passed | Capture fixture passed | Pending | Pending |
+| Bilibili live | Passed 2026-08-29 | Passed 2026-08-29 | Observed 2026-08-29 | Capture fixture passed | Capture fixture passed | Passed 2026-08-29 | Pending |
+| Douyin video | Passed 2026-08-29 | Passed 2026-08-29 | Observed 2026-08-29 | Capture fixture passed | Capture fixture passed | Pending | Pending |
+| Douyin live | Passed 2026-08-29 | Passed 2026-08-29 | Observed 2026-08-29 | Capture fixture passed | Capture fixture passed | Pending | Pending |
 
-The final 2026-08-10 quick matrix passed all six scenarios with current `0.7.2` development code, fresh isolated profiles, silent output, no native WASAPI output, fresh worklet meters, and zero hard-clipped samples. The input/output readings were: YouTube video `-32.83/-25.83 dB`, YouTube live `-20.52/-23.76 dB`, Bilibili video `-44.86/-35.13 dB`, Bilibili live `-22.18/-25.49 dB`, Douyin short video `-30.13/-33.53 dB`, and Douyin live `-38.75/-35.49 dB`.
+The final 2026-08-29 quick matrix passed all six scenarios with current `0.8.0` code, fresh isolated profiles, silent output, no native WASAPI output, fresh worklet meters, and zero hard-clipped samples. The eight-scenario capture matrix also passed, including dynamic in-page source replacement, continued metering, a single live audio track, popup state matching the live DSP, mute/player-volume behavior, loud cut, quiet lift, burst recovery, and stop cleanup.
 
-The representative Bilibili live endurance run lasted `1,800,011 ms` and collected 360 consecutive five-second samples. Signal ticks advanced `53 -> 90046`, maximum signal age was `91 ms`, offscreen heap growth peaked at `1,195,700 bytes` against a `32 MiB` limit, and hard-clipped samples remained zero. Three attempted anonymous-headless YouTube endurance runs correctly failed when the site unloaded its media element after roughly 45–60 seconds even though the extension capture session remained alive; they are not counted as extension passes. These automated results prove capture and DSP continuity, not audible quality; mute/volume, in-page source switching, controlled listening, and the two-hour mixed run remain separate gates.
+The current-version representative Bilibili live endurance run lasted `1,800,013 ms` and collected 360 consecutive five-second samples. Signal ticks advanced by `89,982`, peak offscreen heap growth was `939,684 bytes` against a `32 MiB` limit, one audio track and a running context remained live, stop cleanup passed, and hard-clipped samples remained zero. Three attempted anonymous-headless YouTube endurance runs correctly failed when the site unloaded its media element after roughly 45–60 seconds even though the extension capture session remained alive; they are not counted as extension passes. A separate native-output test sampled the actual Windows default render endpoint and verified that stopping LoudEase returned the audible level within `-0.905 dB` of baseline. These results prove pipeline continuity and restoration, not universal audible preference; broader listening and the two-hour mixed run remain stable-release gates.
 
 ## Core global compatibility matrix
 

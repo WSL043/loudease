@@ -19,6 +19,14 @@ const captureHoldMs = Math.max(0, Number(process.env.WVB_E2E_HOLD_MS || 0));
 const holdSampleMs = Math.max(250, Number(process.env.WVB_E2E_HOLD_SAMPLE_MS || 5000));
 const maxHoldHeapGrowthBytes = Math.max(1, Number(process.env.WVB_E2E_MAX_HEAP_GROWTH_MB || 32)) * 1024 * 1024;
 const maxHoldSignalAgeMs = Math.max(1000, Number(process.env.WVB_E2E_MAX_SIGNAL_AGE_MS || 10000));
+const endpointAbEnabled = process.env.WVB_E2E_ENDPOINT_AB === '1';
+const sourceSwitchEnabled = process.env.WVB_E2E_SWITCH_SOURCE === '1';
+const endpointBaselineHoldMs = Math.max(2000, Number(process.env.WVB_E2E_ENDPOINT_BASELINE_MS || 4000));
+const endpointStoppedHoldMs = Math.max(2000, Number(process.env.WVB_E2E_ENDPOINT_STOPPED_MS || 4000));
+const endpointMeterPath = path.join(tmpDir, `endpoint-meter-${runSuffix}.json`);
+const endpointMeterStopPath = path.join(tmpDir, `endpoint-meter-${runSuffix}.stop`);
+const endpointAbReportPath = path.join(tmpDir, 'latest-audible-endpoint-a-b.json');
+const sourceSwitchReportPath = path.join(tmpDir, 'latest-e2e-switch-switching-audio-html.json');
 const playerVolume = process.env.WVB_E2E_PLAYER_VOLUME === ''
   ? NaN
   : Number(process.env.WVB_E2E_PLAYER_VOLUME);
@@ -66,6 +74,24 @@ function log(message) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function rmsDb(samples) {
+  if (!samples.length) return -120;
+  const meanSquare = samples.reduce((sum, sample) => sum + (Number(sample.peak || 0) ** 2), 0) / samples.length;
+  return meanSquare > 0 ? 10 * Math.log10(meanSquare) : -120;
+}
+
+function summarizeEndpointWindow(samples, startedAtMs, fromMs, toMs) {
+  const selected = samples.filter((sample) => {
+    const at = startedAtMs + Number(sample.elapsedMs || 0);
+    return at >= fromMs && at < toMs;
+  });
+  return {
+    sampleCount: selected.length,
+    rmsDbfs: Number(rmsDb(selected).toFixed(3)),
+    maxPeak: selected.length ? Math.max(...selected.map((sample) => Number(sample.peak || 0))) : 0
+  };
 }
 
 function reserveFreePort() {
@@ -795,6 +821,15 @@ async function main() {
   if (silentSink) log('fake browser output and a silent AudioContext sink requested; DSP remains live without hardware audio output');
   if (captureOnly) log('capture-only verification enabled; signal and gain assertions are skipped');
   const child = spawn(chrome, args, { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
+  let endpointMeterChild = null;
+  let endpointMeterStderr = '';
+  const endpointMarkers = {
+    baselineStartedAt: null,
+    captureRequestedAt: null,
+    captureActiveAt: null,
+    stoppedAt: null,
+    measurementEndedAt: null
+  };
   let chromeStderr = '';
   let stderrProbeTail = '';
   let nativeAudioOutputOpened = false;
@@ -867,6 +902,28 @@ async function main() {
       await sleep(250);
     }
 
+    if (endpointAbEnabled) {
+      if (muteAudio || silentSink || process.env.WVB_E2E_HEADLESS === '1') {
+        throw new Error('Endpoint A/B requires visible Chrome with real audio output.');
+      }
+      fs.rmSync(endpointMeterPath, { force: true });
+      fs.rmSync(endpointMeterStopPath, { force: true });
+      endpointMeterChild = spawn('pwsh', [
+        '-NoProfile',
+        '-File', path.join(root, 'tools', 'windows_audible_endpoint_meter.ps1'),
+        '-DurationSeconds', '120',
+        '-SampleMilliseconds', '50',
+        '-OutputPath', endpointMeterPath,
+        '-StopPath', endpointMeterStopPath
+      ], { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
+      endpointMeterChild.stderr?.on('data', (chunk) => {
+        endpointMeterStderr += chunk.toString('utf8');
+      });
+      endpointMarkers.baselineStartedAt = Date.now();
+      log(`endpoint A/B baseline started durationMs=${endpointBaselineHoldMs}`);
+      await sleep(endpointBaselineHoldMs);
+    }
+
     const targets = await httpJson(`http://127.0.0.1:${debugPort}/json/list`);
     log(`targets ${targets.map((target) => `${target.type}:${target.url}`).join(' | ')}`);
     for (const target of targets.filter((item) => /chrome-extension:\/\//.test(item.url) && item.webSocketDebuggerUrl)) {
@@ -885,6 +942,7 @@ async function main() {
     }
     const targetInfos = await browserCdp.command('Target.getTargets');
     log(`targetInfos ${targetInfos.targetInfos.map((target) => `${target.type}:${target.targetId}:${target.url}`).join(' | ')}`);
+    endpointMarkers.captureRequestedAt = endpointAbEnabled ? Date.now() : null;
     await browserCdp.command('Extensions.triggerAction', { id: extensionId, targetId: createdTab.targetId });
     log('extension action triggered');
     const popupUrl = `chrome-extension://${extensionId}/popup/index.html`;
@@ -1189,6 +1247,69 @@ async function main() {
       return latest || { phase: 'error' };
     }})(${JSON.stringify(targetPrefix)}, ${JSON.stringify(pageUrl)}, ${JSON.stringify(scenario.minSignalTicks)}, ${JSON.stringify(scenario.expect)}, ${JSON.stringify(captureHoldMs > 0)})`, { userGesture: true });
     log('status polled');
+    if (endpointAbEnabled && status?.phase === 'capture-active') {
+      endpointMarkers.captureActiveAt = Date.now();
+    }
+    let dynamicSwitch = null;
+    if (sourceSwitchEnabled) {
+      if (status?.phase !== 'capture-active' || captureHoldMs <= 0) {
+        throw new Error('Source-switch verification requires an active deferred capture.');
+      }
+      const beforeTicks = Number(status?.tab?.signalTickCount || 0);
+      await clickElement(page.cdp, '#switch');
+      let afterStatus = null;
+      let pageStateAfter = null;
+      for (let attempt = 0; attempt < 24; attempt += 1) {
+        await sleep(250);
+        afterStatus = await readPopupCaptureStatus(popup.cdp, targetPrefix, pageUrl);
+        pageStateAfter = await evaluateValue(page.cdp, 'window.__WVB_SWITCH_STATE__ || null');
+        if (
+          Number(afterStatus?.signalTickCount || 0) > beforeTicks + 12
+          && Number(pageStateAfter?.switchCount || 0) >= 1
+          && Number.isFinite(Number(afterStatus?.averageInputDb))
+        ) {
+          break;
+        }
+      }
+      const popupState = await evaluateValue(popup.cdp, `(() => ({
+        appState: document.querySelector('#app')?.dataset?.state || '',
+        statusLabel: document.querySelector('#statusLabel')?.textContent?.trim() || '',
+        stateTitle: document.querySelector('#stateTitle')?.textContent?.trim() || '',
+        stateSub: document.querySelector('#stateSub')?.textContent?.trim() || '',
+        levelActive: document.querySelector('#levelVisual')?.dataset?.active === 'true',
+        captureButtonHidden: document.querySelector('#captureButton')?.hidden === true,
+        effectValue: document.querySelector('#effectValue')?.textContent?.trim() || ''
+      }))()`);
+      dynamicSwitch = {
+        version: manifestVersion,
+        generatedAt: new Date().toISOString(),
+        passed: Boolean(
+          afterStatus?.captureActive
+          && afterStatus?.captureState === 'processing'
+          && afterStatus?.capturePipelineMode === 'programme-leveler-v4'
+          && Number(afterStatus?.signalTickCount || 0) > beforeTicks + 12
+          && Number(afterStatus?.captureAudioTrackCount || 0) >= 1
+          && Number(afterStatus?.lastSignalAgeMs ?? Infinity) < 2500
+          && Number(pageStateAfter?.switchCount || 0) >= 1
+          && popupState?.appState === 'working'
+          && popupState?.levelActive === true
+          && popupState?.captureButtonHidden === true
+          && popupState?.statusLabel === 'Active'
+          && Boolean(popupState?.stateTitle)
+        ),
+        page: scenario.page.split('?')[0],
+        beforeTicks,
+        afterTicks: Number(afterStatus?.signalTickCount || 0),
+        pageStateAfter,
+        popupState,
+        tab: afterStatus
+      };
+      if (!dynamicSwitch.passed) {
+        throw new Error(`Dynamic source switch did not remain live: ${JSON.stringify(dynamicSwitch)}`);
+      }
+      status.tab = afterStatus;
+      log(`dynamic source switch passed ticks=${beforeTicks}->${dynamicSwitch.afterTicks}`);
+    }
     if (captureHoldMs > 0 && status?.phase === 'capture-active') {
       let holdFailure = null;
       try {
@@ -1215,6 +1336,9 @@ async function main() {
       const stopped = await stopPopupCapture(popup.cdp, targetPrefix, pageUrl);
       Object.assign(status, stopped);
       if (holdFailure) throw holdFailure;
+    }
+    if (endpointAbEnabled) {
+      endpointMarkers.stoppedAt = Date.now();
     }
     const afterTargets = await httpJson(`http://127.0.0.1:${debugPort}/json/list`);
     log(`after targets ${afterTargets.map((target) => `${target.type}:${target.url}`).join(' | ')}`);
@@ -1330,6 +1454,63 @@ async function main() {
     if (status.stopResponse?.ok !== true) {
       throw new Error(`Capture stop returned an error: ${status.stopResponse?.error || 'unknown'}`);
     }
+    let endpointAb = null;
+    if (endpointAbEnabled) {
+      log(`endpoint A/B stopped-output observation durationMs=${endpointStoppedHoldMs}`);
+      await sleep(endpointStoppedHoldMs);
+      endpointMarkers.measurementEndedAt = Date.now();
+      fs.writeFileSync(endpointMeterStopPath, 'stop\n', 'utf8');
+      await waitForChildExit(endpointMeterChild, 10000);
+      if (endpointMeterChild.exitCode !== 0 || !fs.existsSync(endpointMeterPath)) {
+        throw new Error(`Endpoint meter failed: ${endpointMeterStderr.trim() || `exit ${endpointMeterChild.exitCode}`}`);
+      }
+      const meter = JSON.parse(fs.readFileSync(endpointMeterPath, 'utf8'));
+      const meterStartedAtMs = Date.parse(meter.startedAt);
+      const baseline = summarizeEndpointWindow(
+        meter.samples || [],
+        meterStartedAtMs,
+        Number(endpointMarkers.baselineStartedAt) + 750,
+        Number(endpointMarkers.captureRequestedAt) - 500
+      );
+      const enabled = summarizeEndpointWindow(
+        meter.samples || [],
+        meterStartedAtMs,
+        Number(endpointMarkers.captureActiveAt) + 750,
+        Number(endpointMarkers.stoppedAt) - 500
+      );
+      const stopped = summarizeEndpointWindow(
+        meter.samples || [],
+        meterStartedAtMs,
+        Number(endpointMarkers.stoppedAt) + 750,
+        Number(endpointMarkers.measurementEndedAt)
+      );
+      const stoppedBaselineDeltaDb = stopped.rmsDbfs - baseline.rmsDbfs;
+      const enabledAudible = nativeAudioOutputOpened && enabled.sampleCount >= 10 && enabled.maxPeak >= 0.001;
+      const stoppedAudible = stopped.sampleCount >= 10 && stopped.maxPeak >= 0.001;
+      endpointAb = {
+        version: manifestVersion,
+        generatedAt: new Date().toISOString(),
+        passed: enabledAudible && stoppedAudible && baseline.sampleCount >= 10 && Math.abs(stoppedBaselineDeltaDb) <= 2,
+        enabledAudible,
+        stoppedAudible,
+        nativeAudioOutputOpened,
+        stoppedBaselineDeltaDb: Number(stoppedBaselineDeltaDb.toFixed(3)),
+        baseline,
+        enabled,
+        stopped,
+        markers: Object.fromEntries(Object.entries(endpointMarkers).map(([key, value]) => [key, value ? new Date(value).toISOString() : null])),
+        meter: {
+          startedAt: meter.startedAt,
+          sampleMilliseconds: meter.sampleMilliseconds,
+          sampleCount: meter.sampleCount
+        }
+      };
+      writeJson(endpointAbReportPath, endpointAb);
+      if (!endpointAb.passed) {
+        throw new Error(`Audible endpoint A/B did not meet restoration gates: ${JSON.stringify(endpointAb)}`);
+      }
+      log(`endpoint A/B passed stoppedBaselineDeltaDb=${endpointAb.stoppedBaselineDeltaDb}`);
+    }
     await sleep(150);
     if (silentSink && nativeAudioOutputOpened) {
       throw new Error('Native WASAPI output opened during a silent E2E run.');
@@ -1341,6 +1522,8 @@ async function main() {
       captureOnly,
       silentSink,
       nativeAudioOutputOpened,
+      endpointAb,
+      dynamicSwitch,
       requestedUrl: externalPageUrl || null,
       finalUrl: externalPlayback?.url || pageUrl,
       pageTitle: externalPlayback?.title || '',
@@ -1387,10 +1570,18 @@ async function main() {
     for (const reportName of scenarioReportNames) {
       writeJson(path.join(tmpDir, reportName), report);
     }
+    if (dynamicSwitch) writeJson(sourceSwitchReportPath, dynamicSwitch);
     writeJson(scenarioReportPath, report);
     writeJson(latestReportPath, report);
     log('PoC smoke passed');
   } finally {
+    if (endpointMeterChild && endpointMeterChild.exitCode == null) {
+      try {
+        fs.writeFileSync(endpointMeterStopPath, 'stop\n', 'utf8');
+      } catch (_) {}
+      await waitForChildExit(endpointMeterChild, 5000);
+      if (endpointMeterChild.exitCode == null) endpointMeterChild.kill();
+    }
     for (const socket of sockets) {
       socket.close();
     }
