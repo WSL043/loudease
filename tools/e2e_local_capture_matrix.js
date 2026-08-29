@@ -74,6 +74,15 @@ const scenarios = [
     report: 'latest-e2e-poc-stable-programme.json',
     minSignalTicks: 320,
     maxProgrammeResets: 0
+  },
+  {
+    id: 'dynamic-source-switch',
+    page: 'switching-audio.html',
+    expect: 'observe',
+    report: 'latest-e2e-poc-observe.json',
+    minSignalTicks: 40,
+    holdMs: 3000,
+    switchSource: true
   }
 ];
 
@@ -113,7 +122,9 @@ for (const scenario of scenarios) {
       WVB_E2E_REQUIRE_POPUP_AUTOCAPTURE: '1',
       WVB_E2E_SILENT_SINK: '1',
       WVB_E2E_HEADLESS: process.env.WVB_E2E_HEADLESS || '1',
-      WVB_E2E_HOLD_MS: '0',
+      WVB_E2E_HOLD_MS: String(scenario.holdMs || 0),
+      WVB_E2E_HOLD_SAMPLE_MS: scenario.holdMs ? '1000' : (process.env.WVB_E2E_HOLD_SAMPLE_MS || '5000'),
+      WVB_E2E_SWITCH_SOURCE: scenario.switchSource ? '1' : '0',
       WVB_E2E_MUTE_AUDIO: '0',
       WVB_E2E_CAPTURE_ONLY: '0'
     }

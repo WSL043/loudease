@@ -1,16 +1,16 @@
 # Release Readiness Review
 
-Review baseline: version `0.7.2`, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
+Review baseline: version `0.8.0` public-beta candidate, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
 
-Latest code/package audit: `2026-08-10`. Static, DSP, isolated silent-Chrome slider/capture, release-build, and package checks passed locally. The store ZIP was byte-for-byte reproducible across two consecutive builds and contained 42 verified runtime files. The current-version six-site smoke matrix passed 6/6, and a representative Bilibili live endurance run passed for 30 minutes with 360 continuous samples, zero native output, zero hard-clipped samples, and bounded heap growth. Silent automation does not replace controlled audible A/B.
+Latest code/package audit: `2026-08-29`. Static, DSP, isolated-Chrome slider/capture, release-build, and package checks passed locally. The store ZIP was byte-for-byte reproducible across two consecutive builds and contained 42 verified runtime files. The current-version six-site smoke matrix passed 6/6. A representative Bilibili live endurance run passed for `1,800,013 ms` with 360 continuous samples, `89,982` fresh signal ticks, zero hard-clipped samples, one live audio track, and peak heap growth of `939,684 bytes`. A real Windows default-render-endpoint A/B verified audible processing and stop restoration: the stopped level returned within `-0.905 dB` of baseline. These measurements prove the pipeline and restoration behavior, not universal listening preference.
 
 ## Decision
 
 | Target | Decision | Reason |
 |---|---|---|
-| Private GitHub beta | Ready | Private prerelease and clean store ZIP exist; this is not a public compatibility claim |
+| Local/private beta candidate | Ready | Clean reproducible store ZIP and current verification evidence exist; no public compatibility claim is implied |
 | Public GitHub beta | Technically ready | Source, package, assets, six-site smoke, and representative endurance evidence are current; publishing the private repository remains an explicit maintainer decision |
-| Chrome Web Store | Not yet | Package, copy, privacy fields, and assets are prepared; controlled audible A/B, public privacy/support URLs, permission decision, and dashboard confirmation remain |
+| Chrome Web Store public beta | Technically ready | Package, copy, privacy fields, assets, endpoint A/B, site matrix, and representative endurance evidence are current; public privacy/support URLs and account-owner dashboard submission remain |
 | Version `1.0.0` | Not yet | Requires the stable-release gates in `docs/VERSIONING.md` |
 
 ## Confirmed implementation
@@ -48,17 +48,16 @@ The store verifier must confirm:
 - all manifest, locale, CSS, HTML, worklet, and icon references exist;
 - a valid default locale and complete translated message catalogs.
 
-## Remaining Chrome Web Store gates
+## Remaining owner and submission gates
 
-1. Complete controlled A/B listening on dialogue, music, live speech, ads, sparse ambience, and loud transient material, including enabled-vs-disabled baseline and stop restoration.
-2. Run the project-defined two-hour mixed-content endurance session and record capture count, track count, context state, stale status, limiter overshoot, and hard-clipped samples. The automated 30-minute representative run is complete.
-3. Reconfirm the permission justifications in `store/PRIVACY_PRACTICES.md` against the final package. The redundant `tabs` permission has been removed and `activeTab` remains as the user-invocation grant for the `tabCapture` target. Before public submission, explicitly decide whether seamless cross-navigation observer recovery justifies persistent `http://*/*` and `https://*/*` host permissions or whether the product should accept reduced recovery in exchange for optional/narrower host access.
-4. Reinspect the required-size assets and copy in `store/`, then make the privacy and support URLs publicly reachable before submission.
-5. Obtain fluent review before publishing any draft in `store/LOCALIZATION_STATUS.md`. English remains the default; unreviewed localized listings stay unpublished and do not block an English-only first release. Do not use keyword lists or compatibility claims unsupported by the matrix.
-6. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
-7. Enable the Chrome Web Store Support Hub or configure a reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.
-8. Record representative global playback evidence before advertising support beyond the baseline matrix; use `docs/TEST_MATRIX.md` as the claim boundary.
-9. Complete the account-owner checklist in `store/ACCOUNT_SETUP.md`. The maintainer reports that the one-time registration fee was probably already paid; contact-email verification, agreements, two-step verification, and final submission still require confirmation in the Developer Dashboard.
+1. Make the privacy and support URLs publicly reachable before submission, then recheck every listing URL.
+2. Keep the retained HTTP(S) host-permission rationale from `store/PRIVACY_PRACTICES.md` aligned with the final package. The permission is used only to restore media/player observation on useful, captured, or explicitly opened tabs across navigation; it does not process audio or collect browsing history.
+3. Publish English as the initial listing. Unreviewed localized listing drafts remain unpublished and do not block the English public beta.
+4. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
+5. Enable the Chrome Web Store Support Hub or configure the reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.
+6. Complete the account-owner checklist in `store/ACCOUNT_SETUP.md`. The maintainer reports that the one-time registration fee was probably already paid; contact-email verification, agreements, two-step verification, and final submission still require confirmation in the Developer Dashboard.
+
+The broader multi-content listening matrix and project-defined two-hour mixed-content endurance session remain `1.0.0` stable-release gates. A clearly labeled public beta is the mechanism for collecting real-user compatibility and listening feedback when no private tester pool exists; it must not be marketed as universal compatibility or universally preferred sound.
 
 ## Residual technical risk
 

@@ -14,6 +14,7 @@
 - Pages with several simultaneous media elements can make the effective player volume ambiguous.
 - When state is unsafe to infer, upward lift is disabled or reduced.
 - The extension cannot control system, hardware, speaker, or headphone gain.
+- LoudEase has no separate master-volume control. Use the website player or operating-system volume for the overall listening level; a fixed master gain would move loud and quiet material together rather than improve balancing.
 
 ## DSP
 
@@ -29,12 +30,12 @@
 ## Compatibility
 
 - Tab-wide capture is more resilient than media-element attachment, but site or Chrome changes can still affect authorization, player-volume hints, or playback.
-- Current `0.7.2` automated evidence covers a six-scenario YouTube/Bilibili/Douyin smoke matrix and one 30-minute Bilibili live endurance run. It does not yet cover the project-defined two-hour mixed-content run or controlled audible A/B. Anonymous headless YouTube unloaded its media element after roughly 45–60 seconds in endurance attempts, so those attempts are recorded as source failures rather than extension passes.
+- The `0.8.0` public-beta candidate passed the current automated YouTube/Bilibili/Douyin 6/6 matrix, the eight-scenario capture matrix, a native Windows endpoint stop-restoration A/B, and one 30-minute Bilibili live endurance run. The project-defined two-hour mixed-content run and broader listening remain stable-release gates rather than claims of universal preference. Anonymous headless YouTube unloaded its media element after roughly 45–60 seconds in endurance attempts, so those attempts are recorded as source failures rather than extension passes.
 - DRM/protected media behavior depends on Chrome and the site; no bypass is attempted.
 - Tampermonkey, Violentmonkey, and Greasy Fork are not supported core distribution channels because userscripts cannot access the whole-tab capture/offscreen pipeline. No weaker page-hook edition is advertised as equivalent.
 
 ## Product status
 
-- Version `0.7.2` is a beta, not a hearing-protection or medical product.
+- Version `0.8.0` is a beta, not a hearing-protection or medical product.
 - The GitHub build contains optional localhost diagnostics and trusted automatic-capture orchestration; the store build removes both.
 - Version `1.0.0` requires the gates documented in `docs/VERSIONING.md`.
