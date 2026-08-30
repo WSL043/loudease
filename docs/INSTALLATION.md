@@ -55,43 +55,6 @@ The project currently has no external runtime dependencies, so no package-instal
 
 When contributor diagnostics are needed, start `python tools/diagnostics_receiver.py` first and then enable the sender in LoudEase settings. The setting now reports **Receiver connected** only after the loopback endpoint answers; enabling the sender alone is not proof that a receiver exists.
 
-## Trusted GitHub automatic protection
-
-This optional maintainer workflow removes the repeated per-tab click without installing a native helper. It is deliberately absent from `dist/store` and from the public Web Store runtime.
-
-1. Build and load `dist/github-dev` from a permanent path.
-2. On Windows, preview the shortcut update without writing anything:
-
-   ```powershell
-   powershell -NoProfile -File tools/enable_auto_protection.ps1 -WhatIf
-   ```
-
-3. Double-click `Enable-LoudEase-AutoProtection.cmd`, or run the PowerShell script without `-WhatIf`. It derives the unpacked extension ID from the exact `dist/github-dev` path, replaces an older LoudEase allowlist argument instead of duplicating it, and updates current-user Start Menu and existing taskbar shortcuts. It does not close Chrome or install a background helper.
-4. Exit every Chrome window so no previous Chrome process remains, then start Chrome with an updated shortcut. Chrome reads this grant only when the browser process starts; opening the flagged shortcut while an unflagged Chrome process is already running does not retrofit the grant.
-5. Open a maintained YouTube, Bilibili, or Douyin page. LoudEase should enter capture before playback without opening the popup. Two protected tabs restored or opened together share one offscreen creation attempt and may run independent capture sessions.
-
-For a custom permanent unpacked path, pass `-ExtensionPath`. To remove the argument later, run:
-
-```powershell
-powershell -NoProfile -File tools/enable_auto_protection.ps1 -Disable
-```
-
-The equivalent manual route remains available: open `chrome://extensions`, copy LoudEase's exact 32-character ID, then edit the Chrome shortcut and append:
-
-   ```text
-   --allowlisted-extension-id=your_32_character_extension_id
-   ```
-
-   A typical complete target looks like:
-
-   ```text
-   "C:\Program Files\Google\Chrome\Application\chrome.exe" --allowlisted-extension-id=abcdefghijklmnopqrstuvwxyzabcdef
-   ```
-
-The switch does not block or disable other extensions. It names one extension ID that Chromium may treat as pre-authorized for tab capture. Only use it with a reviewed unpacked build at a stable path. Removing the argument and fully restarting Chrome restores the normal per-tab click requirement.
-
-The Chrome Web Store package uses the same DSP but physically strips this automatic orchestration. A store extension ID could be written into a local Chrome command line in theory, but LoudEase does not ship or claim that unsupported public workflow.
-
 ## Why there is no Monkey/userscript build
 
 Tampermonkey and Violentmonkey run userscripts in or alongside page contexts. Even [`document-start`](https://violentmonkey.github.io/api/metadata-block/#run-at) means "as early as possible" and does not guarantee execution before every page script. More importantly, userscripts do not receive Chrome's extension-only [`chrome.tabCapture`](https://developer.chrome.com/docs/extensions/reference/api/tabCapture), an extension offscreen document, or the complete tab audio mix. Reimplementing LoudEase there would be a different, weaker page-hook product with predictable iframe, MSE/Web Audio, protected-player, navigation, and startup-leak gaps.
@@ -105,4 +68,4 @@ For that reason, Greasy Fork is not a second LoudEase distribution channel. Its 
 3. Confirm that the waveform is moving and a current dB value is shown.
 4. Adjust **Reduce loud sounds** or **Lift quiet sounds** only when the defaults do not fit the material.
 
-Chrome normally requires a user gesture before `tabCapture` can start on a new tab. After authorization, LoudEase can continue processing that tab while another tab is active. The trusted GitHub workflow above is the only maintained no-helper exception and requires the browser-startup allowlist.
+Chrome requires a user gesture before `tabCapture` can start on a new tab. After authorization, LoudEase can continue processing that tab while another tab is active. LoudEase does not modify browser shortcuts or install a native helper.
