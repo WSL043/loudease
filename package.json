@@ -29,7 +29,6 @@
     "test:dsp": "node tools/dsp_unit_tests.js && node tools/programme_leveler_experiment.js && node tools/leveler_worklet_tests.js && node tools/offline_audio_graph_tests.js",
     "test:silent": "node tools/e2e_silent_sink.js",
     "test:capture": "node tools/e2e_local_capture_matrix.js",
-    "test:auto-capture": "node tools/e2e_github_auto_capture.js",
     "test:sites": "node tools/e2e_real_site_matrix.js",
     "test:long": "node tools/e2e_long_run_smoke.js",
     "test:slider": "node tools/e2e_slider_persistence.js",

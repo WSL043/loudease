@@ -27,7 +27,7 @@ The live runtime, current source, tests, and recorded evidence outrank old scree
 - Upward programme confidence requires representative signal and reaches full strength after about 1.5 seconds of continuous accepted audio; fast downward protection does not wait.
 - Transition limiting uses a fixed programme-relative safety crest and must not chase recent quiet output peaks.
 - A popup label such as **active** requires fresh runtime evidence, not merely an enabled preference.
-- The public store runtime requires a user gesture for each newly captured tab. The trusted GitHub build may use Chromium's exact-ID startup allowlist, but that orchestration must be development-only and stripped from the store target.
+- Every build requires an explicit user action before a newly selected tab is captured. Development tooling must not modify Chrome startup arguments or browser profiles.
 - The store build and GitHub development build use the same DSP. The store build removes contributor-only localhost diagnostics.
 - Raw audio, browsing history, URLs, titles, account identifiers, and secrets must not be uploaded or silently collected.
 

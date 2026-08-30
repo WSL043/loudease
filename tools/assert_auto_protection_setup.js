@@ -16,25 +16,38 @@ function ok(condition, message) {
   console.log(`OK   ${message}`);
 }
 
-const scriptPath = path.join(root, 'tools', 'enable_auto_protection.ps1');
-const launcherPath = path.join(root, 'Enable-LoudEase-AutoProtection.cmd');
+const retiredPaths = [
+  'Enable-LoudEase-AutoProtection.cmd',
+  'tools/enable_auto_protection.ps1',
+  'tools/e2e_github_auto_capture.js',
+  'tools/assert_github_auto_capture.js'
+];
 
-ok(fs.existsSync(scriptPath), 'Windows automatic-protection setup script exists');
-ok(fs.existsSync(launcherPath), 'double-click Windows setup launcher exists');
-
-if (fs.existsSync(scriptPath)) {
-  const script = read('tools/enable_auto_protection.ps1');
-  ok(/ValidatePattern\('\^\[a-p\]\{32\}\$'\)/.test(script), 'setup validates the exact Chrome extension ID shape');
-  ok(/-replace[\s\S]*allowlisted-extension-id/.test(script), 'setup replaces an existing LoudEase allowlist argument instead of duplicating it');
-  ok(/Disable/.test(script), 'setup provides a reversible disable path');
-  ok(/WhatIf/.test(script), 'setup provides a no-write inspection mode');
-  ok(/WScript\.Shell/.test(script) && /\.lnk/.test(script), 'setup updates Chrome shortcuts without a resident helper');
-  ok(!/Stop-Process|taskkill|TerminateProcess/i.test(script), 'setup never closes the user browser');
+for (const relativePath of retiredPaths) {
+  ok(!fs.existsSync(path.join(root, relativePath)), `${relativePath} is retired`);
 }
 
-if (fs.existsSync(launcherPath)) {
-  const launcher = read('Enable-LoudEase-AutoProtection.cmd');
-  ok(/enable_auto_protection\.ps1/i.test(launcher), 'double-click launcher delegates to the reviewed PowerShell setup');
+const userFacingFiles = [
+  'README.md',
+  'README_zh.md',
+  'AGENTS.md',
+  'CHANGELOG.md',
+  'package.json',
+  'background.js',
+  'docs/ARCHITECTURE.md',
+  'docs/BUILD.md',
+  'docs/FIRST_PRINCIPLES_AUDIT.md',
+  'docs/INSTALLATION.md',
+  'docs/KNOWN_LIMITATIONS.md',
+  'docs/RESEARCH.md',
+  'docs/ROOT_CAUSE.md',
+  'docs/TEST_MATRIX.md',
+  'docs/实现技术文档.md'
+];
+const unsafeStartupPath = /allowlisted-extension-id|startup allowlist|enable[_-]auto[_-]protection|automatic protection|自动保护|启动[^\n]{0,40}allowlist|automaticCapture|requestAutomaticCapture|trusted GitHub auto(?:matic)?-?protection|test:auto-capture/i;
+
+for (const relativePath of userFacingFiles) {
+  ok(!unsafeStartupPath.test(read(relativePath)), `${relativePath} contains no unsupported Chrome startup integration`);
 }
 
 if (process.exitCode) process.exit(process.exitCode);

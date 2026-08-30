@@ -50,7 +50,7 @@ A later short-form report showed the remaining cross-video failure: protection c
 
 ## Remaining hard boundary
 
-Chrome requires a normal MV3 extension to be invoked by the user before a tab can be captured. The public store runtime must state this clearly and make per-tab authorization fast and observable. The trusted GitHub build can use Chromium's exact-ID browser-startup allowlist to pre-authorize its existing tab-capture path; this is an explicit browser-process configuration, not a second audio architecture, and it is stripped from the store build.
+Chrome requires a normal MV3 extension to be invoked by the user before a tab can be captured. Every LoudEase build states this clearly and keeps per-tab authorization fast and observable. LoudEase does not modify browser startup arguments or create a separate Chrome profile.
 
 ## Regression rules
 

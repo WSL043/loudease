@@ -13,8 +13,8 @@ All notable public changes to LoudEase are recorded here.
 - Made the runtime audit compare the live DSP policy revision as well as the manifest version, so same-version development updates can no longer be mistaken for a successfully reloaded extension.
 - Serialized offscreen-document creation so concurrently restored or opened protected tabs share one creation attempt instead of racing Chrome's single-offscreen-document limit.
 - Made local diagnostics distinguish "sending enabled" from an actually reachable receiver and probe immediately when enabled.
-- Added a reversible, no-resident Windows shortcut setup tool for trusted automatic protection and runtime discovery that no longer hardcodes an obsolete unpacked extension ID.
-- Added trusted GitHub-build automatic protection using Chromium's exact-extension-ID startup allowlist, with pre-play capture for the maintained media-site matrix, inherited new-tab protection, truthful no-allowlist fallback, and complete store-build stripping.
+- Retired the unsupported Chrome startup-argument integration and its shortcut setup tool. LoudEase no longer changes browser launch configuration or creates a separate browser profile.
+- Standardized GitHub and store builds on Chrome's normal user-invoked tab-capture flow while keeping development-only diagnostics out of the store package.
 - Replaced the accumulated fixed-target loud/quiet controller with one programme-centred gain law shared by the primary AudioWorklet and fallback path.
 - Added constant-memory gated programme loudness estimation that persists through pause/resume and resets when the active media programme changes.
 - Calibrated the new policy against independent-model and legacy-reference experiments, including startup onset, dynamics, player-volume equivalence, programme-boundary, and clipping checks.

@@ -2,7 +2,7 @@
 
 The repository has two deterministic, allowlist-based targets:
 
-- `npm run build:dev` writes `dist/github-dev` and retains developer diagnostics plus the trusted allowlisted auto-protection path.
+- `npm run build:dev` writes `dist/github-dev` and retains contributor diagnostics and test controls.
 - `npm run build:store` writes and verifies the stripped `dist/store` directory.
 - `npm run package:store` also writes `dist/loudease-store.zip` with sorted paths, stored entries, and a fixed timestamp.
 - `npm run test:release` rebuilds and verifies the store target.
@@ -11,11 +11,9 @@ The repository has two deterministic, allowlist-based targets:
 
 Only `manifest.json`, `background.js`, the release notices (`LICENSE`, `NOTICE`, `TRADEMARKS.md`), and runtime files below `assets`, `content`, `monitor`, `offscreen`, `popup`, `shared`, and `_locales` are eligible. Tests, temporary output, tools, other documentation, source-only files, logs, archives, keys, secrets, and Git metadata are never copied.
 
-`Enable-LoudEase-AutoProtection.cmd` and `tools/enable_auto_protection.ps1` are reviewed source-maintainer setup tools. They are intentionally outside both extension packages, install no resident component, and never become Chrome Web Store runtime code.
-
 ## Development-only marker contract
 
-Store removal is explicit. The build does not infer development-only code from names or arbitrary regular expressions. The existing marker name is retained for compatibility, but it now encloses both contributor diagnostics and the GitHub-only automatic-capture orchestration.
+Store removal is explicit. The build does not infer development-only code from names or arbitrary regular expressions. The existing marker name is retained for compatibility and encloses contributor diagnostics and test-only controls.
 
 Wrap every complete development-only JavaScript or CSS block with comments on their own lines:
 
@@ -49,8 +47,6 @@ JSON has no comments, so the explicit removal contract lives outside the runtime
 The store builder verifies and removes those exact host permissions, removes exact allowlisted paths named in `assets`, and deletes the contract property. The store build fails if the contract is absent, a marker is unbalanced, a listed permission is absent, or any localhost string survives.
 
 The development build also contains a test-only silent-output switch used by isolated Chrome E2E. It routes the offscreen `AudioContext` to `{ type: 'none' }` while keeping the DSP graph live. Every declaration, message field, status field, and storage key for this switch must stay inside the same development markers. The store verifier rejects `e2eSilentSink`, `E2E_SILENT_SINK`, and its storage key if any survive packaging.
-
-The GitHub build's automatic-capture code must also remain inside complete removable marker blocks. It may call the existing `startTabCapture()` path only; it must not introduce a second PCM graph. `tools/assert_github_auto_capture.js` builds the store target and rejects any surviving automatic-capture symbol or startup-allowlist instruction.
 
 ## Main integration checklist
 

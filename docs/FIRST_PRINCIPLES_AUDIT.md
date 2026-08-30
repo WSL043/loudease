@@ -32,7 +32,7 @@ Prevent a web tab from alternating between unexpectedly loud and inaudibly quiet
 | Player is muted or volume is zero | Output zero |
 | Captured stream ends | Stop and clean the session |
 | Store tab has no authorization | Ask for one user invocation; do not claim automatic coverage |
-| GitHub Chrome process lacks the exact-ID startup allowlist | Record one truthful denial, stop automatic retries, and keep manual capture available |
+| A tab has not been authorized for capture | Ask for one explicit user action and do not retry silently |
 | Telemetry is stale | Show waiting/recovery, not active processing |
 | Development diagnostics are not enabled | Send nothing to localhost |
 

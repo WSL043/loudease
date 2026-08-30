@@ -5,8 +5,7 @@ The runtime combines established browser and audio engineering techniques. The v
 ## Primary references
 
 - [Chrome `tabCapture` API](https://developer.chrome.com/docs/extensions/reference/api/tabCapture): user invocation, stream IDs, offscreen consumption from Chrome 116, and capture lifecycle.
-- [Chromium `tabCapture` implementation](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/browser/extensions/api/tab_capture/tab_capture_api.cc): the normal per-tab grant check and the exact-ID startup allowlist exception used by the trusted GitHub build.
-- [Chromium extension switches](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/extensions/common/switches.cc): source definition of `allowlisted-extension-id`.
+- [Chromium `tabCapture` implementation](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/chrome/browser/extensions/api/tab_capture/tab_capture_api.cc): the normal per-tab user-invocation grant check and stream-ID lifecycle.
 - [Chrome offscreen documents](https://developer.chrome.com/docs/extensions/reference/api/offscreen): long-lived extension document for DOM and Web Audio work unavailable to a service worker.
 - [Web Audio API](https://www.w3.org/TR/webaudio-1.1/): `AudioContext`, `AudioWorklet`, channel handling, parameters, and processing model.
 - [ITU-R BS.1770-5](https://www.itu.int/rec/R-REC-BS.1770): perceptual weighting and loudness measurement basis.
@@ -17,7 +16,7 @@ The runtime combines established browser and audio engineering techniques. The v
 
 ### Full-tab capture instead of media-element sources
 
-Tab capture avoids one-source-node ownership conflicts and follows SPA media replacement, live players, and page Web Audio. The public tradeoff is mandatory per-tab user authorization. For the trusted GitHub build, Chromium's exact-ID startup allowlist removes that authorization check without changing the audio graph; LoudEase then starts capture on early navigation events rather than after the tab becomes audible.
+Tab capture avoids one-source-node ownership conflicts and follows SPA media replacement, live players, and page Web Audio. The tradeoff is mandatory per-tab user authorization. LoudEase keeps that browser security boundary intact in development and store builds.
 
 ### Programme-centred control instead of one fixed compressor
 

@@ -6,8 +6,6 @@ This document describes the current `0.8.0` runtime. The runtime files and execu
 
 The public store runtime processes audio from a user-authorized Chrome tab. Chrome normally requires `tabCapture` to start from a user invocation.
 
-The trusted GitHub development build has an additional maintainer-only mode. When Chrome itself is launched with `--allowlisted-extension-id=<LoudEase ID>`, Chromium grants that one extension ID the per-tab capture capability at browser startup. The development service worker can then establish the same tab-capture pipeline during early navigation for the maintained YouTube, Bilibili, and Douyin site matrix, and for a new tab opened by an already protected tab. No second DSP or page-level audio graph is used. The store builder removes this orchestration path completely.
-
 The production audio path is:
 
 ```text
@@ -33,7 +31,6 @@ The old page-level `createMediaElementSource()` engine is no longer part of the 
 - stores global and per-site settings;
 - exposes status and recovery commands to the popup;
 - owns opt-in development diagnostics, which are removed from the store build.
-- in the trusted GitHub build only, starts allowlisted capture early for maintained media sites and inherited new tabs.
 
 ### Offscreen document (`offscreen/`)
 
@@ -71,17 +68,17 @@ The options page contains advanced settings, diagnostics export, and the develop
 
 ## Session lifecycle
 
-1. The public path begins when the user opens the extension on a normal tab. The trusted GitHub auto-protection path begins on an early tab URL event after Chrome was launched with the exact extension ID allowlisted.
-2. The popup or GitHub-only service-worker path requests a `tabCapture` stream ID for that tab.
+1. The session begins when the user opens the extension on a normal tab.
+2. The popup requests a `tabCapture` stream ID for that tab.
 3. The service worker asks the offscreen document to consume the ID immediately.
-4. The offscreen document creates a `CaptureSession` and resumes its `AudioContext` under the popup gesture or the browser-startup grant.
+4. The offscreen document creates a `CaptureSession` and resumes its `AudioContext` under the popup gesture.
 5. Status flows from the worklet to the offscreen session, then to the service worker and popup.
 6. Navigation in the same captured tab can continue without rebuilding the graph; a changed programme fingerprint resets cumulative loudness state and inherited gain.
 7. Closing the tab, stopping capture, disabling the extension, or losing the stream stops tracks, disconnects nodes, removes listeners, and closes the context.
 
 ## Multi-tab behavior
 
-Captured tabs have independent sessions and settings views. Switching focus does not stop an existing captured tab. Concurrent startup requests await one offscreen-document creation and then create separate sessions. In the store runtime, a never-authorized tab remains outside the extension until the user invokes it there. In the allowlisted GitHub runtime, maintained media-site tabs and inherited new tabs are captured automatically before playback when Chrome exposes the startup grant.
+Captured tabs have independent sessions and settings views. Switching focus does not stop an existing captured tab. Concurrent user-authorized requests await one offscreen-document creation and then create separate sessions. A never-authorized tab remains outside the extension until the user invokes it there.
 
 ## Player-volume boundary
 
@@ -111,7 +108,7 @@ The contributor build also exposes a test-only silent `AudioContext` sink for is
 - No remote JavaScript or Wasm is loaded.
 - Audio samples do not leave the local Web Audio graph.
 - Development diagnostics are off by default and absent from the store build.
-- The Chromium startup allowlist grants silent tab capture to one exact extension ID. Use it only with a locally reviewed GitHub build, and remove the launch argument to roll back automatic protection.
+- LoudEase never modifies Chrome startup arguments or browser profiles. Each newly selected tab is captured only after an explicit user action.
 
 ## Source map
 
