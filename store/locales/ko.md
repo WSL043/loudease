@@ -4,7 +4,7 @@ Review status: Draft - fluent review required before publishing
 
 ## 제품 이름
 
-LoudEase Beta
+LoudEase
 
 ## 요약
 

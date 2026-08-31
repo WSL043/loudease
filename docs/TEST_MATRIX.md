@@ -20,7 +20,7 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 
 ## Real-site release baseline
 
-The following rows require current `0.8.0` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate.
+The following rows require current `0.8.1` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate unless the affected runtime is byte-identical and the release review records that limited carry-forward explicitly.
 
 | Scenario | Connect | Fresh signal | Cut/lift evidence | Mute/volume | Source switch | 30 min | 2 h mixed run |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -37,7 +37,7 @@ The current-version representative Bilibili live endurance run lasted `1,800,013
 
 ## Core global compatibility matrix
 
-These rows extend coverage across distinct playback architectures. A row may be advertised as tested only after current-version evidence is recorded. They are not all blockers for the first private beta.
+These rows extend coverage across distinct playback architectures. A row may be advertised as tested only after current-version evidence is recorded. They are not all blockers for the current public beta.
 
 | Scenario | Technology represented | Status |
 |---|---|---:|

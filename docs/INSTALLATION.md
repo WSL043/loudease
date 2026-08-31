@@ -4,13 +4,11 @@ LoudEase is a Chrome extension. Ordinary users do not deploy a server, run a dat
 
 ## Chrome Web Store
 
-After the public store release, install LoudEase from its Chrome Web Store listing. Chrome handles installation and updates.
-
-The store listing is not public during the private beta.
+Install LoudEase from its [Chrome Web Store listing](https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog). Chrome handles installation and updates.
 
 ## Manual beta sideload for trusted testers
 
-Chrome documents unpacked extensions as a Developer-mode workflow for trusted code. Use this route only for invited or public beta testing before the store release, not as ordinary-user distribution.
+Chrome documents unpacked extensions as a Developer-mode workflow for trusted code. Use this route only for testing a specific verified package, not as ordinary-user distribution.
 
 Requirements:
 

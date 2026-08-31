@@ -1,6 +1,6 @@
 # Chrome Web Store submission checklist
 
-Use this checklist with the Chrome Web Store Developer Dashboard for the `0.8.0` public beta. Dashboard wording can change; when it does, preserve the intent recorded here instead of guessing at a different disclosure.
+Use this checklist with the Chrome Web Store Developer Dashboard for the `0.8.1` public beta. Dashboard wording can change; when it does, preserve the intent recorded here instead of guessing at a different disclosure.
 
 ## Account
 
@@ -12,7 +12,7 @@ Use this checklist with the Chrome Web Store Developer Dashboard for the `0.8.0`
 ## Package
 
 - [ ] Upload the final `dist/loudease-store.zip` produced by `npm run package:store`.
-- [ ] Confirm manifest version `0.8.0`, Manifest V3, and 42 verified runtime files.
+- [ ] Confirm manifest version `0.8.1`, Manifest V3, and 42 verified runtime files.
 - [ ] Record the final SHA-256 checksum and source commit.
 - [ ] Confirm the package contains no localhost diagnostics, remote executable code, telemetry, credentials, development markers, tests, tools, or source-only files.
 

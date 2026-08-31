@@ -21,7 +21,7 @@ const checks = [
   ['audit doc records the open-source boundary', /Open-source the runtime and public tests/.test(audit) && /Keep private any licensed listening corpus/.test(audit)],
   ['architecture cites the current runtime version', architecture.includes(`current \`${currentVersion}\` runtime`)],
   ['DSP doc cites the current implementation version', dsp.includes(`version \`${currentVersion}\``) && /Momentary loudness uses/.test(dsp) && /Short-term loudness uses/.test(dsp)],
-  ['known limitations cite the current beta version', limitations.includes(`Version \`${currentVersion}\` is a beta`)],
+  ['known limitations cite the current public-beta version', limitations.includes(`Version \`${currentVersion}\` remains a public beta`)],
   ['research documents established methods without novelty inflation', /established browser and audio engineering techniques/.test(research) && /not an uncopyable secret/.test(research)],
   ['legacy page engine is not present', !fs.existsSync(path.join(root, 'content', 'engine.js'))],
   ['architecture records the observer-only content bridge', /old page-level \`createMediaElementSource\(\)\` engine is no longer part of the runtime/.test(architecture) && /does not process PCM audio/.test(architecture)],

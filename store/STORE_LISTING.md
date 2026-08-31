@@ -6,7 +6,7 @@ This document contains copy-ready fields for the LoudEase store submission. Duri
 
 **Product name**
 
-LoudEase Beta
+LoudEase
 
 **Summary**
 
@@ -22,7 +22,7 @@ Accessibility
 
 **Detailed description**
 
-LoudEase Beta makes uneven web audio easier to listen to while the first public release gathers compatibility and listening feedback.
+LoudEase makes uneven web audio easier to listen to while the public beta gathers compatibility and listening feedback.
 
 Open the extension on a tab to authorize local audio balancing. LoudEase then analyzes that tab's audio in real time, reduces sudden loud sections, and lifts genuine quiet passages according to the selected strength. Lower settings preserve more original dynamics; full strength targets closer program-level consistency.
 

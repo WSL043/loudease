@@ -25,7 +25,10 @@ const localizationStatus = fs.readFileSync(path.join(root, 'store', 'LOCALIZATIO
 const buildGuide = fs.readFileSync(path.join(root, 'docs', 'BUILD.md'), 'utf8');
 const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
 const communityTesting = fs.readFileSync(path.join(root, 'docs', 'COMMUNITY_TESTING.md'), 'utf8');
+const storeListing = fs.readFileSync(path.join(root, 'store', 'STORE_LISTING.md'), 'utf8');
+const storeAssetsSource = fs.readFileSync(path.join(root, 'store', 'assets-source.html'), 'utf8');
 const compatibilityForm = fs.readFileSync(path.join(root, '.github', 'ISSUE_TEMPLATE', 'compatibility.yml'), 'utf8');
+const popup = fs.readFileSync(path.join(root, 'popup', 'index.html'), 'utf8');
 const monitor = fs.readFileSync(path.join(root, 'monitor', 'index.html'), 'utf8');
 const monitorScript = fs.readFileSync(path.join(root, 'monitor', 'index.js'), 'utf8');
 const background = fs.readFileSync(path.join(root, 'background.js'), 'utf8');
@@ -57,6 +60,7 @@ const checks = [
   ['manifest keeps capture authorization without redundant tabs access', !manifest.permissions.includes('tabs') && manifest.permissions.includes('activeTab')],
   ['store dashboard copy and privacy fields exist', ['store/STORE_LISTING.md', 'store/PRIVACY_PRACTICES.md', 'store/ASSETS.md'].every((file) => fs.existsSync(path.join(root, file))) && /Single purpose/.test(fs.readFileSync(path.join(root, 'store', 'PRIVACY_PRACTICES.md'), 'utf8'))],
   ['store screenshots and promotional tile use exact dimensions', pngHasSize('store/assets/screenshot-balancing-1280x800.png', 1280, 800) && pngHasSize('store/assets/screenshot-settings-1280x800.png', 1280, 800) && pngHasSize('store/assets/promo-small-440x280.png', 440, 280)],
+  ['public product-name surfaces use LoudEase without a channel suffix', [popup, monitor, storeListing, storeAssetsSource, testInstructions, ...storeLocaleDrafts.map((locale) => fs.readFileSync(path.join(root, 'store', 'locales', `${locale}.md`), 'utf8'))].every((text) => !text.includes('LoudEase Beta')) && /\nLoudEase\n/.test(storeListing)],
   ['release review blocks diagnostics and silent E2E from the store package', /no localhost permission or URL, no diagnostics or silent-E2E symbol/.test(releaseReview)],
   ['readmes link current privacy and release limits', /PRIVACY\.md/.test(readme) && /RELEASE_READINESS_REVIEW\.md/.test(englishReadme)],
   ['private corpus and future telemetry have explicit release gates', /private-corpus\//.test(gitignore) && /Telemetry is not implemented/.test(dataGovernance) && /Raw PCM/.test(dataGovernance) && /clear, separate opt-in/.test(dataGovernance) && /DATA_GOVERNANCE\.md/.test(privacy) && /DATA_GOVERNANCE\.md/.test(releaseReview)],
@@ -70,7 +74,7 @@ const checks = [
   ['GitHub and store releases use one stripped archive', /npm run package:store/.test(publishing) && /exact same ZIP to the Chrome Web Store/.test(publishing) && /only installable release archive/.test(buildGuide) && /Never attach `dist\/github-dev`/.test(publishing)],
   ['source instructions do not create an unrelated lockfile', !englishReadme.includes('npm install') && !readme.includes('npm install') && !installation.includes('npm install')],
   ['Chrome Web Store account checklist is documented', /one-time developer registration fee/.test(accountSetup) && /two-step verification/.test(accountSetup) && /never automated/.test(publishing)],
-  ['Chrome Web Store reviewer instructions are complete', /No account or credentials are required/.test(testInstructions) && /Stop balancing/.test(testInstructions) && /Expected limitations/.test(testInstructions) && /LoudEase Beta/.test(testInstructions)],
+  ['Chrome Web Store reviewer instructions are complete', /No account or credentials are required/.test(testInstructions) && /Stop balancing/.test(testInstructions) && /Expected limitations/.test(testInstructions) && /`LoudEase` public-beta review package/.test(testInstructions)],
   ['Chrome Web Store submission checklist covers account package listing privacy and review', ['Developer contact email', 'two-step verification', 'SHA-256', 'Website content', 'Web history', 'Submit for review'].every((text) => submissionChecklist.includes(text))],
   ['localized store drafts and status table agree on fluent review', /English remains the default listing/.test(localizationStatus) && storeLocaleDrafts.every((locale) => {
     const file = path.join(root, 'store', 'locales', `${locale}.md`);

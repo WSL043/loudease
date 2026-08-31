@@ -1,6 +1,6 @@
 # Release Readiness Review
 
-Review baseline: version `0.8.0` public-beta candidate, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
+Review baseline: version `0.8.1` public-beta metadata update, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
 
 Latest code/package audit: `2026-08-29`. Static, DSP, isolated-Chrome slider/capture, release-build, and package checks passed locally. The store ZIP was byte-for-byte reproducible across two consecutive builds and contained 42 verified runtime files. The current-version six-site smoke matrix passed 6/6. A representative Bilibili live endurance run passed for `1,800,013 ms` with 360 continuous samples, `89,982` fresh signal ticks, zero hard-clipped samples, one live audio track, and peak heap growth of `939,684 bytes`. A real Windows default-render-endpoint A/B verified audible processing and stop restoration: the stopped level returned within `-0.905 dB` of baseline. These measurements prove the pipeline and restoration behavior, not universal listening preference.
 
@@ -8,7 +8,7 @@ Latest code/package audit: `2026-08-29`. Static, DSP, isolated-Chrome slider/cap
 
 | Target | Decision | Reason |
 |---|---|---|
-| Local/private beta candidate | Ready | Clean reproducible store ZIP and current verification evidence exist; no public compatibility claim is implied |
+| Local release candidate | Ready | Clean reproducible store ZIP and current verification evidence exist; no universal compatibility claim is implied |
 | Public GitHub beta | Technically ready | Source, package, assets, six-site smoke, and representative endurance evidence are current; publishing the private repository remains an explicit maintainer decision |
 | Chrome Web Store public beta | Technically ready | Package, copy, privacy fields, assets, endpoint A/B, site matrix, and representative endurance evidence are current; public privacy/support URLs and account-owner dashboard submission remain |
 | Version `1.0.0` | Not yet | Requires the stable-release gates in `docs/VERSIONING.md` |

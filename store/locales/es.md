@@ -4,7 +4,7 @@ Review status: Draft - fluent review required before publishing
 
 ## Nombre del producto
 
-LoudEase Beta
+LoudEase
 
 ## Resumen
 
