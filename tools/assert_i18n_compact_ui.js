@@ -22,7 +22,7 @@ const checks = [
   ['popup omits URL shortcuts diagnostics and technical counters', !/current-page|shortcut|diagnostic|compactStats|sourceCount|audibleCount/i.test(popupHtml)],
   ['all locale catalogs contain the complete English key set', locales.every((locale) => JSON.stringify(Object.keys(catalogs[locale]).sort()) === JSON.stringify(englishKeys))],
   ['all locales expose manifest localization keys', locales.every((locale) => ['appName', 'appShortName', 'appDescription'].every((key) => catalogs[locale][key]?.message))],
-  ['no locale exposes unreplaced brand placeholders', locales.every((locale) => !/__WVB_/.test(JSON.stringify(catalogs[locale])) && catalogs[locale].appName?.message === 'LoudEase Beta')],
+  ['all locale manifest names use the stable LoudEase product name', locales.every((locale) => !/__WVB_/.test(JSON.stringify(catalogs[locale])) && catalogs[locale].appName?.message === 'LoudEase')],
   ['all locales expose localized action titles with the product name preserved', locales.every((locale) => ['actionTitleEnabled', 'actionTitlePaused'].every((key) => catalogs[locale][key]?.message?.startsWith('LoudEase ')))],
   ['localized messages preserve English placeholders', locales.every((locale) => englishKeys.every((key) => JSON.stringify(placeholders(catalogs[locale][key]?.message)) === JSON.stringify(placeholders(catalogs.en[key]?.message))))],
   ['non-English catalogs contain translated UI copy', locales.slice(1).every((locale) => englishKeys.filter((key) => catalogs[locale][key]?.message !== catalogs.en[key]?.message).length >= englishKeys.length * 0.9)],

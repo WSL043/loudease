@@ -1,6 +1,6 @@
 {
   "name": "loudease",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "description": "Local-first loudness control for more comfortable web audio.",
   "license": "GPL-3.0-only",

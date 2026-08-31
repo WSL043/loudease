@@ -1,11 +1,11 @@
 # Chrome Web Store test instructions
 
-These instructions are for the `LoudEase Beta` public-review package. No account or credentials are required. The extension has no paid feature, remote service, analytics endpoint, or reviewer-only mode.
+These instructions are for the `LoudEase` public-beta review package. No account or credentials are required. The extension has no paid feature, remote service, analytics endpoint, or reviewer-only mode.
 
 ## Basic review path
 
 1. Open a normal HTTP(S) page with audible HTML5 video or audio. A public YouTube video is sufficient; protected browser pages such as `chrome://` cannot be captured.
-2. Start playback, open **LoudEase Beta** from the Chrome toolbar, and use the popup action to authorize that tab.
+2. Start playback, open **LoudEase** from the Chrome toolbar, and use the popup action to authorize that tab.
 3. Confirm that the popup changes from a connecting state to an active state and that the input/output waveform moves while sound is present.
 4. Move **Reduce loud sounds** and **Lift quiet sounds**. Close and reopen the popup to confirm that the values persist.
 5. Mute the website player or set its volume to zero. LoudEase must not produce audible output. Restore the player volume to continue.
@@ -27,4 +27,4 @@ All audio processing is local. The store package contains no localhost diagnosti
 - Chrome requires a user gesture for every newly captured tab.
 - Browser-internal, protected, and unsupported surfaces cannot be captured.
 - Site navigation or player replacement can occasionally require the user to reopen the popup and authorize capture again.
-- LoudEase Beta is a listening-comfort tool, not hearing protection, a medical device, or broadcast-standard loudness normalization.
+- LoudEase is a listening-comfort tool, not hearing protection, a medical device, or broadcast-standard loudness normalization.

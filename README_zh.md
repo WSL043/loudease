@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/WSL043/loudease/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/WSL043/loudease/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Private beta" src="https://img.shields.io/badge/status-private%20beta-f59e0b">
+  <img alt="Public beta" src="https://img.shields.io/badge/status-public%20beta-f59e0b">
   <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">
   <img alt="Local AudioWorklet" src="https://img.shields.io/badge/processing-local%20AudioWorklet-159669">
   <a href="LICENSE"><img alt="GPL 3.0 only License" src="https://img.shields.io/badge/license-GPL--3.0--only-17202b"></a>
@@ -36,7 +36,7 @@
 </p>
 
 > [!NOTE]
-> LoudEase 目前仍是私有 Beta。下面会明确区分已经验证的行为和等待社区验证的目标，不把测试计划写成兼容承诺。
+> LoudEase 目前已作为公开测试版发布。下面会明确区分已经验证的行为和等待社区验证的目标，不把测试计划写成兼容承诺。
 
 ## 把网页声音收进更舒服的范围
 
@@ -70,7 +70,7 @@ LoudEase 不是简单的音量放大器、均衡器，也不是经过校准的�
 
 ## 安装
 
-正式公开后，普通用户从 Chrome 应用商店安装，只需要 Chrome 116 或更高版本，不需要 Node.js、服务器或数据库。
+普通用户可从 [Chrome 应用商店](https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog) 安装 LoudEase，只需要 Chrome 116 或更高版本，不需要 Node.js、服务器或数据库。
 
 ### 受信任测试者手动侧载 Beta
 
@@ -109,7 +109,7 @@ LoudEase 不发布 Tampermonkey、Violentmonkey 或 Greasy Fork 核心版本。�
 
 | 证据 | 当前范围 |
 |---|---|
-| 私有 Beta 基线 | YouTube 视频/直播、Bilibili 视频/直播、抖音视频/直播 |
+| 公开测试版基线 | YouTube 视频/直播、Bilibili 视频/直播、抖音视频/直播 |
 | 自动回归 | HTML5 媒体、SPA 换源、iframe、Web Audio、静音、播放器零音量、滑块持久化和离线 DSP 音频图 |
 | 社区测试目标 | Twitch、TikTok、Spotify Web Player、Vimeo、社交视频、地区平台和受保护流媒体 |
 

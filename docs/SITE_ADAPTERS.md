@@ -15,7 +15,7 @@ These hints enforce player intent and improve status. They do not carry audio sa
 
 ## Release baseline
 
-The private beta must keep current-version evidence for:
+The public beta must keep current-version evidence for:
 
 - YouTube video;
 - YouTube live;

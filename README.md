@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://github.com/WSL043/loudease/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/WSL043/loudease/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Private beta" src="https://img.shields.io/badge/status-private%20beta-f59e0b">
+  <img alt="Public beta" src="https://img.shields.io/badge/status-public%20beta-f59e0b">
   <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">
   <img alt="Local AudioWorklet" src="https://img.shields.io/badge/processing-local%20AudioWorklet-159669">
   <a href="LICENSE"><img alt="GPL 3.0 only License" src="https://img.shields.io/badge/license-GPL--3.0--only-17202b"></a>
@@ -36,7 +36,7 @@
 </p>
 
 > [!NOTE]
-> LoudEase is currently a private beta. Compatibility statements below distinguish verified behavior from community test targets.
+> LoudEase is publicly available as a beta. Compatibility statements below distinguish verified behavior from community test targets.
 
 ## A calmer listening range
 
@@ -70,7 +70,7 @@ The store build is smaller for privacy and review compliance; it does not use a 
 
 ## Install
 
-Ordinary users install the future public release from the Chrome Web Store and need only Chrome 116 or newer. They do not need Node.js, a server, or a database.
+Ordinary users install LoudEase from the [Chrome Web Store](https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog) and need only Chrome 116 or newer. They do not need Node.js, a server, or a database.
 
 ### Manual beta sideload for trusted testers
 
@@ -109,7 +109,7 @@ See [Installation](docs/INSTALLATION.md) for the store, packaged-beta, and sourc
 
 | Evidence | Current scope |
 |---|---|
-| Private beta baseline | YouTube video/live, Bilibili video/live, Douyin video/live |
+| Public beta baseline | YouTube video/live, Bilibili video/live, Douyin video/live |
 | Automated regression | HTML5 media, SPA source replacement, iframes, Web Audio, mute, zero player volume, slider persistence, and offline DSP graphs |
 | Community test targets | Twitch, TikTok, Spotify Web Player, Vimeo, social video, regional services, and protected streaming |
 

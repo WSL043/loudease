@@ -33,7 +33,7 @@ When the public-beta gates pass:
 5. Run `npm run package:store`, attach the resulting `dist/loudease-store.zip` and its SHA-256 checksum, identify the source commit, and mark the GitHub release as **Pre-release**.
 6. State the tested platforms, known limitations, privacy boundary, installation steps, and feedback route without claiming universal compatibility.
 
-The first Chrome Web Store submission may use this same public-beta build when real-user compatibility and listening feedback are needed before `1.0.0`. Its name and description must clearly say `BETA`, and the listing must not imply that the stable-release evidence gates have passed.
+The Chrome Web Store product name remains **LoudEase** across release channels. Before `1.0.0`, the listing description must clearly disclose that the release is a public beta and must not imply that the stable-release evidence gates have passed.
 
 For a store beta, upload the exact same verified ZIP, complete the listing/privacy/distribution/test fields, and submit it for review only after the public privacy and support URLs plus the developer-account requirements are confirmed. Store review readiness does not promote the product to `1.0.0`.
 

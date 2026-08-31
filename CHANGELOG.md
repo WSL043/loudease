@@ -4,6 +4,11 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+## 0.8.1 - 2026-08-31
+
+- Standardized the product name as **LoudEase** across the extension manifest, localized UI, reviewer instructions, store copy, and promotional artwork. Public-beta status remains disclosed in the listing description instead of being part of the product name.
+- Kept the audio-processing runtime and permission model unchanged from 0.8.0.
+
 ## 0.8.0-beta.1 - 2026-08-29
 
 - Split real-time control into a stable programme baseline, floor-qualified quiet-detail correction capped at 16 dB, and independent fast loud protection. This prevents a loud live programme's near-silence from producing +20 to +25 dB gain waves while bringing clearly audible quiet detail closer to the programme centre.

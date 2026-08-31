@@ -19,7 +19,7 @@ LoudEase balances audio in browser tabs explicitly authorized by the user. It re
 
 The store build does not request `tabs`. Matching HTTP(S) host access already exposes the limited tab fields used by the implemented observer and session recovery. `activeTab` remains because it is the explicit user-invocation grant for the `tabCapture` target.
 
-For the `0.8.0` public beta, required HTTP(S) host access is retained because the implemented product supports arbitrary ordinary web-audio pages and must restore its media-state observer after navigation in an already authorized capture session. The observer is still injected only into audible, recognized-media, captured, or explicitly opened tabs, and it is limited to the single audio-balancing purpose described above.
+For the `0.8.1` public beta, required HTTP(S) host access is retained because the implemented product supports arbitrary ordinary web-audio pages and must restore its media-state observer after navigation in an already authorized capture session. The observer is still injected only into audible, recognized-media, captured, or explicitly opened tabs, and it is limited to the single audio-balancing purpose described above.
 
 ## Remote code declaration
 
