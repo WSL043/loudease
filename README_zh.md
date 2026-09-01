@@ -7,11 +7,15 @@
 
 <h1 align="center">LoudEase</h1>
 
-<p align="center"><strong>压住突兀的大声，保留该有的细节，把控制权留给你。</strong></p>
+<p align="center"><strong>Chrome 标签页自动音量平衡：提起听不清的对白，压住突然冲出来的大声。</strong></p>
 
 <p align="center">
-  LoudEase 自动收窄网页音频中让人不舒服的响度落差，<br>
-  同时始终尊重播放器音量和静音状态。
+  打开网页、点击一次 LoudEase，就能以更一致的音量继续收听。<br>
+  声音只在本机处理，播放器音量和静音始终由你控制。
+</p>
+
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog"><strong>从 Chrome 应用商店安装 LoudEase</strong></a>
 </p>
 
 <p align="center">

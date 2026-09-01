@@ -336,7 +336,7 @@
     "message": "Балансировщик громкости"
   },
   "appDescription": {
-    "message": "Балансирует громкие и тихие звуки на веб-страницах, учитывая текущую громкость плеера."
+    "message": "Автоматически выравнивает громкие и тихие звуки во вкладках, учитывая беззвучный режим и громкость плеера."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — включён"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "Техническая диагностика" },
   "technicalDiagnosticsHelp": { "message": "Сведения о подключении в реальном времени для устранения неполадок." },
   "reportCopiedOpenIssue": { "message": "Отчёт скопирован. Вставьте его в форму GitHub." },
-  "feedbackOpened": { "message": "Форма отзыва о звуке открыта." }
+  "feedbackOpened": { "message": "Форма отзыва о звуке открыта." },
+  "targetLoudnessLabel": { "message": "Целевая громкость" },
+  "targetLoudnessHelp": { "message": "Задаёт уровень после выравнивания. Чем выше, тем сильнее." },
+  "siteTargetLoudnessHelp": { "message": "Переопределяет целевой уровень для этого сайта." },
+  "targetModeGentle": { "message": "Мягко" },
+  "targetModeBalanced": { "message": "Баланс" },
+  "targetModeStrong": { "message": "Сильно" },
+  "liftBlockedVolumeConflict": { "message": "Усиление приостановлено: несколько проигрывателей используют разную громкость." },
+  "liftBlockedVolumeUnknown": { "message": "Усиление ждёт надёжного значения громкости проигрывателя." }
 }

@@ -64,6 +64,11 @@
               <span><strong data-i18n="playerLimitShort">Respect player volume</strong><small data-i18n="playerLimitStatement">Quiet-sound lift will not exceed the player's current volume.</small></span>
               <input id="globalRespect" type="checkbox">
             </label>
+            <label class="rangeRow target" for="globalTarget">
+              <span><strong data-i18n="targetLoudnessLabel">Target loudness</strong><small data-i18n="targetLoudnessHelp">Sets the calibrated centre after balancing. Higher is stronger.</small></span>
+              <output id="globalTargetValue" for="globalTarget">Balanced · -19 dB</output>
+              <input id="globalTarget" type="range" min="-22" max="-16" step="1" value="-19">
+            </label>
             <label class="rangeRow" for="globalCut">
               <span><strong data-i18n="reduceLoudLabel">Reduce loud sounds</strong><small data-i18n="reduceLoudHelp">Controls peak reduction</small></span>
               <output id="globalCutValue" for="globalCut">100</output>
@@ -86,6 +91,11 @@
           <header class="viewHeader"><div><h1 data-i18n="sitesTab">Site rules</h1><p data-i18n="siteRulesHelp">Override the default strength for a hostname.</p></div></header>
           <form id="siteForm" class="siteEditor">
             <label class="field"><span data-i18n="siteLabel">Site</span><input id="siteKey" type="text" inputmode="url" autocomplete="off" placeholder="example.com"></label>
+            <label class="rangeRow target" for="siteTarget">
+              <span><strong data-i18n="targetLoudnessLabel">Target loudness</strong><small data-i18n="siteTargetLoudnessHelp">Overrides the calibrated centre for this site.</small></span>
+              <output id="siteTargetValue" for="siteTarget">Balanced · -19 dB</output>
+              <input id="siteTarget" type="range" min="-22" max="-16" step="1" value="-19">
+            </label>
             <label class="rangeRow" for="siteCut">
               <span><strong data-i18n="reduceLoudLabel">Reduce loud sounds</strong><small data-i18n="reduceLoudHelp">Controls peak reduction</small></span>
               <output id="siteCutValue" for="siteCut">100</output>

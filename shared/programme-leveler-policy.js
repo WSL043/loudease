@@ -40,6 +40,15 @@
     return clamp(finite(value, fallback), 0, 100);
   }
 
+  function createProgrammeParams(targetLoudnessDb = DEFAULT_PARAMS.programmeTargetDb) {
+    const programmeTargetDb = clamp(finite(targetLoudnessDb, DEFAULT_PARAMS.programmeTargetDb), -22, -16);
+    return Object.freeze({
+      ...DEFAULT_PARAMS,
+      programmeTargetDb,
+      maxLiftDb: DEFAULT_PARAMS.maxLiftDb + programmeTargetDb - DEFAULT_PARAMS.programmeTargetDb
+    });
+  }
+
   function dbToEnergy(value) {
     return Math.pow(10, (finite(value, -120) + 0.691) / 10);
   }
@@ -243,6 +252,7 @@
     DEFAULT_PARAMS,
     ProgrammeLoudnessEstimator,
     applyDeadband,
+    createProgrammeParams,
     computeTargetGainDb,
     computeTransitionCeilingDb,
     dbToEnergy,

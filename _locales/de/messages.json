@@ -336,7 +336,7 @@
     "message": "Lautstärkeausgleich"
   },
   "appDescription": {
-    "message": "Gleicht laute und leise Töne auf Webseiten aus und berücksichtigt dabei die aktuelle Player-Lautstärke."
+    "message": "Normalisiert laute und leise Tab-Audios automatisch und respektiert Stummschaltung und Player-Lautstärke."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — aktiviert"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "Technische Diagnose" },
   "technicalDiagnosticsHelp": { "message": "Live-Verbindungsdetails zur Fehlerbehebung." },
   "reportCopiedOpenIssue": { "message": "Bericht kopiert. Fügen Sie ihn in das GitHub-Formular ein." },
-  "feedbackOpened": { "message": "Formular für Höreindrücke geöffnet." }
+  "feedbackOpened": { "message": "Formular für Höreindrücke geöffnet." },
+  "targetLoudnessLabel": { "message": "Ziellautheit" },
+  "targetLoudnessHelp": { "message": "Legt den Pegel nach dem Ausgleich fest. Höher bedeutet kräftiger." },
+  "siteTargetLoudnessHelp": { "message": "Überschreibt den Zielpegel für diese Website." },
+  "targetModeGentle": { "message": "Sanft" },
+  "targetModeBalanced": { "message": "Ausgewogen" },
+  "targetModeStrong": { "message": "Kräftig" },
+  "liftBlockedVolumeConflict": { "message": "Die Anhebung ist pausiert, weil mehrere Player unterschiedliche Lautstärken verwenden." },
+  "liftBlockedVolumeUnknown": { "message": "Die Anhebung wartet auf eine zuverlässige Player-Lautstärke." }
 }

@@ -6,7 +6,7 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 
 | Layer | Scenarios | Command |
 |---|---|---|
-| Pure policy | settings, gate hysteresis, gated programme estimate, confidence, strength zero, player-volume bounds, live quiet-bed cap | `npm test` |
+| Pure policy | settings, target-loudness bounds, gate hysteresis, gated programme estimate, confidence, strength zero, player-volume bounds, live quiet-bed cap | `npm test` |
 | Unified worklet | baseline neutrality, programme convergence, cold start, adaptive onset, bounded quiet-bed recovery, dynamics, mute, player cap, source reset | `npm run test:dsp` |
 | Limiter | look-ahead delay, ceiling, clustered peaks, dynamic ceiling, stereo ratio, overshoot | `npm run test:dsp` |
 | Offline PCM | legacy reference vs production vs independent v4 model, steady levels, dynamics, onset, player volume, boundaries | `npm run test:dsp` |
@@ -15,7 +15,7 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 | Stability E2E | repeated capture, reload, source switching, session cleanup | `npm run test:long -- --duration-ms 30000` |
 | Silent capture E2E | live tabCapture/DSP with no system playback device, plus native-output rejection | `npm run test:silent` |
 | Real-site smoke | YouTube, Bilibili, and Douyin video/live in isolated silent Chrome | `npm run test:sites` |
-| Slider persistence | input/change ordering and saved custom strength | `npm run test:slider` |
+| Slider persistence | input/change ordering and saved custom strength; advanced target persistence is covered by settings contracts | `npm run test:slider` |
 | Store build | allowlist, references, diagnostics stripping, locale catalogs, forbidden code | `npm run test:release` |
 
 ## Real-site release baseline

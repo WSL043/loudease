@@ -336,7 +336,7 @@
     "message": "Balanceador de volumen"
   },
   "appDescription": {
-    "message": "Equilibra los sonidos fuertes y suaves de las páginas web respetando el volumen actual del reproductor."
+    "message": "Normaliza automáticamente el audio fuerte y suave de las pestañas respetando el silencio y el volumen del reproductor."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — activado"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "Diagnóstico técnico" },
   "technicalDiagnosticsHelp": { "message": "Detalles de conexión en vivo para resolver problemas." },
   "reportCopiedOpenIssue": { "message": "Informe copiado. Pégalo en el formulario de GitHub." },
-  "feedbackOpened": { "message": "Formulario de opinión de escucha abierto." }
+  "feedbackOpened": { "message": "Formulario de opinión de escucha abierto." },
+  "targetLoudnessLabel": { "message": "Volumen objetivo" },
+  "targetLoudnessHelp": { "message": "Define el nivel tras equilibrar. Un valor mayor es más intenso." },
+  "siteTargetLoudnessHelp": { "message": "Sustituye el nivel objetivo para este sitio." },
+  "targetModeGentle": { "message": "Suave" },
+  "targetModeBalanced": { "message": "Equilibrado" },
+  "targetModeStrong": { "message": "Intenso" },
+  "liftBlockedVolumeConflict": { "message": "El aumento está en pausa porque varios reproductores usan volúmenes distintos." },
+  "liftBlockedVolumeUnknown": { "message": "El aumento espera una lectura fiable del volumen del reproductor." }
 }

@@ -336,7 +336,7 @@
     "message": "볼륨 밸런서"
   },
   "appDescription": {
-    "message": "플레이어의 현재 볼륨을 유지하면서 웹 페이지의 큰 소리와 작은 소리의 균형을 조정합니다."
+    "message": "음소거와 플레이어 볼륨을 유지하면서 탭의 큰 소리와 작은 소리를 자동으로 균일화합니다."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — 사용"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "기술 진단" },
   "technicalDiagnosticsHelp": { "message": "문제 해결을 위한 실시간 연결 정보입니다." },
   "reportCopiedOpenIssue": { "message": "보고서가 복사되었습니다. GitHub 양식에 붙여 넣으세요." },
-  "feedbackOpened": { "message": "청취 피드백 양식을 열었습니다." }
+  "feedbackOpened": { "message": "청취 피드백 양식을 열었습니다." },
+  "targetLoudnessLabel": { "message": "목표 음량" },
+  "targetLoudnessHelp": { "message": "균형 조정 후 기준 음량을 설정합니다. 높을수록 강합니다." },
+  "siteTargetLoudnessHelp": { "message": "이 사이트의 기준 음량을 따로 설정합니다." },
+  "targetModeGentle": { "message": "부드럽게" },
+  "targetModeBalanced": { "message": "균형" },
+  "targetModeStrong": { "message": "강하게" },
+  "liftBlockedVolumeConflict": { "message": "여러 플레이어의 음량이 달라 조용한 소리 증폭이 일시 중지되었습니다." },
+  "liftBlockedVolumeUnknown": { "message": "신뢰할 수 있는 플레이어 음량을 기다리는 동안 조용한 소리는 증폭되지 않습니다." }
 }

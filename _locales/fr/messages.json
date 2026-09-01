@@ -336,7 +336,7 @@
     "message": "Équilibreur de volume"
   },
   "appDescription": {
-    "message": "Équilibre les sons forts et faibles des pages Web tout en respectant le volume actuel du lecteur."
+    "message": "Normalise automatiquement les sons forts et faibles des onglets tout en respectant le mode muet et le volume du lecteur."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — activé"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "Diagnostic technique" },
   "technicalDiagnosticsHelp": { "message": "Détails de connexion en direct pour le dépannage." },
   "reportCopiedOpenIssue": { "message": "Rapport copié. Collez-le dans le formulaire GitHub." },
-  "feedbackOpened": { "message": "Formulaire de ressenti d’écoute ouvert." }
+  "feedbackOpened": { "message": "Formulaire de ressenti d’écoute ouvert." },
+  "targetLoudnessLabel": { "message": "Volume cible" },
+  "targetLoudnessHelp": { "message": "Définit le niveau après équilibrage. Plus haut signifie plus puissant." },
+  "siteTargetLoudnessHelp": { "message": "Remplace le niveau cible pour ce site." },
+  "targetModeGentle": { "message": "Doux" },
+  "targetModeBalanced": { "message": "Équilibré" },
+  "targetModeStrong": { "message": "Puissant" },
+  "liftBlockedVolumeConflict": { "message": "Le renforcement est en pause car plusieurs lecteurs ont des volumes différents." },
+  "liftBlockedVolumeUnknown": { "message": "Le renforcement attend une mesure fiable du volume du lecteur." }
 }

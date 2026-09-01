@@ -8,6 +8,7 @@ const css = fs.readFileSync(path.join(root, 'popup', 'index.css'), 'utf8');
 const background = fs.readFileSync(path.join(root, 'background.js'), 'utf8');
 
 const checks = [
+  ['popup explains only genuinely blocked quiet lift', /function liftBlockedNotice/.test(popup) && /playerVolumeConflict/.test(popup) && /playerVolumeKnown/.test(popup) && /quietDeficitDb/.test(popup) && /effectiveMaxLiftDb/.test(popup)],
   ['popup omits presets and modes', !/data-preset|presetBar|presetButton/.test(html)],
   ['manual strength edits become custom preset', /preset: 'custom'/.test(popup)],
   ['committed strength changes flush persistence immediately', /addEventListener\('change',[\s\S]*?flushPersistSettings\(strengthSaveOptions\(\)\)/.test(popup) && /function flushPersistSettings\(options = \{\}\)/.test(popup)],

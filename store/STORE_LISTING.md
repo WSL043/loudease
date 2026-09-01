@@ -10,7 +10,7 @@ LoudEase
 
 **Summary**
 
-Public beta that balances loud and quiet web audio locally while respecting mute and player volume.
+Automatically normalizes loud and quiet tab audio locally while respecting mute and player volume.
 
 **Single purpose**
 
@@ -22,9 +22,11 @@ Accessibility
 
 **Detailed description**
 
-LoudEase makes uneven web audio easier to listen to while the public beta gathers compatibility and listening feedback.
+LoudEase is an automatic volume normalizer for Chrome tabs: it lifts genuinely quiet programmes and reduces loud sections so you reach for the volume control less often.
 
 Open the extension on a tab to authorize local audio balancing. LoudEase then analyzes that tab's audio in real time, reduces sudden loud sections, and lifts genuine quiet passages according to the selected strength. Lower settings preserve more original dynamics; full strength targets closer program-level consistency.
+
+Choose a calibrated target in advanced settings: Gentle (`-22 dB`), Balanced (`-19 dB`, default), or Strong (`-16 dB`). Save it globally or override it for individual sites.
 
 What it does:
 

@@ -334,6 +334,15 @@ configure(runtime, { cutStrength: 100, liftStrength: 100 }, { configSequence: 2 
 render(runtime, 2, 0.35, Math.round(0.5 * SAMPLE_RATE));
 assert('runtime setting updates change processing', latest(runtime).currentGainDb < -3, JSON.stringify(latest(runtime)));
 
+const strongTarget = new ProcessorClass();
+configure(strongTarget, { targetLoudnessDb: -16 });
+render(strongTarget, 7, 0.02);
+assert(
+  'runtime target loudness setting reaches the AudioWorklet controller',
+  latest(strongTarget).targetLoudnessDb === -16 && latest(strongTarget).targetGainDb > 19,
+  JSON.stringify(latest(strongTarget))
+);
+
 const muted = new ProcessorClass();
 configure(muted, {}, { playerMuted: true });
 const mutedOut = render(muted, 0.5, 0.2);

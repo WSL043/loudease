@@ -62,9 +62,11 @@ The two strength controls are independent:
 - **Reduce loud sounds** maps to downward loudness control and peak protection.
 - **Lift quiet sounds** maps to confidence-gated upward programme and within-programme correction, with a `+25 dB` cap, up to `10 dB` of bounded limiter allowance, and player-volume constraints.
 
+The advanced settings page also stores a target loudness from `-22 dB` to `-16 dB`. The balanced default remains `-19 dB`; the value can be global or overridden per hostname and is passed to each live capture without rebuilding the graph.
+
 ### Monitor and options (`monitor/`)
 
-The options page contains advanced settings, diagnostics export, and the development-only localhost sender switch. It separately reports whether the receiver actually answered, so a checked box is not presented as a live receiver. It is not part of the normal listening workflow.
+The options page contains advanced target-loudness settings, global and per-site strength overrides, diagnostics export, and the development-only localhost sender switch. It separately reports whether the receiver actually answered, so a checked box is not presented as a live receiver. It is not part of the normal listening workflow.
 
 ## Session lifecycle
 

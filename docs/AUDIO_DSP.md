@@ -48,7 +48,7 @@ When a site hides programme changes behind an unchanged URL and media identity, 
 
 Let:
 
-- `T = -19 dB` be the current product loudness centre;
+- `T` be the selected product loudness centre (`-19 dB` by default, adjustable from `-22` to `-16 dB`);
 - `P` be gated programme loudness;
 - `M` be 400 ms momentary loudness;
 - `C` and `L` be the normalized cut and lift slider strengths.
@@ -67,7 +67,7 @@ The distinction matters on live streams. Before this bound, a programme measured
 
 The fast protector independently limits the result when a 20 ms/100 ms measurement exceeds `T + 3 dB`. These decisions feed one target and one linked stereo envelope, so there are not separate compressors fighting each other.
 
-The `-19 dB` centre is a LoudEase product calibration, not an EBU or platform mandate. A reproducible sweep compares `-20`, `-19`, `-18`, and `-16 dB` centres with the lift needed to keep the same quiet boundary. Across two ordinary reference levels, `-19 dB` minimizes the worst enabled/bypass error at about `1.24 dB`; `-20 dB` reaches about `2.18 dB` and `-18 dB` about `2.23 dB`. Any future change to `T` must beat this sweep and a controlled listening corpus rather than being inferred from the first seconds of one programme.
+The `-19 dB` default is a LoudEase product calibration, not an EBU or platform mandate. A reproducible sweep compares `-20`, `-19`, `-18`, and `-16 dB` centres with the lift needed to keep the same quiet boundary. Across two ordinary reference levels, `-19 dB` minimizes the worst enabled/bypass error at about `1.24 dB`; `-20 dB` reaches about `2.18 dB` and `-18 dB` about `2.23 dB`. Users may trade that neutrality for a gentler or stronger centre in advanced settings. The selected target is bounded to `-22` through `-16 dB`, and the positive programme cap moves with it from `22` through `28 dB`; the limiter allowance, player-volume boundary, and maximum cut do not expand.
 
 ## Cold start and confidence
 
