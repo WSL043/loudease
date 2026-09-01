@@ -106,13 +106,15 @@ async function render(chrome, origin, shot) {
 async function main() {
   fs.mkdirSync(tmpDir, { recursive: true });
   const chrome = findChrome();
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
+  const previewVersion = encodeURIComponent(manifest.version);
   const { server, port } = await startServer();
   const origin = `http://127.0.0.1:${port}`;
   const shots = [
     { url: '/popup/index.html', output: 'docs/popup-screenshot-light.png', width: 340, height: 275 },
     { url: '/popup/index.html', output: 'docs/popup-screenshot-dark.png', width: 340, height: 275, dark: true },
-    { url: '/monitor/index.html', output: 'docs/settings-screenshot-light.png', width: 1080, height: 616 },
-    { url: '/monitor/index.html', output: 'docs/settings-screenshot-dark.png', width: 1080, height: 616, dark: true },
+    { url: `/monitor/index.html?previewVersion=${previewVersion}`, output: 'docs/settings-screenshot-light.png', width: 1080, height: 616 },
+    { url: `/monitor/index.html?previewVersion=${previewVersion}`, output: 'docs/settings-screenshot-dark.png', width: 1080, height: 616, dark: true },
     { url: '/store/assets-source.html?asset=balancing', output: 'store/assets/screenshot-balancing-1280x800.png', width: 1280, height: 800 },
     { url: '/store/assets-source.html?asset=settings', output: 'store/assets/screenshot-settings-1280x800.png', width: 1280, height: 800 },
     { url: '/store/assets-source.html?asset=promo', output: 'store/assets/promo-small-440x280.png', width: 440, height: 280 },

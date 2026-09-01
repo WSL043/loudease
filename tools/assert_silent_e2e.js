@@ -30,6 +30,7 @@ const localMatrix = read('tools/e2e_local_capture_matrix.js');
 const matrix = read('tools/e2e_real_site_matrix.js');
 const release = read('tools/assert_release_build.js');
 const acceptance = read('tools/acceptance_audit.js');
+const stability = read('tools/e2e_stability_smoke.js');
 const backgroundDev = devBlocks(background);
 const offscreenDev = devBlocks(offscreen);
 
@@ -63,6 +64,10 @@ assert(
 assert(
   /configureSilentSinkInExtensionPage/.test(read('tools/e2e_stability_smoke.js')),
   'stability runner configures the silent sink from a deterministic extension page'
+);
+assert(
+  /latest-stability-switch-/.test(stability) && !/latest-e2e-switch-/.test(stability),
+  'stability evidence cannot overwrite the richer popup source-switch report'
 );
 assert(/WVB_E2E_SILENT_SINK\s*=\s*['"]1['"]/.test(slider), 'slider persistence uses the silent E2E path');
 assert(

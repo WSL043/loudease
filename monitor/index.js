@@ -41,6 +41,10 @@ const els = {
   siteList: document.getElementById('siteList')
 };
 
+const previewVersion = new URLSearchParams(location.search).get('previewVersion')
+  || globalThis.chrome?.runtime?.getManifest?.().version
+  || 'preview';
+
 const { get: t, apply: applyI18n, initialize: initializeI18n } = globalThis.WebVolumeBalancerI18n;
 const uiPreferences = globalThis.WebVolumeBalancerUiPreferences;
 const LANGUAGE_OPTIONS = [
@@ -56,7 +60,7 @@ let globalSaveTimer = null;
 let globalSaveRevision = 0;
 let diagnosticsRequestRevision = 0;
 let previewState = {
-  version: 'preview',
+  version: previewVersion,
   settings: { enabled: true, respectPlayerVolume: true, preset: 'custom', cutStrength: 100, liftStrength: 100, targetLoudnessDb: -19 },
   siteSettings: {},
   /* WVB_DEV_DIAGNOSTICS_START */
@@ -70,7 +74,7 @@ function extensionMessage(payload) {
     return chrome.runtime.sendMessage(payload);
   }
   if (payload?.type === 'WVB_GET_DIAGNOSTICS') {
-    return Promise.resolve({ version: 'preview', now: Date.now(), tabs: [], events: [] });
+    return Promise.resolve({ version: previewVersion, now: Date.now(), tabs: [], events: [] });
   }
   if (payload?.type === 'WVB_GET_OPTIONS_STATE') {
     return Promise.resolve(structuredClone(previewState));

@@ -4,6 +4,12 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+## 0.8.2 - 2026-09-01
+
+- Added a configurable target-loudness baseline from -22 dB to -16 dB so listeners can choose gentler or stronger balancing without turning the control into a conventional master-volume slider.
+- Added compact, voluntary Chrome Web Store review and GitHub Star actions to the popup, with localized accessible labels and no large promotional panel in Settings.
+- Kept the existing permission set, local-only audio processing, mute/player-volume boundaries, and user-initiated tab-capture model unchanged.
+
 ## 0.8.1 - 2026-08-31
 
 - Standardized the product name as **LoudEase** across the extension manifest, localized UI, reviewer instructions, store copy, and promotional artwork. Public-beta status remains disclosed in the listing description instead of being part of the product name.

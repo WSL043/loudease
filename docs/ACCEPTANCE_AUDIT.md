@@ -1,6 +1,6 @@
 # Acceptance Audit
 
-Current source of truth: version `0.8.1`. Runtime evidence must match this version to satisfy a release gate.
+Current source of truth: version `0.8.2`. Runtime evidence must match this version to satisfy a release gate.
 
 ## Product acceptance
 

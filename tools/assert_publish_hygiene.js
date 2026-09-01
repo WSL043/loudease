@@ -27,6 +27,7 @@ const changelog = fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
 const communityTesting = fs.readFileSync(path.join(root, 'docs', 'COMMUNITY_TESTING.md'), 'utf8');
 const storeListing = fs.readFileSync(path.join(root, 'store', 'STORE_LISTING.md'), 'utf8');
 const storeAssetsSource = fs.readFileSync(path.join(root, 'store', 'assets-source.html'), 'utf8');
+const assetRenderer = fs.readFileSync(path.join(root, 'tools', 'render_store_assets.js'), 'utf8');
 const compatibilityForm = fs.readFileSync(path.join(root, '.github', 'ISSUE_TEMPLATE', 'compatibility.yml'), 'utf8');
 const popup = fs.readFileSync(path.join(root, 'popup', 'index.html'), 'utf8');
 const monitor = fs.readFileSync(path.join(root, 'monitor', 'index.html'), 'utf8');
@@ -56,6 +57,7 @@ const checks = [
   ['GPL license transition and contribution policies exist', packageMetadata.license === 'GPL-3.0-only' && /GNU GENERAL PUBLIC LICENSE/.test(license) && /Historical tagged releases retain their original license grants/.test(changelog) && /Developer Certificate of Origin/.test(contributing)],
   ['governance and provenance policies exist', ['GOVERNANCE.md', 'DCO', 'ASSET_PROVENANCE.md', 'THIRD_PARTY_NOTICES.md', '.github/CODEOWNERS', 'REUSE.toml', 'LICENSES/GPL-3.0-only.txt', 'docs/LICENSING.md'].every((file) => fs.existsSync(path.join(root, file))) && fs.existsSync(path.join(root, 'TRADEMARKS.md')) && fs.existsSync(path.join(root, 'NOTICE'))],
   ['selected logo and reproducible current light/dark product screenshots exist', ['assets/logo-ai-a-light.png', 'assets/logo-ai-a-dark.png', 'docs/popup-screenshot-light.png', 'docs/popup-screenshot-dark.png', 'docs/settings-screenshot-light.png', 'docs/settings-screenshot-dark.png'].every((file) => fs.existsSync(path.join(root, file))) && fs.existsSync(path.join(root, 'tools', 'render_store_assets.js')) && /assets:store/.test(JSON.stringify(packageMetadata))],
+  ['rendered settings screenshots use the current manifest version instead of a preview label', /previewVersion/.test(assetRenderer) && /previewVersion/.test(monitorScript) && assetRenderer.includes('manifest.version')],
   ['privacy and security policies exist', /Audio samples are not uploaded/.test(privacy) && /Limited Use requirements/.test(privacy) && /Security Policy/.test(security)],
   ['manifest keeps capture authorization without redundant tabs access', !manifest.permissions.includes('tabs') && manifest.permissions.includes('activeTab')],
   ['store dashboard copy and privacy fields exist', ['store/STORE_LISTING.md', 'store/PRIVACY_PRACTICES.md', 'store/ASSETS.md'].every((file) => fs.existsSync(path.join(root, file))) && /Single purpose/.test(fs.readFileSync(path.join(root, 'store', 'PRIVACY_PRACTICES.md'), 'utf8'))],
