@@ -8,7 +8,8 @@
     respectPlayerVolume: true,
     preset: 'standard',
     cutStrength: 100,
-    liftStrength: 100
+    liftStrength: 100,
+    targetLoudnessDb: -19
   });
   const VALID_PRESETS = new Set(['standard', 'voice', 'night', 'live', 'strong', 'custom']);
   const NOISE_FLOOR_ENERGY = 1e-9;
@@ -45,7 +46,8 @@
       respectPlayerVolume: input.respectPlayerVolume !== false,
       preset: VALID_PRESETS.has(preset) ? preset : 'custom',
       cutStrength: percent(input.cutStrength, DEFAULT_SETTINGS.cutStrength),
-      liftStrength: percent(input.liftStrength, DEFAULT_SETTINGS.liftStrength)
+      liftStrength: percent(input.liftStrength, DEFAULT_SETTINGS.liftStrength),
+      targetLoudnessDb: clamp(finite(input.targetLoudnessDb, DEFAULT_SETTINGS.targetLoudnessDb), -22, -16)
     };
   }
 

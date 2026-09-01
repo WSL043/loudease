@@ -15,7 +15,7 @@ const checks = [
   ['background has separate site settings storage', /const SITE_SETTINGS_KEY = 'webVolumeBalancer\.siteSettings';/.test(background)],
   ['background derives stable http hostname keys', /function siteKeyFromUrl\(url\)/.test(background) && /replace\(\^?\/\^www\\\.\//.test(background.replace(/\s+/g, ' '))],
   ['background merges global settings with site override', /async function readSettingsForUrl\(tabUrl = ''\)/.test(background) && /\.\.\.\(siteSettings\[siteKey\] \|\| \{\}\)/.test(background)],
-  ['background stores only preset and strength in site scope', /function siteScopedSettings\(input = \{\}\)/.test(background) && /preset: normalized\.preset/.test(background) && /cutStrength: normalized\.cutStrength/.test(background) && /liftStrength: normalized\.liftStrength/.test(background)],
+  ['background stores preset strength and target loudness in site scope', /function siteScopedSettings\(input = \{\}\)/.test(background) && /preset: normalized\.preset/.test(background) && /cutStrength: normalized\.cutStrength/.test(background) && /liftStrength: normalized\.liftStrength/.test(background) && /targetLoudnessDb: normalized\.targetLoudnessDb/.test(background)],
   ['tab capture starts with effective settings for the tab url', /nextSettings: await readSettingsForUrl\(tabUrl\)/.test(background)],
   ['settings reads use message or sender tab url', /settingsPayload\(String\(message\.tabUrl \|\| sender\.tab\?\.url \|\| ''\)\)/.test(background)],
   ['settings writes accept site scoped and global only flags', /siteScoped: message\.siteScoped === true/.test(background) && /globalOnly: message\.globalOnly === true/.test(background)],

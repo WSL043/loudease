@@ -336,7 +336,7 @@
     "message": "موازن مستوى الصوت"
   },
   "appDescription": {
-    "message": "يوازن الأصوات المرتفعة والمنخفضة على صفحات الويب مع مراعاة مستوى الصوت الحالي للمشغل."
+    "message": "يوحّد تلقائيًا الأصوات المرتفعة والمنخفضة في علامات التبويب مع احترام الكتم ومستوى صوت المشغل."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — مفعّل"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "التشخيص الفني" },
   "technicalDiagnosticsHelp": { "message": "تفاصيل الاتصال المباشر لاستكشاف الأخطاء وإصلاحها." },
   "reportCopiedOpenIssue": { "message": "تم نسخ التقرير. الصقه في نموذج GitHub." },
-  "feedbackOpened": { "message": "تم فتح نموذج ملاحظات الاستماع." }
+  "feedbackOpened": { "message": "تم فتح نموذج ملاحظات الاستماع." },
+  "targetLoudnessLabel": { "message": "مستوى الصوت المستهدف" },
+  "targetLoudnessHelp": { "message": "يضبط المستوى بعد الموازنة. القيمة الأعلى تعني صوتًا أقوى." },
+  "siteTargetLoudnessHelp": { "message": "يتجاوز المستوى المستهدف لهذا الموقع." },
+  "targetModeGentle": { "message": "هادئ" },
+  "targetModeBalanced": { "message": "متوازن" },
+  "targetModeStrong": { "message": "قوي" },
+  "liftBlockedVolumeConflict": { "message": "تم إيقاف الرفع لأن عدة مشغلات تستخدم مستويات صوت مختلفة." },
+  "liftBlockedVolumeUnknown": { "message": "ينتظر الرفع قراءة موثوقة لمستوى صوت المشغل." }
 }

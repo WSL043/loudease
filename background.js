@@ -302,7 +302,8 @@ function siteScopedSettings(input = {}) {
   return {
     preset: normalized.preset,
     cutStrength: normalized.cutStrength,
-    liftStrength: normalized.liftStrength
+    liftStrength: normalized.liftStrength,
+    targetLoudnessDb: normalized.targetLoudnessDb
   };
 }
 
@@ -727,6 +728,7 @@ function aggregateStatus(tabId) {
         settingsPreset: String(capture.settingsPreset || ''),
         settingsCutStrength: finite(capture.settingsCutStrength, DEFAULT_SETTINGS.cutStrength),
         settingsLiftStrength: finite(capture.settingsLiftStrength, DEFAULT_SETTINGS.liftStrength),
+        settingsTargetLoudnessDb: finite(capture.settingsTargetLoudnessDb, DEFAULT_SETTINGS.targetLoudnessDb),
         settingsRespectPlayerVolume: capture.settingsRespectPlayerVolume !== false,
         mediaStateAgeMs: capture.mediaStateAgeMs == null ? null : Number(capture.mediaStateAgeMs) || 0,
         averageOutputDb: capture.averageOutputDb == null ? null : finite(capture.averageOutputDb, -91),
@@ -889,6 +891,7 @@ function aggregateStatus(tabId) {
     settingsPreset: String(capture?.settingsPreset || ''),
     settingsCutStrength: finite(capture?.settingsCutStrength, DEFAULT_SETTINGS.cutStrength),
     settingsLiftStrength: finite(capture?.settingsLiftStrength, DEFAULT_SETTINGS.liftStrength),
+    settingsTargetLoudnessDb: finite(capture?.settingsTargetLoudnessDb, DEFAULT_SETTINGS.targetLoudnessDb),
     settingsRespectPlayerVolume: capture?.settingsRespectPlayerVolume !== false,
     captureActive: Boolean(capture?.active),
     captureConnected: capture?.connected === true,
@@ -1001,6 +1004,7 @@ function diagnosticsSnapshot() {
         settingsPreset: String(status.settingsPreset || ''),
         settingsCutStrength: finite(status.settingsCutStrength, DEFAULT_SETTINGS.cutStrength),
         settingsLiftStrength: finite(status.settingsLiftStrength, DEFAULT_SETTINGS.liftStrength),
+        settingsTargetLoudnessDb: finite(status.settingsTargetLoudnessDb, DEFAULT_SETTINGS.targetLoudnessDb),
         settingsRespectPlayerVolume: status.settingsRespectPlayerVolume !== false,
         averageOutputDb: status.averageOutputDb == null ? null : finite(status.averageOutputDb, -91),
         averageOutputPeak: finite(status.averageOutputPeak, 0),
@@ -1272,6 +1276,9 @@ function captureSettingsOutOfSync(capture = {}, effective = {}) {
     return true;
   }
   if (capture.settingsLiftStrength !== undefined && finite(capture.settingsLiftStrength, -1) !== finite(effective.liftStrength, DEFAULT_SETTINGS.liftStrength)) {
+    return true;
+  }
+  if (capture.settingsTargetLoudnessDb !== undefined && finite(capture.settingsTargetLoudnessDb, DEFAULT_SETTINGS.targetLoudnessDb) !== finite(effective.targetLoudnessDb, DEFAULT_SETTINGS.targetLoudnessDb)) {
     return true;
   }
   if (capture.settingsPreset !== undefined && String(capture.settingsPreset || '') !== String(effective.preset || DEFAULT_SETTINGS.preset)) {

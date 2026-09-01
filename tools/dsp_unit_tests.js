@@ -9,6 +9,7 @@ const {
 const {
   POLICY_REVISION,
   DEFAULT_PARAMS,
+  createProgrammeParams,
   ProgrammeLoudnessEstimator,
   computeTargetGainDb,
   computeTransitionCeilingDb,
@@ -30,6 +31,8 @@ function close(actual, expected, tolerance = 0.01) {
 assert('settings preserve known preset', normalizeSettings({ preset: 'night' }).preset === 'night');
 assert('settings classify unknown preset as custom', normalizeSettings({ preset: 'mystery' }).preset === 'custom');
 assert('default settings retain independent full-strength controls', DEFAULT_SETTINGS.cutStrength === 100 && DEFAULT_SETTINGS.liftStrength === 100);
+assert('default settings use the balanced loudness target', DEFAULT_SETTINGS.targetLoudnessDb === -19);
+assert('target loudness is clamped to the supported safe range', normalizeSettings({ targetLoudnessDb: -30 }).targetLoudnessDb === -22 && normalizeSettings({ targetLoudnessDb: -10 }).targetLoudnessDb === -16);
 assert('K-weighting constants remain the BS.1770 biquad approximation', K_WEIGHTING_PARAMS.shelfGainDb > 3.9 && K_WEIGHTING_PARAMS.highpassFrequencyHz > 38);
 assert('programme controller exposes its runtime policy revision', POLICY_REVISION === 'uniform-shortform-v1');
 
@@ -90,6 +93,22 @@ const loud = gain({ programmeDb: -12, momentaryDb: -12, fastDb: -12, peakDb: -6 
 assert('loud programme receives downward correction', loud.targetGainDb < -5.5 && loud.targetGainDb > -7, JSON.stringify(loud));
 const quiet = gain({ programmeDb: -35, momentaryDb: -35, fastDb: -35, peakDb: -24 });
 assert('quiet programme receives strong upward correction', quiet.targetGainDb > 13 && quiet.targetGainDb < 16, JSON.stringify(quiet));
+const strongParams = createProgrammeParams(-16);
+const strongQuiet = computeTargetGainDb({
+  enabled: true,
+  signalActive: true,
+  cutStrength: 100,
+  liftStrength: 100,
+  programmeDb: -37.25,
+  confidence: 1,
+  momentaryDb: -37.25,
+  fastDb: -37.25,
+  peakDb: -40,
+  limiterCeilingDb: -3,
+  canLift: true
+}, strongParams);
+assert('strong target raises a quiet programme by about 20.25 dB', close(strongQuiet.targetGainDb, 20.25), JSON.stringify(strongQuiet));
+assert('strong target expands only the calibrated lift bound', strongParams.programmeTargetDb === -16 && strongParams.maxLiftDb === 28 && strongParams.maxCutDb === DEFAULT_PARAMS.maxCutDb);
 const loudMoment = gain({ programmeDb: -20, momentaryDb: -12, fastDb: -12, peakDb: -6 });
 const quietMoment = gain({ programmeDb: -20, momentaryDb: -28, fastDb: -28, peakDb: -18 });
 assert('within-programme loud moments are compressed around the centre', loudMoment.dynamicsCorrectionDb < -4, JSON.stringify(loudMoment));

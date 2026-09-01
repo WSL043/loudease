@@ -53,6 +53,7 @@ const {
   POLICY_REVISION,
   DEFAULT_PARAMS: PROGRAMME_PARAMS,
   ProgrammeLoudnessEstimator,
+  createProgrammeParams,
   computeTargetGainDb,
   computeTransitionCeilingDb
 } = globalThis.LoudEaseProgrammePolicy;
@@ -65,7 +66,8 @@ let settings = {
   enabled: true,
   respectPlayerVolume: true,
   cutStrength: 100,
-  liftStrength: 100
+  liftStrength: 100,
+  targetLoudnessDb: PROGRAMME_PARAMS.programmeTargetDb
 };
 
 function trackSummary(track) {
@@ -196,16 +198,17 @@ class CaptureSession {
     this.targetGainDb = 0;
     this.targetLiftDb = 0;
     this.targetReductionDb = 0;
-    this.effectiveMaxLiftDb = PROGRAMME_PARAMS.maxLiftDb;
-    this.playerVolumeLiftCeilingDb = PROGRAMME_PARAMS.programmeTargetDb;
+    this.programmeParams = createProgrammeParams(this.settings.targetLoudnessDb);
+    this.effectiveMaxLiftDb = this.programmeParams.maxLiftDb;
+    this.playerVolumeLiftCeilingDb = this.programmeParams.programmeTargetDb;
     this.effectiveLimiterCeilingDb = LIMITER_CEILING_DB;
-    this.adaptiveTransitionCeilingDb = PROGRAMME_PARAMS.programmeTargetDb
-      + PROGRAMME_PARAMS.transitionDefaultCrestDb;
+    this.adaptiveTransitionCeilingDb = this.programmeParams.programmeTargetDb
+      + this.programmeParams.transitionDefaultCrestDb;
     this.peakHeadroomDb = 0;
     this.quietDeficitDb = 0;
     this.requestedLiftDb = 0;
     this.rawPeakHeadroomDb = 0;
-    this.liftLimiterBudgetDb = PROGRAMME_PARAMS.liftLimiterBudgetDb;
+    this.liftLimiterBudgetDb = this.programmeParams.liftLimiterBudgetDb;
     this.effectiveLiftBudgetDb = 0;
     this.energyHistory = [];
     this.peakHistory = [];
@@ -520,21 +523,21 @@ class CaptureSession {
       peakDb: linearToDb(peak),
       limiterCeilingDb,
       canLift
-    });
+    }, this.programmeParams);
     this.targetGainDb = gain.targetGainDb;
     this.targetLiftDb = Math.max(0, gain.targetGainDb);
     this.targetReductionDb = Math.max(0, -gain.targetGainDb);
     this.effectiveMaxLiftDb = canLift
-      ? PROGRAMME_PARAMS.maxLiftDb * strengthScale(this.settings.liftStrength)
+      ? this.programmeParams.maxLiftDb * strengthScale(this.settings.liftStrength)
       : 0;
-    this.playerVolumeLiftCeilingDb = PROGRAMME_PARAMS.programmeTargetDb + volumeDb;
+    this.playerVolumeLiftCeilingDb = this.programmeParams.programmeTargetDb + volumeDb;
     this.effectiveLimiterCeilingDb = limiterCeilingDb;
     this.peakHeadroomDb = limiterCeilingDb - linearToDb(peak) - 0.5;
     this.rawPeakHeadroomDb = this.peakHeadroomDb;
-    this.liftLimiterBudgetDb = PROGRAMME_PARAMS.liftLimiterBudgetDb * strengthScale(this.settings.liftStrength);
+    this.liftLimiterBudgetDb = this.programmeParams.liftLimiterBudgetDb * strengthScale(this.settings.liftStrength);
     this.effectiveLiftBudgetDb = gain.liftBudgetDb;
     this.quietDeficitDb = Number.isFinite(this.programmeState.programmeDb)
-      ? Math.max(0, PROGRAMME_PARAMS.programmeTargetDb - this.programmeState.programmeDb)
+      ? Math.max(0, this.programmeParams.programmeTargetDb - this.programmeState.programmeDb)
       : 0;
     this.requestedLiftDb = Math.max(0, gain.programmeCorrectionDb + gain.dynamicsCorrectionDb);
     this.programmeInputDb = this.programmeState.programmeDb;
@@ -547,8 +550,8 @@ class CaptureSession {
     this.adaptiveTransitionCeilingDb = computeTransitionCeilingDb({
       baseCeilingDb: limiterCeilingDb,
       cutStrength: this.settings.cutStrength,
-      programmeTargetDb: PROGRAMME_PARAMS.programmeTargetDb + volumeDb
-    });
+      programmeTargetDb: this.programmeParams.programmeTargetDb + volumeDb
+    }, this.programmeParams);
     const frameStartGainDb = this.currentGainDb;
     if (this.targetGainDb < this.currentGainDb && this.targetGainDb < 0) {
       this.smoothGain(this.targetGainDb, CUT_ATTACK_SECONDS, frameStartGainDb);
@@ -596,13 +599,13 @@ class CaptureSession {
     this.targetGainDb = 0;
     this.targetLiftDb = 0;
     this.targetReductionDb = 0;
-    this.effectiveMaxLiftDb = PROGRAMME_PARAMS.maxLiftDb;
-    this.playerVolumeLiftCeilingDb = PROGRAMME_PARAMS.programmeTargetDb;
+    this.effectiveMaxLiftDb = this.programmeParams.maxLiftDb;
+    this.playerVolumeLiftCeilingDb = this.programmeParams.programmeTargetDb;
     this.peakHeadroomDb = 0;
     this.quietDeficitDb = 0;
     this.requestedLiftDb = 0;
     this.rawPeakHeadroomDb = 0;
-    this.liftLimiterBudgetDb = PROGRAMME_PARAMS.liftLimiterBudgetDb;
+    this.liftLimiterBudgetDb = this.programmeParams.liftLimiterBudgetDb;
     this.effectiveLiftBudgetDb = 0;
     this.currentGainDb = 0;
     this.currentLiftDb = 0;
@@ -885,6 +888,7 @@ class CaptureSession {
 
   applySettings(nextSettings = this.settings, options = {}) {
     this.settings = normalizeSettings(nextSettings);
+    this.programmeParams = createProgrammeParams(this.settings.targetLoudnessDb);
     this.configureLeveler();
     this.configureLimiter();
     this.applyPlayerVolume();
@@ -1001,6 +1005,7 @@ class CaptureSession {
       settingsPreset: this.settings.preset,
       settingsCutStrength: this.settings.cutStrength,
       settingsLiftStrength: this.settings.liftStrength,
+      settingsTargetLoudnessDb: this.settings.targetLoudnessDb,
       settingsRespectPlayerVolume: this.settings.respectPlayerVolume !== false
     };
   }

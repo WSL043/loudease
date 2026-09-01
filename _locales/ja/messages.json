@@ -336,7 +336,7 @@
     "message": "ボリュームバランサー"
   },
   "appDescription": {
-    "message": "プレーヤーの現在音量を尊重しながら、Webページの大きな音と小さな音をバランス調整します。"
+    "message": "ミュートとプレーヤー音量を尊重しながら、タブの大きな音と小さな音を自動で均一化します。"
   },
   "actionTitleEnabled": {
     "message": "LoudEase — 有効"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "技術診断" },
   "technicalDiagnosticsHelp": { "message": "トラブルシューティング用のリアルタイム接続情報です。" },
   "reportCopiedOpenIssue": { "message": "レポートをコピーしました。GitHub フォームに貼り付けてください。" },
-  "feedbackOpened": { "message": "聴取フィードバックフォームを開きました。" }
+  "feedbackOpened": { "message": "聴取フィードバックフォームを開きました。" },
+  "targetLoudnessLabel": { "message": "目標ラウドネス" },
+  "targetLoudnessHelp": { "message": "バランス後の基準音量を設定します。高いほど強くなります。" },
+  "siteTargetLoudnessHelp": { "message": "このサイトの基準音量を上書きします。" },
+  "targetModeGentle": { "message": "穏やか" },
+  "targetModeBalanced": { "message": "バランス" },
+  "targetModeStrong": { "message": "強力" },
+  "liftBlockedVolumeConflict": { "message": "複数プレーヤーの音量が異なるため、静かな音の増幅を停止しています。" },
+  "liftBlockedVolumeUnknown": { "message": "信頼できるプレーヤー音量を待っているため、静かな音はまだ増幅されません。" }
 }

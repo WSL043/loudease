@@ -22,6 +22,8 @@ const els = {
   globalLift: document.getElementById('globalLift'),
   globalCutValue: document.getElementById('globalCutValue'),
   globalLiftValue: document.getElementById('globalLiftValue'),
+  globalTarget: document.getElementById('globalTarget'),
+  globalTargetValue: document.getElementById('globalTargetValue'),
   /* WVB_DEV_DIAGNOSTICS_START */
   localDiagnostics: document.getElementById('localDiagnostics'),
   localDiagnosticsState: document.getElementById('localDiagnosticsState'),
@@ -33,6 +35,8 @@ const els = {
   siteLift: document.getElementById('siteLift'),
   siteCutValue: document.getElementById('siteCutValue'),
   siteLiftValue: document.getElementById('siteLiftValue'),
+  siteTarget: document.getElementById('siteTarget'),
+  siteTargetValue: document.getElementById('siteTargetValue'),
   deleteSite: document.getElementById('deleteSite'),
   siteList: document.getElementById('siteList')
 };
@@ -53,7 +57,7 @@ let globalSaveRevision = 0;
 let diagnosticsRequestRevision = 0;
 let previewState = {
   version: 'preview',
-  settings: { enabled: true, respectPlayerVolume: true, preset: 'custom', cutStrength: 100, liftStrength: 100 },
+  settings: { enabled: true, respectPlayerVolume: true, preset: 'custom', cutStrength: 100, liftStrength: 100, targetLoudnessDb: -19 },
   siteSettings: {},
   /* WVB_DEV_DIAGNOSTICS_START */
   localDiagnosticsEnabled: false,
@@ -128,6 +132,36 @@ function setRange(input, output, value) {
   input.value = String(next);
   input.style.setProperty('--value', `${next}%`);
   output.textContent = String(next);
+}
+
+function clampTargetLoudness(value) {
+  const numeric = Number(value);
+  return Math.min(-16, Math.max(-22, Number.isFinite(numeric) ? numeric : -19));
+}
+
+function targetLoudnessLabel(value) {
+  const target = clampTargetLoudness(value);
+  const mode = target <= -21
+    ? t('targetModeGentle', undefined, 'Gentle')
+    : target >= -17
+      ? t('targetModeStrong', undefined, 'Strong')
+      : t('targetModeBalanced', undefined, 'Balanced');
+  return `${mode} · ${target} dB`;
+}
+
+function setTargetRange(input, output, value) {
+  const next = clampTargetLoudness(value);
+  input.value = String(next);
+  input.style.setProperty('--value', `${((next + 22) / 6) * 100}%`);
+  output.textContent = targetLoudnessLabel(next);
+}
+
+function bindTargetRange(input, output, onChange) {
+  input.addEventListener('input', () => {
+    setTargetRange(input, output, input.value);
+    onChange?.();
+  });
+  input.addEventListener('change', () => onChange?.({ flush: true }));
 }
 
 function bindRange(input, output, onChange) {
@@ -223,16 +257,17 @@ function fillSiteForm(siteKey = '', settings = {}) {
   els.siteKey.value = siteKey;
   setRange(els.siteCut, els.siteCutValue, settings.cutStrength);
   setRange(els.siteLift, els.siteLiftValue, settings.liftStrength);
+  setTargetRange(els.siteTarget, els.siteTargetValue, settings.targetLoudnessDb);
 }
 
-function renderSiteList(siteSettings = {}) {
+function renderSiteList(siteSettings = {}, globalSettings = {}) {
   const entries = Object.entries(siteSettings).sort(([left], [right]) => left.localeCompare(right));
   if (!entries.length) {
     els.siteList.innerHTML = `<div class="empty compact">${t('noSiteDefaults', undefined, 'No site rules yet.')}</div>`;
     return;
   }
   els.siteList.innerHTML = entries.map(([siteKey, settings]) => `
-    <button class="siteRow" type="button" data-site="${escapeHtml(siteKey)}"><strong>${escapeHtml(siteKey)}</strong><span>${t('reductionLabel', undefined, 'Reduction')} ${clampPercent(settings.cutStrength)}</span><span>${t('liftLabel', undefined, 'Lift')} ${clampPercent(settings.liftStrength)}</span></button>`).join('');
+    <button class="siteRow" type="button" data-site="${escapeHtml(siteKey)}"><strong>${escapeHtml(siteKey)}</strong><span>${t('reductionLabel', undefined, 'Reduction')} ${clampPercent(settings.cutStrength)}</span><span>${t('liftLabel', undefined, 'Lift')} ${clampPercent(settings.liftStrength)}</span><span>${targetLoudnessLabel(settings.targetLoudnessDb ?? globalSettings.targetLoudnessDb)}</span></button>`).join('');
 }
 
 /* WVB_DEV_DIAGNOSTICS_START */
@@ -254,11 +289,12 @@ function renderOptionsState(state, options = {}) {
   els.globalRespect.checked = settings.respectPlayerVolume !== false;
   setRange(els.globalCut, els.globalCutValue, settings.cutStrength);
   setRange(els.globalLift, els.globalLiftValue, settings.liftStrength);
+  setTargetRange(els.globalTarget, els.globalTargetValue, settings.targetLoudnessDb);
   /* WVB_DEV_DIAGNOSTICS_START */
   els.localDiagnostics.checked = lastOptionsState.localDiagnosticsEnabled === true;
   renderLocalDiagnosticsState(lastOptionsState.localDiagnosticsEnabled, lastOptionsState.localDiagnosticsAvailable);
   /* WVB_DEV_DIAGNOSTICS_END */
-  renderSiteList(sites);
+  renderSiteList(sites, settings);
   if (!options.preserveEditor && !els.siteKey.value) fillSiteForm('', settings);
   els.settingsHealth.textContent = t('settingsSummary', [String(lastOptionsState.version || '--'), String(Object.keys(sites).length)], `v${lastOptionsState.version || '--'}, ${Object.keys(sites).length} sites`);
 }
@@ -273,7 +309,8 @@ function readGlobalSettings() {
     respectPlayerVolume: els.globalRespect.checked,
     preset: 'custom',
     cutStrength: clampPercent(els.globalCut.value),
-    liftStrength: clampPercent(els.globalLift.value)
+    liftStrength: clampPercent(els.globalLift.value),
+    targetLoudnessDb: clampTargetLoudness(els.globalTarget.value)
   };
 }
 
@@ -299,7 +336,7 @@ async function saveSiteSettings(event) {
   const response = await extensionMessage({
     type: 'WVB_SAVE_SITE_SETTINGS',
     siteKey: els.siteKey.value,
-    settings: { preset: 'custom', cutStrength: clampPercent(els.siteCut.value), liftStrength: clampPercent(els.siteLift.value) }
+    settings: { preset: 'custom', cutStrength: clampPercent(els.siteCut.value), liftStrength: clampPercent(els.siteLift.value), targetLoudnessDb: clampTargetLoudness(els.siteTarget.value) }
   });
   if (response?.ok === false) throw new Error(response.error || t('statusError', undefined, 'Error'));
   renderOptionsState(response.state || await extensionMessage({ type: 'WVB_GET_OPTIONS_STATE' }), { preserveEditor: true });
@@ -480,8 +517,10 @@ function bind() {
   els.globalRespect.addEventListener('change', () => scheduleGlobalSave({ flush: true }));
   bindRange(els.globalCut, els.globalCutValue, scheduleGlobalSave);
   bindRange(els.globalLift, els.globalLiftValue, scheduleGlobalSave);
+  bindTargetRange(els.globalTarget, els.globalTargetValue, scheduleGlobalSave);
   bindRange(els.siteCut, els.siteCutValue);
   bindRange(els.siteLift, els.siteLiftValue);
+  bindTargetRange(els.siteTarget, els.siteTargetValue);
   els.siteForm.addEventListener('submit', (event) => saveSiteSettings(event).catch(reportSettingsError));
   els.deleteSite.addEventListener('click', () => deleteSiteSettings().catch(reportSettingsError));
   els.resetSettings.addEventListener('click', () => resetSettings().catch(reportSettingsError));
@@ -492,7 +531,7 @@ function bind() {
     const row = event.target.closest('[data-site]');
     if (!row) return;
     const siteKey = row.dataset.site || '';
-    fillSiteForm(siteKey, lastOptionsState?.siteSettings?.[siteKey] || lastOptionsState?.settings || {});
+    fillSiteForm(siteKey, { ...(lastOptionsState?.settings || {}), ...(lastOptionsState?.siteSettings?.[siteKey] || {}) });
     els.settingsHealth.textContent = t('editingSite', siteKey, `Editing ${siteKey}`);
   });
   els.copyJson.addEventListener('click', () => copyDiagnostics().catch(reportDiagnosticsError));

@@ -336,7 +336,7 @@
     "message": "Volume Balancer"
   },
   "appDescription": {
-    "message": "Balances loud and quiet audio on web pages while respecting the player's volume."
+    "message": "Automatically normalizes loud and quiet tab audio while respecting mute and player volume."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — enabled"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "Technical diagnostics" },
   "technicalDiagnosticsHelp": { "message": "Live connection details for troubleshooting." },
   "reportCopiedOpenIssue": { "message": "Report copied. Paste it into the GitHub form." },
-  "feedbackOpened": { "message": "Listening feedback form opened." }
+  "feedbackOpened": { "message": "Listening feedback form opened." },
+  "targetLoudnessLabel": { "message": "Target loudness" },
+  "targetLoudnessHelp": { "message": "Sets the calibrated centre after balancing. Higher is stronger." },
+  "siteTargetLoudnessHelp": { "message": "Overrides the calibrated centre for this site." },
+  "targetModeGentle": { "message": "Gentle" },
+  "targetModeBalanced": { "message": "Balanced" },
+  "targetModeStrong": { "message": "Strong" },
+  "liftBlockedVolumeConflict": { "message": "Quiet lift is paused because multiple players use different volume levels." },
+  "liftBlockedVolumeUnknown": { "message": "Quiet lift is waiting for a reliable player-volume reading." }
 }

@@ -336,7 +336,7 @@
     "message": "音量平衡器"
   },
   "appDescription": {
-    "message": "平衡網頁中的大聲和小聲，同時遵循播放器目前音量。"
+    "message": "自動均衡分頁中的大聲和小聲，同時遵循靜音與播放器音量。"
   },
   "actionTitleEnabled": {
     "message": "LoudEase — 已啟用"
@@ -383,5 +383,13 @@
   "technicalDiagnostics": { "message": "技術診斷" },
   "technicalDiagnosticsHelp": { "message": "用於疑難排解的即時連線詳情。" },
   "reportCopiedOpenIssue": { "message": "報告已複製，請貼到 GitHub 表單中。" },
-  "feedbackOpened": { "message": "已開啟聽感回饋表。" }
+  "feedbackOpened": { "message": "已開啟聽感回饋表。" },
+  "targetLoudnessLabel": { "message": "目標響度" },
+  "targetLoudnessHelp": { "message": "調整平衡後的音量基準，數值越高越強勁。" },
+  "siteTargetLoudnessHelp": { "message": "為這個網站單獨設定平衡後的音量基準。" },
+  "targetModeGentle": { "message": "舒緩" },
+  "targetModeBalanced": { "message": "平衡" },
+  "targetModeStrong": { "message": "強勁" },
+  "liftBlockedVolumeConflict": { "message": "多個播放器的音量不同，安靜聲音提升已暫停。" },
+  "liftBlockedVolumeUnknown": { "message": "正在等待可靠的播放器音量，安靜聲音暫不提升。" }
 }

@@ -283,6 +283,21 @@ function setNotices(notices = []) {
   }
 }
 
+function liftBlockedNotice(status = {}) {
+  const wantsLift = percentValue(settings?.liftStrength) > 0
+    && finiteNumber(status.quietDeficitDb, 0) > 1
+    && finiteNumber(status.requestedLiftDb, 0) > 0
+    && finiteNumber(status.effectiveMaxLiftDb, 0) <= 0;
+  if (!wantsLift || settings?.respectPlayerVolume === false) return null;
+  if (status.playerVolumeConflict) {
+    return { tone: 'warning', text: t('liftBlockedVolumeConflict', undefined, 'Quiet lift is paused because multiple players use different volume levels.') };
+  }
+  if (status.playerVolumeKnown !== true) {
+    return { tone: 'warning', text: t('liftBlockedVolumeUnknown', undefined, 'Quiet lift is waiting for a reliable player-volume reading.') };
+  }
+  return null;
+}
+
 function setReloadVisible(visible) {
   elements.reloadButton.hidden = !visible;
 }
@@ -866,6 +881,8 @@ function renderStatus(status) {
     return;
   }
   if (captureActive || (active > 0 && processed > 0 && audible > 0)) {
+    const blockedNotice = liftBlockedNotice(status);
+    if (blockedNotice) setNotices([blockedNotice]);
     const reduction = percentValue(settings?.cutStrength) > 0 ? Math.max(0, finiteNumber(status.averageReductionDb)) : 0;
     const lift = percentValue(settings?.liftStrength) > 0 ? Math.max(0, finiteNumber(status.averageLiftDb)) : 0;
     const effect = displayEffectForStatus(status, reduction, lift);

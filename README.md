@@ -7,11 +7,15 @@
 
 <h1 align="center">LoudEase</h1>
 
-<p align="center"><strong>Smooth the jumps. Keep the detail. Stay in control.</strong></p>
+<p align="center"><strong>Automatic volume normalization for Chrome tabs — quiet dialogue up, loud surprises down.</strong></p>
 
 <p align="center">
-  LoudEase makes web audio more comfortable by calming sudden loudness and bringing genuine quiet passages closer.<br>
-  Player volume and mute always remain authoritative.
+  Open a tab, click LoudEase once, and keep listening at a more consistent level.<br>
+  Processing stays local, while player volume and mute remain authoritative.
+</p>
+
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog"><strong>Install LoudEase from the Chrome Web Store</strong></a>
 </p>
 
 <p align="center">

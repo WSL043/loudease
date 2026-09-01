@@ -25,6 +25,7 @@ if (!ProgrammePolicy) {
 const {
   DEFAULT_PARAMS: PROGRAMME_PARAMS,
   ProgrammeLoudnessEstimator,
+  createProgrammeParams,
   computeTargetGainDb,
   computeTransitionCeilingDb,
   energyToDb
@@ -44,6 +45,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.historyIndex = 0;
     this.historyCount = 0;
     this.programmeEstimator = new ProgrammeLoudnessEstimator();
+    this.programmeParams = PROGRAMME_PARAMS;
     this.programmeState = this.programmeEstimator.snapshot();
     this.programmeStrideFrames = 0;
     this.programmeKey = '';
@@ -126,6 +128,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.targetEnabled = settings.enabled === false ? 0 : 1;
     this.targetCutStrength = clamp(Number(settings.cutStrength) || 0, 0, 100);
     this.targetLiftStrength = clamp(Number(settings.liftStrength) || 0, 0, 100);
+    this.programmeParams = createProgrammeParams(settings.targetLoudnessDb);
     this.respectPlayerVolume = settings.respectPlayerVolume !== false;
     this.targetPlayerVolumeCap = clamp(Number(message.playerVolumeCap), 0, 1);
     if (!Number.isFinite(this.targetPlayerVolumeCap)) this.targetPlayerVolumeCap = 1;
@@ -258,7 +261,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.controlInput.peakDb = linearToDb(this.inputPeak);
       this.controlInput.limiterCeilingDb = this.baseCeilingDb();
       this.controlInput.canLift = canLift;
-      this.lastControl = computeTargetGainDb(this.controlInput, PROGRAMME_PARAMS, this.controlResult);
+      this.lastControl = computeTargetGainDb(this.controlInput, this.programmeParams, this.controlResult);
       this.targetGainDb = this.lastControl.targetGainDb;
       this.signalTickCount += 1;
     } else {
@@ -271,8 +274,8 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
 
     this.transitionInput.baseCeilingDb = this.baseCeilingDb();
     this.transitionInput.cutStrength = this.cutStrength;
-    this.transitionInput.programmeTargetDb = PROGRAMME_PARAMS.programmeTargetDb + volumeDb;
-    this.adaptiveTransitionCeilingDb = computeTransitionCeilingDb(this.transitionInput);
+    this.transitionInput.programmeTargetDb = this.programmeParams.programmeTargetDb + volumeDb;
+    this.adaptiveTransitionCeilingDb = computeTransitionCeilingDb(this.transitionInput, this.programmeParams);
 
     this.reportInputPeak = Math.max(this.reportInputPeak, this.inputPeak);
     this.reportOutputPeak = Math.max(this.reportOutputPeak, this.outputPeak);
@@ -319,15 +322,16 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         targetGainDb: this.targetGainDb,
         targetLiftDb: Math.max(0, this.targetGainDb),
         targetReductionDb: Math.max(0, -this.targetGainDb),
-        effectiveMaxLiftDb: PROGRAMME_PARAMS.maxLiftDb * (this.liftStrength / 100),
-        playerVolumeLiftCeilingDb: PROGRAMME_PARAMS.programmeTargetDb + volumeDb,
+        effectiveMaxLiftDb: this.programmeParams.maxLiftDb * (this.liftStrength / 100),
+        playerVolumeLiftCeilingDb: this.programmeParams.programmeTargetDb + volumeDb,
         effectiveLimiterCeilingDb: this.ceilingDb(),
         adaptiveTransitionCeilingDb: this.adaptiveTransitionCeilingDb,
         peakHeadroomDb,
         rawPeakHeadroomDb: peakHeadroomDb,
-        liftLimiterBudgetDb: PROGRAMME_PARAMS.liftLimiterBudgetDb * (this.liftStrength / 100),
+        liftLimiterBudgetDb: this.programmeParams.liftLimiterBudgetDb * (this.liftStrength / 100),
         effectiveLiftBudgetDb: this.lastControl?.liftBudgetDb || 0,
-        quietDeficitDb: programmeDb == null ? 0 : Math.max(0, PROGRAMME_PARAMS.programmeTargetDb - programmeDb),
+        quietDeficitDb: programmeDb == null ? 0 : Math.max(0, this.programmeParams.programmeTargetDb - programmeDb),
+        targetLoudnessDb: this.programmeParams.programmeTargetDb,
         requestedLiftDb,
         signalActive: this.signalActive,
         signalTickCount: this.signalTickCount,
