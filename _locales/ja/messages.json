@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "バランス" },
   "targetModeStrong": { "message": "強力" },
   "liftBlockedVolumeConflict": { "message": "複数プレーヤーの音量が異なるため、静かな音の増幅を停止しています。" },
-  "liftBlockedVolumeUnknown": { "message": "信頼できるプレーヤー音量を待っているため、静かな音はまだ増幅されません。" }
+  "liftBlockedVolumeUnknown": { "message": "信頼できるプレーヤー音量を待っているため、静かな音はまだ増幅されません。" },
+  "supportLoudEase": { "message": "LoudEase を応援" },
+  "supportLoudEaseHeading": { "message": "LoudEase は役立っていますか？" },
+  "supportLoudEaseHelp": { "message": "正直なストアレビューや GitHub の Star は、ほかのリスナーがプロジェクトを見つける助けになります。報酬や高評価は求めません。" },
+  "rateStore": { "message": "Chrome ウェブストアでレビュー" },
+  "starGitHub": { "message": "GitHub で Star" },
+  "storeReviewOpened": { "message": "Chrome ウェブストアのレビューを開きました。" },
+  "githubOpened": { "message": "GitHub プロジェクトを開きました。" }
 }

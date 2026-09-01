@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "Équilibré" },
   "targetModeStrong": { "message": "Puissant" },
   "liftBlockedVolumeConflict": { "message": "Le renforcement est en pause car plusieurs lecteurs ont des volumes différents." },
-  "liftBlockedVolumeUnknown": { "message": "Le renforcement attend une mesure fiable du volume du lecteur." }
+  "liftBlockedVolumeUnknown": { "message": "Le renforcement attend une mesure fiable du volume du lecteur." },
+  "supportLoudEase": { "message": "Soutenir LoudEase" },
+  "supportLoudEaseHeading": { "message": "LoudEase vous aide ?" },
+  "supportLoudEaseHelp": { "message": "Un avis honnête sur le Store ou une étoile GitHub aide d'autres auditeurs à trouver le projet. Aucune récompense ni note positive n'est attendue." },
+  "rateStore": { "message": "Donner un avis sur le Chrome Web Store" },
+  "starGitHub": { "message": "Ajouter une étoile sur GitHub" },
+  "storeReviewOpened": { "message": "Avis du Chrome Web Store ouverts." },
+  "githubOpened": { "message": "Projet GitHub ouvert." }
 }

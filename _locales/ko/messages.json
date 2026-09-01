@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "균형" },
   "targetModeStrong": { "message": "강하게" },
   "liftBlockedVolumeConflict": { "message": "여러 플레이어의 음량이 달라 조용한 소리 증폭이 일시 중지되었습니다." },
-  "liftBlockedVolumeUnknown": { "message": "신뢰할 수 있는 플레이어 음량을 기다리는 동안 조용한 소리는 증폭되지 않습니다." }
+  "liftBlockedVolumeUnknown": { "message": "신뢰할 수 있는 플레이어 음량을 기다리는 동안 조용한 소리는 증폭되지 않습니다." },
+  "supportLoudEase": { "message": "LoudEase 응원하기" },
+  "supportLoudEaseHeading": { "message": "LoudEase가 도움이 되나요?" },
+  "supportLoudEaseHelp": { "message": "솔직한 스토어 리뷰나 GitHub Star는 다른 사용자가 프로젝트를 찾는 데 도움이 됩니다. 보상이나 긍정적 평가를 요구하지 않습니다." },
+  "rateStore": { "message": "Chrome 웹 스토어에서 리뷰" },
+  "starGitHub": { "message": "GitHub에서 Star" },
+  "storeReviewOpened": { "message": "Chrome 웹 스토어 리뷰를 열었습니다." },
+  "githubOpened": { "message": "GitHub 프로젝트를 열었습니다." }
 }

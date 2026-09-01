@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "متوازن" },
   "targetModeStrong": { "message": "قوي" },
   "liftBlockedVolumeConflict": { "message": "تم إيقاف الرفع لأن عدة مشغلات تستخدم مستويات صوت مختلفة." },
-  "liftBlockedVolumeUnknown": { "message": "ينتظر الرفع قراءة موثوقة لمستوى صوت المشغل." }
+  "liftBlockedVolumeUnknown": { "message": "ينتظر الرفع قراءة موثوقة لمستوى صوت المشغل." },
+  "supportLoudEase": { "message": "ادعم LoudEase" },
+  "supportLoudEaseHeading": { "message": "هل يساعدك LoudEase؟" },
+  "supportLoudEaseHelp": { "message": "تساعد المراجعة الصادقة في المتجر أو نجمة GitHub مستمعين آخرين على العثور على المشروع. لا توجد مكافأة ولا يُطلب تقييم إيجابي." },
+  "rateStore": { "message": "مراجعة في Chrome Web Store" },
+  "starGitHub": { "message": "إضافة نجمة على GitHub" },
+  "storeReviewOpened": { "message": "تم فتح مراجعات Chrome Web Store." },
+  "githubOpened": { "message": "تم فتح مشروع GitHub." }
 }
