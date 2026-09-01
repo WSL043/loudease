@@ -18,7 +18,7 @@ Modified distributions must replace the LoudEase name, logo, and icons with a di
 | Files | Origin | License |
 |---|---|---|
 | `assets/moon.svg` | Lucide `moon`, derived from Feather Icons | MIT |
-| `assets/settings.svg`, `assets/sun.svg` | Lucide Icons | ISC |
+| `assets/message-square.svg`, `assets/settings.svg`, `assets/star.svg`, `assets/sun.svg` | Lucide Icons | ISC |
 
 The required copyright and permission notices are reproduced in `THIRD_PARTY_NOTICES.md`; machine-readable mappings are in `REUSE.toml`.
 

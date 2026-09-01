@@ -62,10 +62,20 @@
       </label>
     </section>
 
-    <label class="limitSetting">
-      <input id="respectPlayerVolume" type="checkbox">
-      <span data-i18n="playerLimitStatement">Quiet-sound lift will not exceed the player's current volume.</span>
-    </label>
+    <div class="footerRow">
+      <label class="limitSetting">
+        <input id="respectPlayerVolume" type="checkbox">
+        <span data-i18n="playerLimitStatement">Quiet-sound lift will not exceed the player's current volume.</span>
+      </label>
+      <div class="supportActions" data-i18n-aria-label="supportLoudEase" aria-label="Support LoudEase">
+        <button id="reviewButton" class="iconButton" type="button" data-i18n-title="rateStore" data-i18n-aria-label="rateStore" title="Review on Chrome Web Store" aria-label="Review on Chrome Web Store">
+          <img src="../assets/message-square.svg" alt="" aria-hidden="true">
+        </button>
+        <button id="githubButton" class="iconButton" type="button" data-i18n-title="starGitHub" data-i18n-aria-label="starGitHub" title="Star on GitHub" aria-label="Star on GitHub">
+          <img src="../assets/star.svg" alt="" aria-hidden="true">
+        </button>
+      </div>
+    </div>
 
     <div id="noticeStrip" class="noticeStrip" role="status" hidden></div>
     <div class="recoveryActions">

@@ -4,7 +4,7 @@ LoudEase runtime code has no bundled third-party JavaScript dependency. The exte
 
 ## Lucide Icons
 
-Applies to `assets/settings.svg` and `assets/sun.svg`.
+Applies to `assets/message-square.svg`, `assets/settings.svg`, `assets/star.svg`, and `assets/sun.svg`.
 
 ISC License
 
