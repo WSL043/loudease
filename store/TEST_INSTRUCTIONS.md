@@ -9,7 +9,7 @@ These instructions are for the `LoudEase` public-beta review package. No account
 3. Confirm that the popup changes from a connecting state to an active state and that the input/output waveform moves while sound is present.
 4. Move **Reduce loud sounds** and **Lift quiet sounds**. Close and reopen the popup to confirm that the values persist.
 5. Mute the website player or set its volume to zero. LoudEase must not produce audible output. Restore the player volume to continue.
-6. Open the extension settings page to inspect the current site rule, global defaults, appearance, language, and the local-only support report.
+6. Open the extension settings page, change **Target loudness** between Gentle (`-22 dB`), Balanced (`-19 dB`), and Strong (`-16 dB`), then reopen Settings to confirm that the calibrated baseline persists. The page also exposes site rules, appearance, language, and the local-only support report.
 7. Choose **Stop balancing** in the popup. The capture session must end and the website's ordinary audio output must resume.
 
 ## Permission behavior

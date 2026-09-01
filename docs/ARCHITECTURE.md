@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current `0.8.1` runtime. The runtime files and executable checks are the source of truth.
+This document describes the current `0.8.2` runtime. The runtime files and executable checks are the source of truth.
 
 ## Product boundary
 

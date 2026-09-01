@@ -1,8 +1,8 @@
 # Release Readiness Review
 
-Review baseline: version `0.8.1` public-beta metadata update, unified AudioWorklet DSP, independent multi-tab capture sessions, internationalized compact popup, and separate development/store builds.
+Review baseline: version `0.8.2` public beta with a configurable target-loudness baseline, unified AudioWorklet DSP, independent multi-tab capture sessions, an internationalized compact popup, and separate development/store builds.
 
-Latest code/package audit: `2026-08-29`. Static, DSP, isolated-Chrome slider/capture, release-build, and package checks passed locally. The store ZIP was byte-for-byte reproducible across two consecutive builds and contained 42 verified runtime files. The current-version six-site smoke matrix passed 6/6. A representative Bilibili live endurance run passed for `1,800,013 ms` with 360 continuous samples, `89,982` fresh signal ticks, zero hard-clipped samples, one live audio track, and peak heap growth of `939,684 bytes`. A real Windows default-render-endpoint A/B verified audible processing and stop restoration: the stopped level returned within `-0.905 dB` of baseline. These measurements prove the pipeline and restoration behavior, not universal listening preference.
+Latest code/package audit: `2026-09-01`. Static, DSP, isolated-Chrome slider/capture, release-build, and package checks passed for `0.8.2`; the capture matrix passed 8/8 and the YouTube/Bilibili/Douyin site matrix passed 6/6. The verified store package contains 44 runtime files and reproduced the same SHA-256 (`6C212FAEAC5D428A878CCAEAA7BDAF611BFB999F60E8387CF90DCB9B351422F9`) across consecutive builds. A current-version Bilibili live endurance run passed for `1,800,005 ms` with 360 continuous samples, `89,907` fresh signal ticks, zero hard-clipped samples, one live audio track, and peak heap growth of `753,984 bytes`; stop cleanup passed. Historical Windows endpoint A/B evidence remains useful context but is not presented as a new `0.8.2` measurement. These measurements prove the pipeline and restoration behavior, not universal listening preference.
 
 ## Decision
 
