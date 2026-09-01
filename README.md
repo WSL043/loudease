@@ -19,6 +19,10 @@
 </p>
 
 <p align="center">
+  If LoudEase helps, leave an <a href="https://chromewebstore.google.com/detail/loudease/gdkaclfjhmenjhoemdkjlpafdhengjog/reviews">honest store review</a> or <a href="https://github.com/WSL043/loudease">star the project on GitHub</a>.
+</p>
+
+<p align="center">
   <a href="https://github.com/WSL043/loudease/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/WSL043/loudease/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Public beta" src="https://img.shields.io/badge/status-public%20beta-f59e0b">
   <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">

@@ -8,6 +8,8 @@ const els = {
   tabs: document.getElementById('tabs'),
   events: document.getElementById('events'),
   refreshNow: document.getElementById('refreshNow'),
+  rateStore: document.getElementById('rateStore'),
+  starGitHub: document.getElementById('starGitHub'),
   shareFeedback: document.getElementById('shareFeedback'),
   shareReport: document.getElementById('shareReport'),
   copyJson: document.getElementById('copyJson'),
@@ -479,6 +481,16 @@ async function shareListeningFeedback() {
   els.health.textContent = t('feedbackOpened', undefined, 'Listening feedback form opened.');
 }
 
+async function openStoreReview() {
+  await openExternal('https://chromewebstore.google.com/detail/loudease/gdkaclfjhmenjhoemdkjlpafdhengjog/reviews');
+  els.health.textContent = t('storeReviewOpened', undefined, 'Chrome Web Store reviews opened.');
+}
+
+async function openGitHubProject() {
+  await openExternal('https://github.com/WSL043/loudease');
+  els.health.textContent = t('githubOpened', undefined, 'GitHub project opened.');
+}
+
 async function shareDiagnostics() {
   await copyDiagnostics();
   await openExternal('https://github.com/WSL043/loudease/issues/new?template=audio-quality.yml');
@@ -535,6 +547,8 @@ function bind() {
     els.settingsHealth.textContent = t('editingSite', siteKey, `Editing ${siteKey}`);
   });
   els.copyJson.addEventListener('click', () => copyDiagnostics().catch(reportDiagnosticsError));
+  els.rateStore.addEventListener('click', () => openStoreReview().catch(reportDiagnosticsError));
+  els.starGitHub.addEventListener('click', () => openGitHubProject().catch(reportDiagnosticsError));
   els.shareFeedback.addEventListener('click', () => shareListeningFeedback().catch(reportDiagnosticsError));
   els.shareReport.addEventListener('click', () => shareDiagnostics().catch(reportDiagnosticsError));
   els.downloadJson.addEventListener('click', () => downloadDiagnostics().catch(reportDiagnosticsError));

@@ -19,6 +19,10 @@
 </p>
 
 <p align="center">
+  如果 LoudEase 对你有帮助，欢迎留下<a href="https://chromewebstore.google.com/detail/loudease/gdkaclfjhmenjhoemdkjlpafdhengjog/reviews">真实的商店评价</a>，或在 <a href="https://github.com/WSL043/loudease">GitHub 点亮 Star</a>。
+</p>
+
+<p align="center">
   <a href="https://github.com/WSL043/loudease/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/WSL043/loudease/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Public beta" src="https://img.shields.io/badge/status-public%20beta-f59e0b">
   <img alt="Chrome MV3" src="https://img.shields.io/badge/Chrome-MV3-2563eb">

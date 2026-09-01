@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "Equilibrado" },
   "targetModeStrong": { "message": "Forte" },
   "liftBlockedVolumeConflict": { "message": "O aumento está pausado porque vários players usam volumes diferentes." },
-  "liftBlockedVolumeUnknown": { "message": "O aumento aguarda uma leitura confiável do volume do player." }
+  "liftBlockedVolumeUnknown": { "message": "O aumento aguarda uma leitura confiável do volume do player." },
+  "supportLoudEase": { "message": "Apoie o LoudEase" },
+  "supportLoudEaseHeading": { "message": "O LoudEase está ajudando?" },
+  "supportLoudEaseHelp": { "message": "Uma avaliação sincera na loja ou uma estrela no GitHub ajuda outras pessoas a encontrar o projeto. Não há recompensa nem expectativa de avaliação positiva." },
+  "rateStore": { "message": "Avaliar na Chrome Web Store" },
+  "starGitHub": { "message": "Dar estrela no GitHub" },
+  "storeReviewOpened": { "message": "Avaliações da Chrome Web Store abertas." },
+  "githubOpened": { "message": "Projeto do GitHub aberto." }
 }

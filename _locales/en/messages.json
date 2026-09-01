@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "Balanced" },
   "targetModeStrong": { "message": "Strong" },
   "liftBlockedVolumeConflict": { "message": "Quiet lift is paused because multiple players use different volume levels." },
-  "liftBlockedVolumeUnknown": { "message": "Quiet lift is waiting for a reliable player-volume reading." }
+  "liftBlockedVolumeUnknown": { "message": "Quiet lift is waiting for a reliable player-volume reading." },
+  "supportLoudEase": { "message": "Support LoudEase" },
+  "supportLoudEaseHeading": { "message": "Is LoudEase helping?" },
+  "supportLoudEaseHelp": { "message": "An honest store review or GitHub star helps other listeners find the project. No reward or positive rating is expected." },
+  "rateStore": { "message": "Review on Chrome Web Store" },
+  "starGitHub": { "message": "Star on GitHub" },
+  "storeReviewOpened": { "message": "Chrome Web Store reviews opened." },
+  "githubOpened": { "message": "GitHub project opened." }
 }

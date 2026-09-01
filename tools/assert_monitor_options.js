@@ -25,6 +25,8 @@ const requiredIds = [
   'deleteSite',
   'resetSettings',
   'downloadJson',
+  'rateStore',
+  'starGitHub',
   'shareFeedback',
   'shareReport',
   'reportJson'
@@ -46,6 +48,7 @@ const checks = [
   ['monitor can toggle local diagnostics and export diagnostics', /type: 'WVB_SET_LOCAL_DIAGNOSTICS'/.test(monitorJs) && /new Blob\(\[JSON\.stringify\(supportReport\(lastSnapshot\), null, 2\)\]/.test(monitorJs)],
   ['voluntary report is copied locally before GitHub is opened', /async function shareDiagnostics/.test(monitorJs) && /await copyDiagnostics\(\)/.test(monitorJs) && /issues\/new\?template=audio-quality\.yml/.test(monitorJs)],
   ['structured listening feedback has a direct user-initiated route', /async function shareListeningFeedback/.test(monitorJs) && /issues\/new\?template=feedback\.yml/.test(monitorJs)],
+  ['support routes expose voluntary store reviews and GitHub stars', /async function openStoreReview/.test(monitorJs) && /chromewebstore\.google\.com\/detail\/loudease\/gdkaclfjhmenjhoemdkjlpafdhengjog\/reviews/.test(monitorJs) && /async function openGitHubProject/.test(monitorJs) && /github\.com\/WSL043\/loudease/.test(monitorJs)],
   ['support reports redact errors and exclude browsing identifiers', /\[url removed\]/.test(supportReportBody) && /\[path removed\]/.test(supportReportBody) && /eventCounts/.test(supportReportBody) && !/\btabId\b/.test(supportReportBody) && !/siteCategory|hostname|page title/i.test(supportReportBody)],
   ['support report is versioned and includes privacy-safe DSP evidence', /schemaVersion: 1/.test(supportReportBody) && /reportScope: 'manual-support-snapshot'/.test(supportReportBody) && /averageInputDb/.test(supportReportBody) && /limiterTickCount/.test(supportReportBody)]
 ];

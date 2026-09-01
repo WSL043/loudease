@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "Баланс" },
   "targetModeStrong": { "message": "Сильно" },
   "liftBlockedVolumeConflict": { "message": "Усиление приостановлено: несколько проигрывателей используют разную громкость." },
-  "liftBlockedVolumeUnknown": { "message": "Усиление ждёт надёжного значения громкости проигрывателя." }
+  "liftBlockedVolumeUnknown": { "message": "Усиление ждёт надёжного значения громкости проигрывателя." },
+  "supportLoudEase": { "message": "Поддержать LoudEase" },
+  "supportLoudEaseHeading": { "message": "LoudEase вам помогает?" },
+  "supportLoudEaseHelp": { "message": "Честный отзыв в магазине или звезда на GitHub помогут другим найти проект. Награды или положительная оценка не требуются." },
+  "rateStore": { "message": "Оставить отзыв в Chrome Web Store" },
+  "starGitHub": { "message": "Поставить звезду на GitHub" },
+  "storeReviewOpened": { "message": "Отзывы Chrome Web Store открыты." },
+  "githubOpened": { "message": "Проект GitHub открыт." }
 }

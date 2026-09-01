@@ -391,5 +391,12 @@
   "targetModeBalanced": { "message": "平衡" },
   "targetModeStrong": { "message": "强劲" },
   "liftBlockedVolumeConflict": { "message": "多个播放器的音量不同，安静声音提升已暂停。" },
-  "liftBlockedVolumeUnknown": { "message": "正在等待可靠的播放器音量，安静声音暂不提升。" }
+  "liftBlockedVolumeUnknown": { "message": "正在等待可靠的播放器音量，安静声音暂不提升。" },
+  "supportLoudEase": { "message": "支持 LoudEase" },
+  "supportLoudEaseHeading": { "message": "LoudEase 对你有帮助吗？" },
+  "supportLoudEaseHelp": { "message": "真实的商店评价或 GitHub Star 能帮助其他用户找到项目；不提供奖励，也不要求好评。" },
+  "rateStore": { "message": "在 Chrome 商店评价" },
+  "starGitHub": { "message": "在 GitHub 点 Star" },
+  "storeReviewOpened": { "message": "已打开 Chrome 商店评价页。" },
+  "githubOpened": { "message": "已打开 GitHub 项目页。" }
 }

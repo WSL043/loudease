@@ -92,6 +92,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px s
 .siteRow span { color: var(--muted); font-size: 10px; }
 .inlineStatus { display: block; margin-block-start: 6px; color: var(--muted); font-size: 10px; }
 .reportPanel { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 24px; padding: 18px 20px; border-block-end: 1px solid var(--line); background: color-mix(in srgb, var(--input) 5%, var(--surface)); }
+.supportPanel { background: color-mix(in srgb, var(--output) 5%, var(--surface)); }
+.supportPanel .kicker { color: var(--output); }
 .reportCopy { min-inline-size: 0; }
 .kicker { display: block; margin-block-end: 5px; color: var(--input); font-size: 9px; font-weight: 780; text-transform: uppercase; }
 .reportCopy h2 { font-size: 16px; }
