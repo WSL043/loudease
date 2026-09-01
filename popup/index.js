@@ -17,6 +17,8 @@ const elements = {
   healthLabel: document.getElementById('healthLabel'),
   themeButton: document.getElementById('themeButton'),
   settingsButton: document.getElementById('settingsButton'),
+  reviewButton: document.getElementById('reviewButton'),
+  githubButton: document.getElementById('githubButton'),
   respectPlayerVolume: document.getElementById('respectPlayerVolume'),
   cutDial: document.getElementById('cutDial'),
   liftDial: document.getElementById('liftDial'),
@@ -747,6 +749,12 @@ function bind() {
       return;
     }
     location.assign('../monitor/index.html');
+  });
+  elements.reviewButton.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://chromewebstore.google.com/detail/loudease/gdkaclfjhmenjhoemdkjlpafdhengjog/reviews' });
+  });
+  elements.githubButton.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://github.com/WSL043/loudease' });
   });
 
   globalThis.chrome?.storage?.onChanged?.addListener(handleStorageChanged);

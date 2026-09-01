@@ -33,7 +33,7 @@ SPDX-FileCopyrightText = "2013-present Cole Bemis"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["assets/settings.svg", "assets/sun.svg"]
+path = ["assets/message-square.svg", "assets/settings.svg", "assets/star.svg", "assets/sun.svg"]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Lucide Icons and Contributors"
 SPDX-License-Identifier = "ISC"

@@ -6,9 +6,12 @@ const html = fs.readFileSync(path.join(root, 'popup', 'index.html'), 'utf8');
 const popup = fs.readFileSync(path.join(root, 'popup', 'index.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'popup', 'index.css'), 'utf8');
 const background = fs.readFileSync(path.join(root, 'background.js'), 'utf8');
+const monitorHtml = fs.readFileSync(path.join(root, 'monitor', 'index.html'), 'utf8');
 
 const checks = [
   ['popup explains only genuinely blocked quiet lift', /function liftBlockedNotice/.test(popup) && /playerVolumeConflict/.test(popup) && /playerVolumeKnown/.test(popup) && /quietDeficitDb/.test(popup) && /effectiveMaxLiftDb/.test(popup)],
+  ['popup keeps voluntary review and star actions as compact accessible icons', ['reviewButton', 'githubButton'].every((id) => html.includes(`id="${id}"`)) && /data-i18n-aria-label="rateStore"/.test(html) && /data-i18n-aria-label="starGitHub"/.test(html) && /chromewebstore\.google\.com\/detail\/loudease\/gdkaclfjhmenjhoemdkjlpafdhengjog\/reviews/.test(popup) && /github\.com\/WSL043\/loudease/.test(popup)],
+  ['settings page does not promote reviews with a large support card', !/supportPanel|id="rateStore"|id="starGitHub"/.test(monitorHtml)],
   ['popup omits presets and modes', !/data-preset|presetBar|presetButton/.test(html)],
   ['manual strength edits become custom preset', /preset: 'custom'/.test(popup)],
   ['committed strength changes flush persistence immediately', /addEventListener\('change',[\s\S]*?flushPersistSettings\(strengthSaveOptions\(\)\)/.test(popup) && /function flushPersistSettings\(options = \{\}\)/.test(popup)],

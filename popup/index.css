@@ -29,7 +29,7 @@
 body { margin: 0; min-inline-size: 340px; color: var(--text); background: var(--surface); }
 button, input { font: inherit; }
 .shell { inline-size: 340px; padding: 12px 14px 11px; display: grid; gap: 0; overflow: hidden; }
-.header, .brand, .headerActions, .statusLine, .strengthTop, .limitSetting, .recoveryActions { display: flex; align-items: center; }
+.header, .brand, .headerActions, .statusLine, .strengthTop, .footerRow, .limitSetting, .supportActions, .recoveryActions { display: flex; align-items: center; }
 .header { block-size: 36px; justify-content: space-between; gap: 10px; border-block-end: 1px solid var(--line); padding-block-end: 9px; }
 .brand { gap: 7px; min-inline-size: 0; }
 .headerActions { flex: none; gap: 8px; }
@@ -95,8 +95,12 @@ output { font-size: 10px; font-weight: 760; font-variant-numeric: tabular-nums; 
 #liftRange { --accent: var(--input); }
 .strengthRange::-webkit-slider-thumb { inline-size: 18px; block-size: 18px; border: 2px solid var(--surface); border-radius: 50%; appearance: none; background: var(--accent); box-shadow: 0 1px 4px rgba(23, 32, 43, .16); }
 .strengthControl.isUnavailable { opacity: .45; }
-.limitSetting { min-block-size: 29px; gap: 7px; color: var(--muted); font-size: 9px; font-weight: 650; line-height: 1.25; cursor: pointer; }
+.footerRow { min-block-size: 29px; justify-content: space-between; gap: 7px; }
+.limitSetting { min-inline-size: 0; gap: 7px; color: var(--muted); font-size: 9px; font-weight: 650; line-height: 1.25; cursor: pointer; }
 .limitSetting input { inline-size: 14px; block-size: 14px; flex: none; margin: 0; accent-color: var(--input); }
+.supportActions { flex: none; gap: 1px; }
+.supportActions .iconButton { inline-size: 24px; block-size: 24px; padding: 4px; }
+.supportActions .iconButton img { inline-size: 15px; block-size: 15px; }
 .noticeStrip { margin-block-start: 6px; padding: 6px 7px; border-inline-start: 3px solid var(--warning); border-radius: 3px; color: #713f00; background: #fff2d9; font-size: 10px; overflow-wrap: anywhere; }
 .noticeChip + .noticeChip::before { content: " · "; }
 .recoveryActions { gap: 6px; flex-wrap: wrap; }
