@@ -18,6 +18,7 @@
 ## DSP
 
 - The limiter is sample-peak based and does not yet estimate oversampled true peak.
+- The strict `npm run audit:true-peak` reproduces inter-sample overshoot at cut strength `0` / lift strength `100`. Phase-offset quarter-rate tones exceed estimated full scale by roughly `0.10 dB`; abrupt alternating samples exceed it by more and are sensitive to reconstruction-filter length. These engineering fixtures identify a limiter limitation, not a measured hardware-output defect. See [DSP evaluation](DSP_EVALUATION.md).
 - Measurement is K-weighted with gated cumulative programme estimation, but is not a certified BS.1770 implementation.
 - There is no speech/music classifier, source separation, denoising, or multiband compression.
 - Equal perceived loudness across all content is impossible without sacrificing dynamics and introducing artifacts.

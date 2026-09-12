@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog"><strong>Install LoudEase from the Chrome Web Store</strong></a>
+  <a href="https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog?utm_source=github&amp;utm_medium=referral&amp;utm_campaign=readme-en"><strong>Install LoudEase from the Chrome Web Store</strong></a>
 </p>
 
 <p align="center">
@@ -78,7 +78,7 @@ The store build is smaller for privacy and review compliance; it does not use a 
 
 ## Install
 
-Ordinary users install LoudEase from the [Chrome Web Store](https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog) and need only Chrome 116 or newer. They do not need Node.js, a server, or a database.
+Ordinary users install LoudEase from the [Chrome Web Store](https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog?utm_source=github&utm_medium=referral&utm_campaign=readme-en) and need only Chrome 116 or newer. They do not need Node.js, a server, or a database.
 
 ### Manual beta sideload for trusted testers
 

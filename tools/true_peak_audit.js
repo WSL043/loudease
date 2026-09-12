@@ -34,7 +34,7 @@ function loadProcessor(sampleRate) {
   return ProcessorClass;
 }
 
-function configure(processor) {
+function configure(processor, settings = {}) {
   processor.port.onmessage({
     data: {
       type: 'configure',
@@ -44,7 +44,8 @@ function configure(processor) {
         respectPlayerVolume: true,
         cutStrength: 0,
         liftStrength: 100,
-        targetLoudnessDb: -19
+        targetLoudnessDb: -19,
+        ...settings
       },
       playerVolumeCap: 1,
       playerVolumeReliable: true,
@@ -76,18 +77,28 @@ function samplePeak(samples) {
 
 // A bounded 8x windowed-sinc estimate. This is an engineering stress detector,
 // not a claim of standards-compliant BS.1770 true-peak metering.
-function estimatedTruePeak(samples, factor = 8, radius = 32) {
+function estimatedTruePeak(samples, factor = 8, radius = 32, windowKind = 'hann') {
+  if (samples.some((sample) => !Number.isFinite(sample))) throw new Error('Non-finite PCM in peak audit');
+  // Each phase uses the same coefficients at every sample. Preparing them once
+  // avoids millions of identical trigonometric calls during regression runs.
+  const phases = Array.from({ length: factor - 1 }, (_, phase) => {
+    const weights = new Float64Array(2 * radius);
+    for (let tap = 0; tap < weights.length; tap += 1) {
+      const distance = ((phase + 1) / factor) + radius - 1 - tap;
+      const sinc = Math.sin(Math.PI * distance) / (Math.PI * distance);
+      const window = windowKind === 'blackman'
+        ? 0.42 + 0.5 * Math.cos(Math.PI * distance / radius) + 0.08 * Math.cos(2 * Math.PI * distance / radius)
+        : 0.5 + 0.5 * Math.cos(Math.PI * distance / radius);
+      weights[tap] = sinc * window;
+    }
+    return weights;
+  });
   let peak = samplePeak(samples);
   for (let index = radius; index < samples.length - radius - 1; index += 1) {
-    for (let phase = 1; phase < factor; phase += 1) {
-      const cursor = index + (phase / factor);
+    for (const weights of phases) {
       let value = 0;
-      for (let sourceIndex = index - radius + 1; sourceIndex <= index + radius; sourceIndex += 1) {
-        const distance = cursor - sourceIndex;
-        const sinc = distance === 0 ? 1 : Math.sin(Math.PI * distance) / (Math.PI * distance);
-        const window = 0.5 + (0.5 * Math.cos(Math.PI * distance / radius));
-        const weight = sinc * window;
-        value += samples[sourceIndex] * weight;
+      for (let tap = 0; tap < weights.length; tap += 1) {
+        value += samples[index - radius + 1 + tap] * weights[tap];
       }
       peak = Math.max(peak, Math.abs(value));
     }
@@ -95,7 +106,7 @@ function estimatedTruePeak(samples, factor = 8, radius = 32) {
   return peak;
 }
 
-function assert(name, condition, details) {
+function assert(name, condition, details = '') {
   if (condition) {
     console.log(`OK   ${name}: ${details}`);
     return;
@@ -104,35 +115,76 @@ function assert(name, condition, details) {
   process.exitCode = 1;
 }
 
-for (const sampleRate of SAMPLE_RATES) {
-  const ProcessorClass = loadProcessor(sampleRate);
-  const fixtures = [
-    ['0.35 x rate sine', 0.35, 0.37],
-    ['0.417 x rate sine', 5 / 12, 0.71],
-    ['0.458 x rate sine', 11 / 24, 1.13],
-    ['0.49 x rate near-Nyquist sine', 0.49, 0.43]
-  ];
-  const generatedFixtures = fixtures.map(([name, frequencyRatio, phase]) => [
-    name,
-    (index) => 1.2 * Math.sin(2 * Math.PI * frequencyRatio * index + phase)
-  ]);
-  generatedFixtures.push(['clustered impulses', (index) => index % 997 === 0 ? 1.2 : (index % 991 === 0 ? -1.2 : 0)]);
-
-  for (const [name, generator] of generatedFixtures) {
-    const processor = new ProcessorClass();
-    configure(processor);
-    render(processor, sampleRate * 3, (index) => 0.02 * Math.sin(2 * Math.PI * 997 * index / sampleRate));
-    const output = render(processor, 8192, generator);
-    const measuredSamplePeak = samplePeak(output);
-    const measuredTruePeak = estimatedTruePeak(output);
-    const details = JSON.stringify({
-      sampleRate,
-      samplePeakDbfs: 20 * Math.log10(Math.max(1e-12, measuredSamplePeak)),
-      estimatedTruePeakDbtp: 20 * Math.log10(Math.max(1e-12, measuredTruePeak))
-    });
-    assert(`${sampleRate} Hz ${name} remains sample-safe`, measuredSamplePeak <= SAMPLE_CEILING + 1e-6, details);
-    assert(`${sampleRate} Hz ${name} keeps estimated inter-sample peak below 0 dBTP`, measuredTruePeak < TRUE_PEAK_LIMIT, details);
+function calibrate() {
+  const sine = Float32Array.from({ length: 2048 }, (_, index) => Math.sin(Math.PI * index / 2 + Math.PI / 4));
+  assert('phase-offset Fs/4 fixture has a -3.01 dBFS sample peak', Math.abs(samplePeak(sine) - Math.SQRT1_2) < 1e-6);
+  for (const [factor, radius, window] of [[8, 32, 'hann'], [16, 128, 'blackman']]) {
+    const name = `${factor}x ${window} radius ${radius}`;
+    assert(`${name} reconstructs unity from the analytically known Fs/4 sine`, Math.abs(estimatedTruePeak(sine, factor, radius, window) - 1) < 0.001);
+    assert(`${name} preserves constant level`, Math.abs(estimatedTruePeak(new Float32Array(2048).fill(0.5), factor, radius, window) - 0.5) < 0.001);
+    assert(`${name} keeps silence exactly zero`, estimatedTruePeak(new Float32Array(2048), factor, radius, window) === 0);
   }
+  let rejected = false;
+  try { estimatedTruePeak(new Float32Array([0, NaN, 0])); } catch { rejected = true; }
+  assert('detector rejects non-finite PCM instead of reporting a safe peak', rejected);
 }
 
-if (process.exitCode) process.exit(process.exitCode);
+function audit() {
+  let unsafe = 0;
+  const report = [];
+  for (const sampleRate of SAMPLE_RATES) {
+    const ProcessorClass = loadProcessor(sampleRate);
+    const fixtures = [
+      ['0.35 x rate sine', 0.35, 0.37],
+      ['0.417 x rate sine', 5 / 12, 0.71],
+      ['0.458 x rate sine', 11 / 24, 1.13],
+      ['0.49 x rate near-Nyquist sine', 0.49, 0.43]
+    ];
+    const generatedFixtures = fixtures.map(([name, frequencyRatio, phase]) => [
+      name,
+      (index) => 1.2 * Math.sin(2 * Math.PI * frequencyRatio * index + phase)
+    ]);
+    generatedFixtures.push(['clustered impulses', (index) => index % 997 === 0 ? 1.2 : (index % 991 === 0 ? -1.2 : 0)]);
+    // Keep the original failing waveform. Near-Nyquist sines do not replace an
+    // abrupt onset at Nyquist; their reconstruction has different ringing.
+    generatedFixtures.push(['alternating full scale (original counterexample)', (index) => index % 2 === 0 ? 1.2 : -1.2]);
+    generatedFixtures.push(['alternating sub-full scale', (index) => index % 2 === 0 ? 0.9 : -0.9]);
+    generatedFixtures.push(['phase-offset Fs/4 sub-full-scale sine', (index) => 0.95 * Math.sin(Math.PI * index / 2 + Math.PI / 4)]);
+
+    for (const [name, generator] of generatedFixtures) {
+      const processor = new ProcessorClass();
+      configure(processor);
+      render(processor, Math.ceil(sampleRate * 3 / BLOCK_SIZE) * BLOCK_SIZE, (index) => 0.02 * Math.sin(2 * Math.PI * 997 * index / sampleRate));
+      const output = render(processor, 8192, generator);
+      const measuredSamplePeak = samplePeak(output);
+      const measuredTruePeak = estimatedTruePeak(output);
+      const referencePeak = measuredTruePeak >= TRUE_PEAK_LIMIT
+        ? estimatedTruePeak(output, 16, 128, 'blackman') : null;
+      const record = {
+        fixture: name,
+        sampleRate,
+        samplePeakDbfs: 20 * Math.log10(Math.max(1e-12, measuredSamplePeak)),
+        estimatedTruePeakDbtp: 20 * Math.log10(Math.max(1e-12, measuredTruePeak)),
+        crossCheckDbtp: referencePeak === null ? null : 20 * Math.log10(Math.max(1e-12, referencePeak)),
+        fullScaleExceeded: measuredTruePeak >= TRUE_PEAK_LIMIT || referencePeak >= TRUE_PEAK_LIMIT
+      };
+      report.push(record);
+      const details = JSON.stringify(record);
+      assert(`${sampleRate} Hz ${name} remains sample-safe`, measuredSamplePeak <= SAMPLE_CEILING + 1e-6, details);
+      assert(`${sampleRate} Hz ${name} keeps estimated inter-sample peak below 0 dBTP`, !record.fullScaleExceeded, details);
+      if (record.fullScaleExceeded) unsafe += 1;
+    }
+  }
+  const result = { schemaVersion: 1, audit: 'engineering-inter-sample-peak', certifiedMeter: false, settings: { cutStrength: 0, liftStrength: 100, targetLoudnessDb: -19 }, unsafeFixtures: unsafe, fixtures: report };
+  const reportPath = path.join(root, 'tmp', 'true-peak-audit.json');
+  fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+  fs.writeFileSync(reportPath, `${JSON.stringify(result, null, 2)}\n`);
+  console.log(`AUDIT ${unsafe}/${report.length} fixtures exceeded estimated full scale. Report: ${reportPath}`);
+}
+
+if (require.main === module) {
+  calibrate();
+  if (!process.exitCode && !process.argv.includes('--self-test')) audit();
+}
+
+module.exports = { loadProcessor, configure, render, samplePeak, estimatedTruePeak };

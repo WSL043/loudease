@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog"><strong>从 Chrome 应用商店安装 LoudEase</strong></a>
+  <a href="https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog?utm_source=github&amp;utm_medium=referral&amp;utm_campaign=readme-zh"><strong>从 Chrome 应用商店安装 LoudEase</strong></a>
 </p>
 
 <p align="center">
@@ -78,7 +78,7 @@ LoudEase 不是简单的音量放大器、均衡器，也不是经过校准的�
 
 ## 安装
 
-普通用户可从 [Chrome 应用商店](https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog) 安装 LoudEase，只需要 Chrome 116 或更高版本，不需要 Node.js、服务器或数据库。
+普通用户可从 [Chrome 应用商店](https://chromewebstore.google.com/detail/gdkaclfjhmenjhoemdkjlpafdhengjog?utm_source=github&utm_medium=referral&utm_campaign=readme-zh) 安装 LoudEase，只需要 Chrome 116 或更高版本，不需要 Node.js、服务器或数据库。
 
 ### 受信任测试者手动侧载 Beta
 

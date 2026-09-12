@@ -17,6 +17,16 @@ const CUT_RELEASE_SECONDS = 0.25;
 const LIFT_ATTACK_SECONDS = 0.18;
 const LIFT_RELEASE_SECONDS = 0.12;
 const MAX_GAIN_INCREASE_STEP_DB = 3;
+// The worklet sample rate is fixed for its lifetime. Compute invariant
+// coefficients once, leaving only the gain-state decision in the sample loop.
+const CUT_ATTACK_ALPHA = 1 - Math.exp(-1 / (sampleRate * CUT_ATTACK_SECONDS));
+const CUT_RELEASE_ALPHA = 1 - Math.exp(-1 / (sampleRate * CUT_RELEASE_SECONDS));
+const LIFT_ATTACK_ALPHA = 1 - Math.exp(-1 / (sampleRate * LIFT_ATTACK_SECONDS));
+const LIFT_RELEASE_ALPHA = 1 - Math.exp(-1 / (sampleRate * LIFT_RELEASE_SECONDS));
+const ONSET_PROTECTION_THRESHOLD = dbToLinear(ONSET_PROTECTION_TRIGGER_DB);
+const PROGRAMME_JUMP_RATIO = dbToLinear(PROGRAMME_JUMP_TRIGGER_DB);
+const TRANSITION_PROTECTION_SAMPLES = Math.round(sampleRate * TRANSITION_PROTECTION_SECONDS);
+const MAX_GAIN_INCREASE_PER_SAMPLE_DB = MAX_GAIN_INCREASE_STEP_DB / FRAME_SAMPLES;
 
 const ProgrammePolicy = globalThis.LoudEaseProgrammePolicy;
 if (!ProgrammePolicy) {
@@ -381,14 +391,13 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.enabled += (this.targetEnabled - this.enabled) * settingAlpha;
       this.playerVolumeCap += (this.targetPlayerVolumeCap - this.playerVolumeCap) * settingAlpha;
       this.muteGain += (this.targetMuteGain - this.muteGain) * muteAlpha;
-      let seconds;
-      if (this.targetGainDb < this.currentGainDb && this.targetGainDb < 0) seconds = CUT_ATTACK_SECONDS;
-      else if (this.targetGainDb > this.currentGainDb && this.currentGainDb < 0) seconds = CUT_RELEASE_SECONDS;
-      else if (this.targetGainDb > this.currentGainDb) seconds = LIFT_ATTACK_SECONDS;
-      else seconds = LIFT_RELEASE_SECONDS;
-      const gainAlpha = 1 - Math.exp(-1 / (sampleRate * seconds));
+      let gainAlpha;
+      if (this.targetGainDb < this.currentGainDb && this.targetGainDb < 0) gainAlpha = CUT_ATTACK_ALPHA;
+      else if (this.targetGainDb > this.currentGainDb && this.currentGainDb < 0) gainAlpha = CUT_RELEASE_ALPHA;
+      else if (this.targetGainDb > this.currentGainDb) gainAlpha = LIFT_ATTACK_ALPHA;
+      else gainAlpha = LIFT_RELEASE_ALPHA;
       const gainDelta = (this.targetGainDb - this.currentGainDb) * gainAlpha;
-      this.currentGainDb += Math.min(gainDelta, MAX_GAIN_INCREASE_STEP_DB / FRAME_SAMPLES);
+      this.currentGainDb += Math.min(gainDelta, MAX_GAIN_INCREASE_PER_SAMPLE_DB);
       const levelGain = dbToLinear(this.currentGainDb) * this.enabled + (1 - this.enabled);
       let futurePeak = 0;
       let rawInputPeak = 0;
@@ -403,15 +412,15 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         this.inputPeak = Math.max(this.inputPeak, Math.abs(sample));
       }
       const liftedJump = this.currentGainDb > 0.01 && futurePeak > dbToLinear(this.adaptiveTransitionCeilingDb);
-      const newSignalOnset = !this.signalActive && futurePeak > dbToLinear(ONSET_PROTECTION_TRIGGER_DB);
+      const newSignalOnset = !this.signalActive && futurePeak > ONSET_PROTECTION_THRESHOLD;
       const activeProgrammeJump = this.signalActive
         && this.cutStrength > 0.01
-        && rawInputPeak > dbToLinear(ONSET_PROTECTION_TRIGGER_DB)
-        && rawInputPeak > this.previousInputFramePeak * dbToLinear(PROGRAMME_JUMP_TRIGGER_DB);
+        && rawInputPeak > ONSET_PROTECTION_THRESHOLD
+        && rawInputPeak > this.previousInputFramePeak * PROGRAMME_JUMP_RATIO;
       if (liftedJump || newSignalOnset || activeProgrammeJump) {
         this.transitionProtectionSamples = Math.max(
           this.transitionProtectionSamples,
-          Math.round(sampleRate * TRANSITION_PROTECTION_SECONDS)
+          TRANSITION_PROTECTION_SAMPLES
         );
         this.transitionCeilingDb = this.adaptiveTransitionCeilingDb;
       }

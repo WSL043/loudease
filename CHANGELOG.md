@@ -4,6 +4,9 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Precomputed fixed AudioWorklet smoothing and onset coefficients to reduce sample-loop work; stereo PCM and diagnostic state match the previous runtime exactly in the three-rate comparison audit.
+- Restored the original inter-sample peak counterexample, calibrated the detector, and added a strict `audit:true-peak` command that reports unresolved overshoot instead of replacing failing fixtures.
+- Added separate, non-identifying Chrome Web Store acquisition tags for the English and Chinese GitHub installation links.
 - Added production AudioWorklet regression coverage at 44.1, 48, and 96 kHz for finite output, calibrated quiet lift and loud reduction, sample-safe limiting, hard mute, and estimated inter-sample peak stress.
 - Added a reproducible one-click onboarding screenshot for a controlled Chrome Web Store conversion experiment; the extension runtime and permissions are unchanged.
 

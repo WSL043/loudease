@@ -69,7 +69,7 @@ const scriptTargets = [
   'tools/limiter_worklet_tests.js',
   'tools/leveler_worklet_tests.js',
   'tools/multirate_worklet_tests.js',
-  'tools/true_peak_audit.js',
+  ['tools/true_peak_audit.js', '--self-test'],
   'tools/meter_worklet_tests.js',
   'tools/assert_test_pages.js',
   'tools/assert_failure_relevance.js',

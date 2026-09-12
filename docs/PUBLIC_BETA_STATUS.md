@@ -25,6 +25,8 @@ The GitHub repository and `v0.8.2-beta.1` prerelease are public. The release tar
 
 Chrome Web Store-managed GA4 listing analytics was enabled on `2026-09-12` to measure acquisition without adding code, identifiers, or telemetry to the extension. Store-page analytics and extension runtime telemetry are separate boundaries: the former is Google-managed aggregate listing measurement; the latter remains absent.
 
+The English and Chinese GitHub README install links now use `utm_source=github`, `utm_medium=referral`, and campaigns `readme-en` / `readme-zh`. These static labels identify the published link, never an individual visitor. Check GA4 session source/medium/campaign and the store-managed `install` event after data has finalized; Google documents a 24-48 hour delay. Tagged GitHub visits remain separate from store-search impressions and do not prove independent users. No conversion improvement is claimed yet. See [Google's UTM documentation](https://developer.chrome.com/docs/webstore/google-analytics#using_utm_parameters).
+
 ## Next measurement checkpoint
 
 Before interpreting the beta as having organic users, record a later snapshot that shows at least one of the following:
