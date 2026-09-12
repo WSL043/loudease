@@ -34,6 +34,7 @@
     "test:slider": "node tools/e2e_slider_persistence.js",
     "audit": "node tools/acceptance_audit.js --json",
     "audit:true-peak": "node tools/true_peak_audit.js",
+    "audit:true-peak-candidate": "node tools/true_peak_candidate.js && node tools/true_peak_candidate_evaluation.js",
     "audit:worklet-performance": "node tools/worklet_performance_audit.js",
     "audit:runtime": "node tools/current_runtime_audit.js --json"
   },

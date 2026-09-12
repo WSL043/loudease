@@ -12,6 +12,7 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 | Peak detector calibration | analytical quarter-rate sine, constant level, silence, and invalid-PCM rejection for 8x Hann and 16x Blackman estimates | `node tools/true_peak_audit.js --self-test` (also executed by `npm test`) |
 | Strict inter-sample peak audit | high-frequency and impulse fixtures plus restored alternating-sample and phase-offset quarter-rate counterexamples; currently fails nine cases, recorded in `docs/DSP_EVALUATION.md` | `npm run audit:true-peak` (separate from normal regression tests) |
 | Worklet equivalence/performance | exact stereo PCM and state against pinned baseline across three sample rates; lift/cut, mute, volume, settings, and source transitions | `npm run audit:worklet-performance` (requires baseline git history) |
+| Offline-only peak candidate | original 24 plus 27 expanded stress cases; bound-pruning equivalence, unchanged delay, mute, stereo, synthetic level change and VM cost; not a release gate pass | `npm run audit:true-peak-candidate` (see `docs/TRUE_PEAK_CANDIDATE.md`) |
 | Limiter | look-ahead delay, ceiling, clustered peaks, dynamic ceiling, stereo ratio, overshoot | `npm run test:dsp` |
 | Offline PCM | legacy reference vs production vs independent v4 model, steady levels, dynamics, onset, player volume, boundaries | `npm run test:dsp` |
 | Offline graph | real AudioWorklet node and AudioContext graph | `npm run test:dsp` |
