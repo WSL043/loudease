@@ -27,6 +27,8 @@ const syntaxTargets = [
   'tools/meter_worklet_tests.js',
   'tools/assert_test_pages.js',
   'tools/e2e_poc_smoke.js',
+  'tools/cdp_extension_ready.js',
+  'tools/cdp_extension_ready_tests.js',
   'tools/e2e_slider_persistence.js',
   'tools/assert_failure_relevance.js',
   'tools/assert_popup_truthfulness.js',
@@ -61,6 +63,7 @@ const syntaxTargets = [
 ];
 
 const scriptTargets = [
+  'tools/cdp_extension_ready_tests.js',
   'tools/verify.js',
   'tools/assert_poc_capture.js',
   'tools/assert_audio_worklet_limiter.js',
