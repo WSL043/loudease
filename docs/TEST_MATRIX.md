@@ -16,6 +16,7 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 | Offline PCM | legacy reference vs production vs independent v4 model, steady levels, dynamics, onset, player volume, boundaries | `npm run test:dsp` |
 | Offline graph | real AudioWorklet node and AudioContext graph | `npm run test:dsp` |
 | Capture E2E | start/stop, loud cut, quiet lift, mute, player volume, burst recovery | `npm run test:capture` |
+| Extension-page readiness | initial document, missing APIs, context replacement, wrong extension, timeout, and disconnected debugger | `node tools/cdp_extension_ready_tests.js` (also executed by `npm test`) |
 | Stability E2E | repeated capture, reload, source switching, session cleanup | `npm run test:long -- --duration-ms 30000` |
 | Silent capture E2E | live tabCapture/DSP with no system playback device, plus native-output rejection | `npm run test:silent` |
 | Real-site smoke | YouTube, Bilibili, and Douyin video/live in isolated silent Chrome | `npm run test:sites` |
@@ -23,6 +24,8 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 | Store build | allowlist, references, diagnostics stripping, locale catalogs, forbidden code | `npm run test:release` |
 
 ## Real-site release baseline
+
+Development follow-up (`2026-09-12`): [CI run 34681266561](https://github.com/WSL043/loudease/actions/runs/34681266561) failed the first capture scenario with `Cannot read properties of undefined (reading 'query')` after discovering the popup target; its remaining seven scenarios passed. The harness queried tabs without waiting for the extension execution context. It now waits for the exact document URL, extension ID, document readiness, and required APIs before evaluating extension code. A deterministic context-transition regression and the local 8/8 silent capture matrix passed after this change. Capture scenarios are not retried and persistent API absence remains a failure.
 
 The following rows require current `0.8.2` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate unless the affected runtime is byte-identical and the release review records that limited carry-forward explicitly.
 

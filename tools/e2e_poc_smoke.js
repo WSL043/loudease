@@ -4,6 +4,7 @@ const http = require('http');
 const net = require('net');
 const path = require('path');
 const { spawn } = require('child_process');
+const { waitForExtensionPage } = require('./cdp_extension_ready.js');
 
 const root = path.resolve(__dirname, '..');
 const tmpDir = path.join(root, 'tmp');
@@ -523,6 +524,7 @@ async function configureSilentSinkInExtensionPage(browserCdp, debugPort, extensi
     target.id === created.targetId || target.url === pageUrl
   ));
   try {
+    await waitForExtensionPage(page.cdp, { url: pageUrl, extensionId, requiredApis: ['storage.local.get', 'storage.local.set'] });
     const configured = await evaluateValue(page.cdp, `(${async function configureSilentSink(key) {
       await chrome.storage.local.set({ [key]: true });
       const stored = await chrome.storage.local.get(key);
@@ -949,6 +951,7 @@ async function main() {
     const popup = await connectTarget(debugPort, (target) => target.url.startsWith(popupUrl));
     sockets.push(popup.cdp);
     log(`popup target ${popup.target.type}:${popup.target.url}`);
+    await waitForExtensionPage(popup.cdp, { url: popupUrl, extensionId, requiredApis: ['tabs.query', 'runtime.sendMessage'] });
     if (checkPopupStrengthPersistence) {
       const sliderReady = await evaluateValue(popup.cdp, `(${async function waitForStrengthControl(targetOrigin) {
         const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
