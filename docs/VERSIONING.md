@@ -8,11 +8,11 @@ LoudEase versions describe the evidence and compatibility boundary of a build. T
 - GitHub tags may add a SemVer prerelease suffix such as `v0.8.0-beta.1`.
 - Documentation, package metadata, release assets, and runtime diagnostics must identify the same source commit and product version.
 
-## Private beta: 0.7.x
+## Private beta: 0.7.x (historical)
 
-The current private series may continue receiving focused fixes without creating a release for every commit. A maintenance commit on `main` does not automatically bump the version, create a tag, or publish a package.
+The private 0.7.x series could receive focused fixes without creating a release for every commit. A maintenance commit on `main` did not automatically bump the version, create a tag, or publish a package.
 
-Before the repository becomes public, stale private prereleases may be removed once, using the exact approval boundary in `docs/PUBLISHING.md`.
+Before the repository became public, stale private prereleases could be removed once using the exact approval boundary in `docs/PUBLISHING.md`. This historical rule is not permission to rewrite the current public release history.
 
 ## Public beta: 0.8.x or 0.9.x
 

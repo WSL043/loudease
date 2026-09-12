@@ -2,6 +2,8 @@
 
 Use this checklist with the Chrome Web Store Developer Dashboard for the `0.8.2` public beta. Dashboard wording can change; when it does, preserve the intent recorded here instead of guessing at a different disclosure.
 
+Publication record (`2026-09-12`): `0.8.2` is published for general availability, no policy warning was observed, and the public listing, privacy URL, support hub, package version, and install route are reachable. The unchecked boxes below remain the reusable checklist for the next update; they do not mean the current public version is awaiting first submission.
+
 ## Account
 
 - [ ] Developer registration is complete and the agreement is accepted.

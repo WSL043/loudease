@@ -117,6 +117,7 @@ async function main() {
     { url: `/monitor/index.html?previewVersion=${previewVersion}`, output: 'docs/settings-screenshot-dark.png', width: 1080, height: 616, dark: true },
     { url: '/store/assets-source.html?asset=balancing', output: 'store/assets/screenshot-balancing-1280x800.png', width: 1280, height: 800 },
     { url: '/store/assets-source.html?asset=settings', output: 'store/assets/screenshot-settings-1280x800.png', width: 1280, height: 800 },
+    { url: '/store/assets-source.html?asset=onboarding', output: 'store/assets/screenshot-onboarding-1280x800.png', width: 1280, height: 800 },
     { url: '/store/assets-source.html?asset=promo', output: 'store/assets/promo-small-440x280.png', width: 440, height: 280 },
     { url: '/store/assets-source.html?asset=process', output: 'docs/processing-flow.png', width: 1200, height: 420 }
   ];

@@ -115,6 +115,8 @@ exists('tools/assert_audio_worklet_meter.js');
 exists('tools/meter_worklet_tests.js');
 exists('tools/limiter_worklet_tests.js');
 exists('tools/leveler_worklet_tests.js');
+exists('tools/multirate_worklet_tests.js');
+exists('tools/true_peak_audit.js');
 exists('tools/assert_test_pages.js');
 exists('tools/dsp_unit_tests.js');
 exists('tools/programme_leveler_experiment.js');

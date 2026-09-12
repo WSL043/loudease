@@ -4,6 +4,9 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Added production AudioWorklet regression coverage at 44.1, 48, and 96 kHz for finite output, calibrated quiet lift and loud reduction, sample-safe limiting, hard mute, and estimated inter-sample peak stress.
+- Added a reproducible one-click onboarding screenshot for a controlled Chrome Web Store conversion experiment; the extension runtime and permissions are unchanged.
+
 ## 0.8.2 - 2026-09-01
 
 - Added a configurable target-loudness baseline from -22 dB to -16 dB so listeners can choose gentler or stronger balancing without turning the control into a conventional master-volume slider.

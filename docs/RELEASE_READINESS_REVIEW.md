@@ -2,15 +2,15 @@
 
 Review baseline: version `0.8.2` public beta with a configurable target-loudness baseline, unified AudioWorklet DSP, independent multi-tab capture sessions, an internationalized compact popup, and separate development/store builds.
 
-Latest code/package audit: `2026-09-01`. Static, DSP, isolated-Chrome slider/capture, release-build, and package checks passed for `0.8.2`; the capture matrix passed 8/8 and the YouTube/Bilibili/Douyin site matrix passed 6/6. The verified store package contains 44 runtime files and reproduced the same SHA-256 (`6C212FAEAC5D428A878CCAEAA7BDAF611BFB999F60E8387CF90DCB9B351422F9`) across consecutive builds. A current-version Bilibili live endurance run passed for `1,800,005 ms` with 360 continuous samples, `89,907` fresh signal ticks, zero hard-clipped samples, one live audio track, and peak heap growth of `753,984 bytes`; stop cleanup passed. Historical Windows endpoint A/B evidence remains useful context but is not presented as a new `0.8.2` measurement. These measurements prove the pipeline and restoration behavior, not universal listening preference.
+Latest code/package audit: `2026-09-12`. Static, DSP, isolated-Chrome slider/capture, release-build, and package checks passed for `0.8.2`; the capture matrix passed 8/8 and the YouTube/Bilibili/Douyin site matrix passed 6/6. The production AudioWorklet also passed 15 multirate assertions at 44.1, 48, and 96 kHz for finite output, quiet lift, loud calibrated output, sample-safe limiting, and hard mute. A separate 30-assertion, 8x windowed-sinc stress screen kept estimated inter-sample peaks below `0 dBTP` for high-frequency, near-Nyquist, and clustered-impulse fixtures at all three rates. The verified store package contains 44 runtime files and reproduced the same SHA-256 (`6C212FAEAC5D428A878CCAEAA7BDAF611BFB999F60E8387CF90DCB9B351422F9`) across consecutive builds. A current-version Bilibili live endurance run passed for `1,800,005 ms` with 360 continuous samples, `89,907` fresh signal ticks, zero hard-clipped samples, one live audio track, and peak heap growth of `753,984 bytes`; stop cleanup passed. Historical Windows endpoint A/B evidence remains useful context but is not presented as a new `0.8.2` measurement. These measurements prove the pipeline and restoration behavior, not universal listening preference.
 
 ## Decision
 
 | Target | Decision | Reason |
 |---|---|---|
 | Local release candidate | Ready | Clean reproducible store ZIP and current verification evidence exist; no universal compatibility claim is implied |
-| Public GitHub beta | Technically ready | Source, package, assets, six-site smoke, and representative endurance evidence are current; publishing the private repository remains an explicit maintainer decision |
-| Chrome Web Store public beta | Technically ready | Package, copy, privacy fields, assets, endpoint A/B, site matrix, and representative endurance evidence are current; public privacy/support URLs and account-owner dashboard submission remain |
+| Public GitHub beta | Published | `v0.8.2-beta.1` targets the tested source commit and contains the matching verified store ZIP |
+| Chrome Web Store public beta | Published; listing revision pending | Version `0.8.2` is public for general availability; a package-neutral third-screenshot revision is waiting for review and configured for automatic publication |
 | Version `1.0.0` | Not yet | Requires the stable-release gates in `docs/VERSIONING.md` |
 
 ## Confirmed implementation
@@ -48,14 +48,15 @@ The store verifier must confirm:
 - all manifest, locale, CSS, HTML, worklet, and icon references exist;
 - a valid default locale and complete translated message catalogs.
 
-## Remaining owner and submission gates
+## Remaining post-publication and stable-release gates
 
-1. Make the privacy and support URLs publicly reachable before submission, then recheck every listing URL.
-2. Keep the retained HTTP(S) host-permission rationale from `store/PRIVACY_PRACTICES.md` aligned with the final package. The permission is used only to restore media/player observation on useful, captured, or explicitly opened tabs across navigation; it does not process audio or collect browsing history.
-3. Publish English as the initial listing. Unreviewed localized listing drafts remain unpublished and do not block the English public beta.
-4. Confirm the store build still has zero remote telemetry. Any future collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
-5. Enable the Chrome Web Store Support Hub or configure the reviewed Support URL, then verify the privacy-safe GitHub Issue Form route described in `docs/FEEDBACK.md`.
-6. Complete the account-owner checklist in `store/ACCOUNT_SETUP.md`. The maintainer reports that the one-time registration fee was probably already paid; contact-email verification, agreements, two-step verification, and final submission still require confirmation in the Developer Dashboard.
+1. Verify the third-screenshot revision after Chrome Web Store approval and record its publication date before starting the matched 14-day acquisition window.
+2. Recheck the public homepage, privacy, support, and install URLs for every update.
+3. Keep the retained HTTP(S) host-permission rationale from `store/PRIVACY_PRACTICES.md` aligned with the published package. The permission is used only to restore media/player observation on useful, captured, or explicitly opened tabs across navigation; it does not process audio or collect browsing history.
+4. Confirm every future store build still has zero remote telemetry. Any future extension data collection must pass `docs/DATA_GOVERNANCE.md` and ship with new explicit consent and store disclosures.
+5. Monitor the Chrome Web Store Support Hub, ratings, installs, uninstalls, impressions, weekly users, and store-managed GA4 acquisition data. Treat the Users report as installation evidence, not active-use telemetry.
+6. Retain and expand the inter-sample stress audit with encoded real-world fixtures. The current high-frequency and impulse screen passes with roughly `2.4 dB` minimum estimated margin, so detector oversampling remains an evidence-gated candidate rather than a production change.
+7. Complete a current `0.8.2` audible endpoint start/stop A/B and the broader stable-release listening and endurance gates before promoting the product to `1.0.0`.
 
 The broader multi-content listening matrix and project-defined two-hour mixed-content endurance session remain `1.0.0` stable-release gates. A clearly labeled public beta is the mechanism for collecting real-user compatibility and listening feedback when no private tester pool exists; it must not be marketed as universal compatibility or universally preferred sound.
 

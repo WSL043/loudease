@@ -1,15 +1,17 @@
 # Chrome Web Store Developer Account
 
-These are account-owner actions. They cannot be completed by the extension build or by an automated coding agent.
+These are account-owner requirements. LoudEase is already published, so the registration steps below are retained as the publisher-account baseline and must be rechecked before future submissions or account transfers.
 
-## Before registration
+Current observation (`2026-09-12`): the WSL043 publisher account can access the public LoudEase item and its Developer Dashboard. Do not infer that every account-level requirement remains satisfied forever; policy notices, contact verification, agreements, and two-step verification still belong to the account owner.
+
+## Account baseline
 
 - Use a dedicated Google account for publishing if practical.
 - Choose the account carefully: the Chrome Web Store developer email cannot be changed after registration without creating another account and transferring items.
 - Use an inbox that WSL043 checks regularly for policy, review, and security notices.
 - Enable Google two-step verification before attempting to publish or update an item.
 
-## Register and configure
+## Registration and maintenance
 
 1. Open the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole/).
 2. Review and accept the developer agreement and policies.
@@ -17,7 +19,7 @@ These are account-owner actions. They cannot be completed by the extension build
 4. Verify the developer contact email in the dashboard.
 5. Set the public publisher display name and support contact deliberately.
 6. Add a physical address only if LoudEase later sells purchases, features, or subscriptions and the dashboard requires it.
-7. Do not configure the Chrome Web Store API for the first release. Manual first publication is simpler and keeps credentials out of the project.
+7. Do not configure the Chrome Web Store API unless repeatable update automation becomes necessary. Manual publication keeps credentials out of the project and remains sufficient for the current release cadence.
 
 Official references:
 
