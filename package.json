@@ -33,6 +33,8 @@
     "test:long": "node tools/e2e_long_run_smoke.js",
     "test:slider": "node tools/e2e_slider_persistence.js",
     "audit": "node tools/acceptance_audit.js --json",
+    "audit:true-peak": "node tools/true_peak_audit.js",
+    "audit:worklet-performance": "node tools/worklet_performance_audit.js",
     "audit:runtime": "node tools/current_runtime_audit.js --json"
   },
   "engines": {

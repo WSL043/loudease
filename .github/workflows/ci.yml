@@ -18,6 +18,13 @@ jobs:
           node-version: 22
       - name: Static and DSP checks
         run: npm test
+      - name: Experimental true-peak audit (known limitation)
+        id: true_peak
+        continue-on-error: true
+        run: npm run audit:true-peak
+      - name: Surface unresolved true-peak results
+        if: steps.true_peak.outcome == 'failure'
+        run: Write-Output '::warning title=Unresolved true-peak audit::The strict inter-sample audit failed. This non-blocking research step does not establish true-peak safety. Review its output and docs/DSP_EVALUATION.md.'
       - name: Popup persistence integration
         run: npm run test:slider
       - name: Supported capture integration
