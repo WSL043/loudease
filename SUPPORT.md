@@ -13,7 +13,7 @@ LoudEase support is public by default and organized by the kind of evidence need
 | Focused product proposal | [Feature request](https://github.com/WSL043/loudease/issues/new?template=feature.yml) |
 | Security vulnerability | [Private security advisory](https://github.com/WSL043/loudease/security/advisories/new) |
 
-Chrome Web Store reviews are useful for public product impressions after the listing exists, but they are not a debugging channel. Store support and GitHub links will be enabled only when their corresponding public surfaces are ready.
+Chrome Web Store reviews are useful for public product impressions, but they are not a debugging channel. The Store Support Hub and public GitHub Issue Forms are both available; use the structured GitHub forms when a report needs reproduction steps or diagnostics.
 
 ## Before submitting
 

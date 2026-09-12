@@ -122,6 +122,8 @@ Test cheap persistence, stationarity, crest, or spectral-flatness evidence again
 
 Test 4x detector oversampling without oversampling the full audio path. Promote only if it catches inter-sample overshoot at acceptable render cost.
 
+Current screening result (`2026-09-12`): an 8x windowed-sinc engineering audit now exercises the production worklet after maximum-lift preconditioning at 44.1, 48, and 96 kHz. High-frequency sines from `0.35 x` sample rate through `0.49 x` sample rate plus clustered impulses remained below `0 dBTP`; the narrowest observed margin was about `2.4 dB`. This is not a standards-compliant BS.1770 meter and does not close the true-peak limitation, but it provides no failing evidence for adding detector oversampling to the real-time path yet.
+
 ### Metadata-assisted boundaries and loudness
 
 Use trustworthy site or media metadata when available, while retaining the PCM fallback. Do not add site-specific assumptions that silently misclassify ordinary pages.

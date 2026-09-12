@@ -21,6 +21,7 @@
     .asset { display: none; width: 100%; height: 100%; }
     body[data-asset="balancing"] .balancing,
     body[data-asset="settings"] .settings,
+    body[data-asset="onboarding"] .onboarding,
     body[data-asset="promo"] .promo,
     body[data-asset="process"] .process { display: grid; }
     .shot {
@@ -108,6 +109,34 @@
       box-shadow: 0 24px 70px rgba(23, 32, 43, .14);
     }
     .settingsFrame img { width: 1080px; height: 616px; display: block; }
+    .onboarding {
+      grid-template-columns: minmax(0, 1fr) 430px;
+      align-items: center;
+      gap: 64px;
+      padding: 70px 92px;
+      background:
+        radial-gradient(circle at 84% 18%, rgba(117, 162, 255, .15), transparent 27%),
+        radial-gradient(circle at 17% 83%, rgba(67, 196, 147, .14), transparent 30%),
+        #f4f6f8;
+    }
+    .onboardingCopy h1 { max-width: 610px; margin: 0; color: #17202b; font-size: 52px; line-height: 1.04; letter-spacing: -.03em; }
+    .onboardingCopy > p { max-width: 590px; margin: 20px 0 34px; color: #687581; font-size: 19px; line-height: 1.5; }
+    .steps { display: grid; gap: 18px; }
+    .step { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 14px; }
+    .stepNumber { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: #fff; background: #17202b; font-size: 16px; font-weight: 800; }
+    .step strong { display: block; color: #17202b; font-size: 18px; }
+    .step span { display: block; margin-top: 3px; color: #687581; font-size: 14px; line-height: 1.4; }
+    .onboardingPopup {
+      width: 402px;
+      padding: 30px;
+      border: 1px solid #cfd7de;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 28px 80px rgba(23, 32, 43, .18);
+    }
+    .onboardingPopup img { width: 340px; height: 275px; display: block; }
+    .localBadge { display: flex; align-items: center; gap: 10px; margin-top: 22px; padding-top: 20px; border-top: 1px solid #e3e8ec; color: #52606b; font-size: 14px; font-weight: 650; }
+    .localBadge i { width: 10px; height: 10px; border-radius: 50%; background: #159669; box-shadow: 0 0 0 5px rgba(21, 150, 105, .12); }
     .promo {
       position: relative;
       grid-template-columns: 1fr 1fr;
@@ -211,6 +240,21 @@
       <img src="../docs/settings-screenshot-light.png" alt="Current LoudEase settings page">
     </section>
   </main>
+  <main class="asset onboarding">
+    <section class="onboardingCopy">
+      <h1>Start balancing in one click.</h1>
+      <p>LoudEase works on the tab you choose. Chrome keeps every new tab under your control.</p>
+      <div class="steps">
+        <div class="step"><b class="stepNumber">1</b><div><strong>Play audio</strong><span>Open a normal web page with video, music, or a live stream.</span></div></div>
+        <div class="step"><b class="stepNumber">2</b><div><strong>Click LoudEase</strong><span>One click authorizes that tab and starts local audio processing.</span></div></div>
+        <div class="step"><b class="stepNumber">3</b><div><strong>Look for Active</strong><span>The live meter confirms that balancing is working now.</span></div></div>
+      </div>
+    </section>
+    <aside class="onboardingPopup">
+      <img src="../docs/popup-screenshot-light.png" alt="Current LoudEase popup showing active processing">
+      <div class="localBadge"><i></i><span>Audio stays on your device</span></div>
+    </aside>
+  </main>
   <main class="asset promo">
     <div class="promoMark"><img src="../assets/logo-ai-a-dark.png" alt=""></div>
     <div class="promoCopy"><h1>LoudEase</h1><p>Comfortable web audio,<br>processed locally.</p><div class="rule"></div></div>
@@ -233,7 +277,7 @@
   </main>
   <script>
     const asset = new URLSearchParams(location.search).get('asset') || 'balancing';
-    document.body.dataset.asset = ['balancing', 'settings', 'promo', 'process'].includes(asset) ? asset : 'balancing';
+    document.body.dataset.asset = ['balancing', 'settings', 'onboarding', 'promo', 'process'].includes(asset) ? asset : 'balancing';
   </script>
 </body>
 </html>

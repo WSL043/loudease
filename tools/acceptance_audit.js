@@ -629,7 +629,7 @@ if (asJson) {
     completionBlockers
   }, null, 2));
 } else {
-  console.log(`Acceptance audit for WebVolumeBalancer ${manifest.version || 'unknown'}`);
+  console.log(`Acceptance audit for LoudEase ${manifest.version || 'unknown'}`);
   for (const item of results) {
     console.log(`${item.state.toUpperCase().padEnd(8)} ${item.name} - ${item.evidence}`);
   }

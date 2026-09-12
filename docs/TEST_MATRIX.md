@@ -8,6 +8,8 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 |---|---|---|
 | Pure policy | settings, target-loudness bounds, gate hysteresis, gated programme estimate, confidence, strength zero, player-volume bounds, live quiet-bed cap | `npm test` |
 | Unified worklet | baseline neutrality, programme convergence, cold start, adaptive onset, bounded quiet-bed recovery, dynamics, mute, player cap, source reset | `npm run test:dsp` |
+| Production worklet multirate | 44.1, 48, and 96 kHz finite output, quiet lift, loud calibrated output, sample-safe limiting, hard mute | `node tools/multirate_worklet_tests.js` (also included by `tools/verify.js`) |
+| Inter-sample peak stress | production worklet after maximum-lift preconditioning; high-frequency, near-Nyquist, and clustered-impulse fixtures at 44.1, 48, and 96 kHz; bounded 8x windowed-sinc estimate | `node tools/true_peak_audit.js` |
 | Limiter | look-ahead delay, ceiling, clustered peaks, dynamic ceiling, stereo ratio, overshoot | `npm run test:dsp` |
 | Offline PCM | legacy reference vs production vs independent v4 model, steady levels, dynamics, onset, player volume, boundaries | `npm run test:dsp` |
 | Offline graph | real AudioWorklet node and AudioContext graph | `npm run test:dsp` |

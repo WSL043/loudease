@@ -1,6 +1,8 @@
 # Chrome Web Store Privacy Practices
 
-Use this as the source of truth when completing the Chrome Web Store Privacy practices form. Re-check the dashboard wording at submission time because form labels can change.
+Use this as the source of truth when completing or reviewing the Chrome Web Store Privacy practices form. Re-check the dashboard wording before every submission because form labels can change.
+
+Dashboard review (`2026-09-12`): the published item declares no remote code, selects Website content and Web history for local processing, leaves the other data categories unselected, includes all three Limited Use certifications, and points to the public `PRIVACY.md`. Chrome Web Store-managed GA4 is enabled for aggregate listing-page measurement; no GA4 or other analytics code is bundled in the extension. These selections match the rationale below.
 
 ## Single purpose
 
@@ -44,11 +46,12 @@ Chrome requires disclosure even when data is handled only on the user's device.
 - Data is not used or transferred for personalized advertising.
 - Data is not used for creditworthiness or lending.
 - The store build sends no analytics or background telemetry.
+- Chrome Web Store-managed GA4 measures the store listing separately from the extension runtime and does not change the extension's data flow.
 - Chrome Sync may synchronize settings according to the user's Google account configuration.
 - A support report is generated locally, excludes browsing identity and audio, and leaves the browser only when the user deliberately submits it.
 - The public privacy policy contains the affirmative Chrome Web Store Limited Use statement.
 
 ## Submission blockers
 
-- The privacy policy and support URL must be public HTTPS pages. The current private GitHub repository does not satisfy that requirement for ordinary users or reviewers.
-- Re-run the store package audit immediately before upload and confirm that no localhost diagnostic permission, string, UI, or network code remains.
+- Keep the privacy policy and support URL public over HTTPS for ordinary users and reviewers.
+- Re-run the store package audit immediately before every upload and confirm that no localhost diagnostic permission, string, UI, or network code remains.

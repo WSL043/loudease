@@ -1,6 +1,6 @@
 # Chrome Web Store Listing
 
-This document contains copy-ready fields for the LoudEase store submission. During private preparation, public URLs must be verified before submission.
+This document contains the canonical Chrome Web Store copy for LoudEase. Version `0.8.2` is publicly listed; re-verify these fields and URLs before every update.
 
 ## Default listing
 
@@ -10,7 +10,7 @@ LoudEase
 
 **Summary**
 
-Automatically normalizes loud and quiet tab audio locally while respecting mute and player volume.
+Automatically normalizes loud and quiet tab audio while respecting mute and player volume.
 
 **Single purpose**
 
@@ -48,13 +48,11 @@ This is a public beta. Core capture, mute, player-volume, multi-tab, source-swit
 
 ## URLs
 
-These URLs must be publicly reachable before store submission.
+These URLs are public and must remain reachable for store users and reviewers.
 
 - Homepage: `https://github.com/WSL043/loudease`
 - Support: `https://github.com/WSL043/loudease/issues/new/choose`
 - Privacy policy: `https://github.com/WSL043/loudease/blob/main/PRIVACY.md`
-
-While the repository is private, these links are not usable by store reviewers or ordinary users. Do not submit the store listing until the repository is public or the same pages are hosted at another public HTTPS location.
 
 ## Distribution and localization
 
@@ -65,7 +63,7 @@ While the repository is private, these links are not usable by store reviewers o
 
 Do not claim support for a named site unless current-version evidence exists for its video and live-audio paths. Use the broader claim "ordinary web tab audio" until the public compatibility matrix supports stronger wording.
 
-Developer registration and account-owner steps are tracked separately in `store/ACCOUNT_SETUP.md`. They require WSL043 to accept the agreements, pay the registration fee, verify the account, and enable two-step verification.
+Developer registration and account-owner requirements remain documented in `store/ACCOUNT_SETUP.md` for future publisher maintenance.
 
 ## Submission notes
 
@@ -73,6 +71,7 @@ Developer registration and account-owner steps are tracked separately in `store/
 - Paid product: No
 - In-app purchases: No
 - Advertising: No
-- Analytics or background telemetry: No
+- Extension analytics or background telemetry: No
+- Chrome Web Store listing analytics: Google-managed GA4 enabled; no analytics code is bundled in the extension
 - Support reports: Generated locally and submitted only when the user chooses
 - Parallel beta listing: If a beta and stable listing coexist, label the beta name and description clearly as `BETA` or `DEVELOPMENT BUILD`.

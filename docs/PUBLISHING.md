@@ -2,9 +2,11 @@
 
 This workflow keeps development flexible without presenting obsolete private builds as public product history.
 
-## Phase 1: private preparation
+Current state (`2026-09-12`): the repository, GitHub prerelease `v0.8.2-beta.1`, and Chrome Web Store version `0.8.2` are public. The GitHub prerelease targets the published source commit and contains the verified store asset; its notes are in `docs/releases/0.8.2-beta.1.md`. A listing-only Chrome Web Store revision adding the third onboarding screenshot is waiting for review and will publish automatically after approval. The phase 1 and phase 2 steps below are retained as release-history policy.
 
-Keep the repository private while completing:
+## Phase 1: private preparation (historical)
+
+This phase was used to keep the repository private while completing:
 
 - Chrome Web Store developer registration and two-step verification;
 - final store package, privacy fields, screenshots, support route, and test instructions;
@@ -12,7 +14,7 @@ Keep the repository private while completing:
 - current-version automated, runtime, endurance, and listening evidence;
 - one explicit decision about stale private prereleases.
 
-Current private cleanup candidates:
+Historical private cleanup candidates at the time of launch:
 
 | Release | Tag |
 |---|---|
@@ -20,7 +22,7 @@ Current private cleanup candidates:
 | LoudEase 0.7.1 Beta 1 | `v0.7.1-beta.1` |
 | LoudEase 0.7.1 Beta 2 | `v0.7.1-beta.2` |
 
-These records must not be made public as the launch history. Deleting a release or tag is destructive and requires the maintainer to approve this exact list first. Removing a GitHub record does not revoke the license granted with a copy that was already distributed.
+These records were not intended to become the public launch history. Deleting any remaining release or tag is destructive and still requires the maintainer to approve the exact target first. Removing a GitHub record does not revoke the license granted with a copy that was already distributed.
 
 ## Phase 2: one public GitHub beta
 
@@ -54,7 +56,7 @@ After beta blockers are resolved and the gates in `docs/VERSIONING.md` and `docs
 
 The public beta remains visible below the stable release. This is normal project history, not clutter.
 
-## Maintainer actions that are never automated
+## Maintainer actions that require explicit authorization
 
 - paying the Chrome Web Store registration fee;
 - accepting developer agreements or policy terms;
@@ -64,4 +66,4 @@ The public beta remains visible below the stable release. This is normal project
 - submitting or publishing a store item;
 - changing the official version, release channel, or product identity.
 
-Automation may prepare files and verify packages, but WSL043 performs these account and publication actions.
+Automation may prepare files and verify packages. It may perform an account or publication action only after WSL043 explicitly authorizes the relevant public operation and the exact target has been verified.
