@@ -27,6 +27,11 @@ jobs:
         run: Write-Output '::warning title=Unresolved true-peak audit::The strict inter-sample audit failed. This non-blocking research step does not establish true-peak safety. Review its output and docs/DSP_EVALUATION.md.'
       - name: Popup persistence integration
         run: npm run test:slider
+      - name: Offline candidate peak regressions (not shipped)
+        run: |
+          node tools/true_peak_candidate.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/true_peak_candidate_evaluation.js --stress-only
       - name: Supported capture integration
         run: npm run test:capture
       - name: Store release build

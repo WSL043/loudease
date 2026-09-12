@@ -1,0 +1,113 @@
+# Offline detector-only limiter candidate
+
+Status: experimental tooling, not shipped. The production worklet and the public
+0.8.2 package have not changed. Passing this experiment does not certify a
+true-peak meter, a limiter ceiling, browser performance, or listening quality.
+
+## Hypothesis and implementation
+
+The current limiter reacts to sample peaks. Reconstructed peaks between samples
+can exceed full scale, and release during the look-ahead interval can weaken
+protection before a transient leaves the delay buffer.
+
+`tools/true_peak_candidate.js` evaluates a replacement detector in a copy of the
+current worklet loaded into a Node VM. Source anchors must each occur exactly
+once; a changed integration point fails instead of silently testing production.
+No extension source imports the candidate. Both build targets exclude `tools`.
+
+The candidate adds three fractional phases (4x detection) with a normalized Hann
+windowed sinc, 64 taps per phase, to the original sample-peak check. It retains
+linked stereo gain and holds a new limiter reduction through the existing
+look-ahead interval plus the detector support. It does not resample the output,
+lower the global ceiling, alter loudness policy, or add network access.
+
+Two adjacent 64-sample chunks provide a conservative maximum magnitude over the
+FIR history. Multiplying that magnitude by the largest absolute coefficient sum
+bounds every interpolated phase. When the bound is below the current ceiling,
+the FIR multiplies can be skipped. History still advances; this is not a
+signal-classification heuristic. Tests require identical gain requirements and
+byte-identical stereo PCM with and without this optimization.
+
+Detector history and coefficients occupy 3.5 KiB of typed-array storage per
+processor, plus fixed object/scalar overhead. The sample loop creates no new
+buffers. The 32-sample detector observation delay fits inside the existing 5 ms
+audio delay at the tested 44.1, 48 and 96 kHz rates. Impulse tests verify that
+the output delay remains unchanged. Rates outside that set are not qualified.
+
+## Reproducible evaluation
+
+```bash
+node tools/true_peak_audit.js
+node tools/true_peak_candidate.js
+node tools/true_peak_candidate_evaluation.js
+```
+
+The first command is expected to fail on current production, retaining all
+counterexamples. The other two commands must pass for the current candidate.
+`npm run audit:true-peak-candidate` runs the latter pair. Run the benchmark
+without simultaneous test workloads; it performs three alternating-order
+trials after warm-up. It measures Node VM elapsed time, not Chrome CPU use.
+
+The short calibration, conservative-bound equivalence, unchanged delay and
+active-limiter mute tests also run in `npm test`. CI runs both the 24 original
+counterexamples and the expanded stress suite (`--stress-only`) as blocking
+candidate regressions. This does not remove the separate, non-blocking failed
+production audit. CI does not enforce a timing threshold on shared runners.
+
+All stress outputs are checked with both an 8x Hann/radius-32 reconstruction and
+a 16x Blackman/radius-128 reconstruction, including when the short filter passes.
+The reference estimates are engineering diagnostics, not certified hardware or
+standards-compliance measurements. See [ITU-R BS.1770](https://www.itu.int/rec/R-REC-BS.1770)
+for the measurement reference, not certification of this implementation.
+
+## Results on 2026-09-12
+
+| Fixture group, across three sample rates | Production over full scale | Candidate over full scale |
+|---|---:|---:|
+| Original high-frequency, impulse and restored counterexamples | 9 / 24 | 0 / 24 |
+| Burst onset/end, phase variation, short alternating bursts, opposite impulse pairs and deterministic wideband signal | 21 / 27 | 0 / 27 |
+
+The candidate's smallest measured margin across the expanded 51 cases is about
+0.475 dB. This is a finite-set observation, not an all-input guarantee. A shorter
+initial 32-tap candidate left only about 0.09 dB on the original counterexamples;
+the retained candidate uses 64 taps to increase the reconstruction support.
+
+A ten-second stereo synthetic sequence covers quiet, ordinary and loud levels,
+mute while input continues, zero-volume silence, quarter player volume,
+disabling, programme reset and recovery. All rates retain the 2:1 inverted
+stereo ratio, and muted sections remain exactly zero. The largest absolute
+one-second RMS change from production is below 0.05 dB (test limit: 0.1 dB).
+This metric does not measure distortion or prove inaudibility. Original quiet
+sections and the tested quarter-volume section are byte-identical.
+
+In the final isolated benchmark (Node v24.19.0 on Windows), median elapsed-time
+overhead versus production is 7.69%, 6.14% and 5.79% at 44.1, 48 and 96 kHz.
+The equivalent unpruned detector costs 10.06%, 8.02% and 9.25%, respectively.
+Both paths produce byte-identical PCM. These are ordinary-sequence measurements,
+not a worst-case bound; continuous high-frequency material may exercise every
+FIR tap. Earlier unoptimized prototypes incurred substantially larger overhead.
+
+Generated evidence is kept locally in `tmp/true-peak-audit.json`,
+`tmp/true-peak-candidate-audit.json` and
+`tmp/true-peak-candidate-evaluation.json`. The evaluation records source hashes,
+per-fixture peaks, per-section changes, trial timings and pruning equivalence.
+The stress-only command writes a separate report rather than replacing timing
+evidence. Failing stress results remain in the reports and produce exit code 1.
+
+## Promotion remains gated
+
+This candidate is ready for further evaluation, not release. Required next work:
+
+1. Measure the actual candidate AudioWorklet in Chrome, including worst-case
+   sustained high-frequency material and multiple tabs. Node timings do not
+   establish the render-thread deadline or whole-browser CPU budget.
+2. Broaden control-transition coverage under active limiting: live ceiling and
+   volume changes, source resets, mute/unmute and channel topology changes.
+3. Evaluate legally usable dialogue, music, ambience and transients with
+   controlled listening and distortion/envelope metrics. Small RMS differences
+   do not rule out pumping or transient damage.
+4. Re-run the full DSP and release gates against the exact promoted runtime,
+   including fallback-policy agreement and current-version real-site evidence.
+
+Do not enable the candidate through a hidden runtime switch or ship a package
+with a different DSP path than the published source.

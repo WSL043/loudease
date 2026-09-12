@@ -10,7 +10,7 @@ const SAMPLE_RATES = [44100, 48000, 96000];
 const SAMPLE_CEILING = 10 ** (-3 / 20);
 const TRUE_PEAK_LIMIT = 1;
 
-function loadProcessor(sampleRate) {
+function loadProcessor(sampleRate, source = workletSource) {
   let ProcessorClass = null;
   class AudioWorkletProcessor {
     constructor() {
@@ -29,7 +29,7 @@ function loadProcessor(sampleRate) {
     }
   });
   vm.runInContext(policySource, context, { filename: 'shared/programme-leveler-policy.js' });
-  vm.runInContext(workletSource, context, { filename: 'offscreen/leveler-worklet.js' });
+  vm.runInContext(source, context, { filename: 'offscreen/leveler-worklet.js' });
   if (typeof ProcessorClass !== 'function') throw new Error(`production leveler processor did not register at ${sampleRate} Hz`);
   return ProcessorClass;
 }
@@ -115,6 +115,15 @@ function assert(name, condition, details = '') {
   process.exitCode = 1;
 }
 
+function measurePeaks(output) {
+  const measuredSamplePeak = samplePeak(output);
+  const measuredTruePeak = estimatedTruePeak(output);
+  // A short-filter pass must not hide a long-filter fail.
+  const referencePeak = estimatedTruePeak(output, 16, 128, 'blackman');
+  return { measuredSamplePeak, measuredTruePeak, referencePeak,
+    fullScaleExceeded: measuredTruePeak >= TRUE_PEAK_LIMIT || referencePeak >= TRUE_PEAK_LIMIT };
+}
+
 function calibrate() {
   const sine = Float32Array.from({ length: 2048 }, (_, index) => Math.sin(Math.PI * index / 2 + Math.PI / 4));
   assert('phase-offset Fs/4 fixture has a -3.01 dBFS sample peak', Math.abs(samplePeak(sine) - Math.SQRT1_2) < 1e-6);
@@ -127,13 +136,17 @@ function calibrate() {
   let rejected = false;
   try { estimatedTruePeak(new Float32Array([0, NaN, 0])); } catch { rejected = true; }
   assert('detector rejects non-finite PCM instead of reporting a safe peak', rejected);
+  const edge = Float32Array.from({ length: 4096 }, (_, index) => index < 512 ? 0 : (index % 2 ? -0.58 : 0.58));
+  const measurements = measurePeaks(edge);
+  assert('long-filter-only overshoot cannot pass the audit',
+    measurements.measuredTruePeak < 1 && measurements.referencePeak > 1 && measurements.fullScaleExceeded);
 }
 
-function audit() {
+function audit({ loader = loadProcessor, reportName = 'true-peak-audit', label = 'production' } = {}) {
   let unsafe = 0;
   const report = [];
   for (const sampleRate of SAMPLE_RATES) {
-    const ProcessorClass = loadProcessor(sampleRate);
+    const ProcessorClass = loader(sampleRate);
     const fixtures = [
       ['0.35 x rate sine', 0.35, 0.37],
       ['0.417 x rate sine', 5 / 12, 0.71],
@@ -156,17 +169,14 @@ function audit() {
       configure(processor);
       render(processor, Math.ceil(sampleRate * 3 / BLOCK_SIZE) * BLOCK_SIZE, (index) => 0.02 * Math.sin(2 * Math.PI * 997 * index / sampleRate));
       const output = render(processor, 8192, generator);
-      const measuredSamplePeak = samplePeak(output);
-      const measuredTruePeak = estimatedTruePeak(output);
-      const referencePeak = measuredTruePeak >= TRUE_PEAK_LIMIT
-        ? estimatedTruePeak(output, 16, 128, 'blackman') : null;
+      const { measuredSamplePeak, measuredTruePeak, referencePeak, fullScaleExceeded } = measurePeaks(output);
       const record = {
         fixture: name,
         sampleRate,
         samplePeakDbfs: 20 * Math.log10(Math.max(1e-12, measuredSamplePeak)),
         estimatedTruePeakDbtp: 20 * Math.log10(Math.max(1e-12, measuredTruePeak)),
-        crossCheckDbtp: referencePeak === null ? null : 20 * Math.log10(Math.max(1e-12, referencePeak)),
-        fullScaleExceeded: measuredTruePeak >= TRUE_PEAK_LIMIT || referencePeak >= TRUE_PEAK_LIMIT
+        crossCheckDbtp: 20 * Math.log10(Math.max(1e-12, referencePeak)),
+        fullScaleExceeded
       };
       report.push(record);
       const details = JSON.stringify(record);
@@ -175,11 +185,12 @@ function audit() {
       if (record.fullScaleExceeded) unsafe += 1;
     }
   }
-  const result = { schemaVersion: 1, audit: 'engineering-inter-sample-peak', certifiedMeter: false, settings: { cutStrength: 0, liftStrength: 100, targetLoudnessDb: -19 }, unsafeFixtures: unsafe, fixtures: report };
-  const reportPath = path.join(root, 'tmp', 'true-peak-audit.json');
+  const result = { schemaVersion: 2, audit: 'engineering-inter-sample-peak', label, certifiedMeter: false, settings: { cutStrength: 0, liftStrength: 100, targetLoudnessDb: -19 }, unsafeFixtures: unsafe, fixtures: report };
+  const reportPath = path.join(root, 'tmp', `${reportName}.json`);
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   fs.writeFileSync(reportPath, `${JSON.stringify(result, null, 2)}\n`);
   console.log(`AUDIT ${unsafe}/${report.length} fixtures exceeded estimated full scale. Report: ${reportPath}`);
+  return result;
 }
 
 if (require.main === module) {
@@ -187,4 +198,4 @@ if (require.main === module) {
   if (!process.exitCode && !process.argv.includes('--self-test')) audit();
 }
 
-module.exports = { loadProcessor, configure, render, samplePeak, estimatedTruePeak };
+module.exports = { loadProcessor, configure, render, samplePeak, estimatedTruePeak, measurePeaks, audit };
