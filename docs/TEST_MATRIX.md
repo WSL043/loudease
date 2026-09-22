@@ -11,6 +11,13 @@ offline stereo cases and four concurrent silent real-time contexts per variant.
 Candidate timing is recorded, not gated on a shared runner; production's known
 inter-sample failure is not hidden. See [measurement boundaries](VOLUME_INTENT.md).
 
+`node tools/true_peak_control_audit.js` adds 30 finite stereo records under active
+limiting, with actual rendered tails, both-channel reconstruction, volume/mute,
+source/settings and mono-to-stereo input transitions. It runs in `npm test`.
+Peak-meter self-tests distinguish interior crops from finite zero-extended
+records and reject insufficient interior context; five EBU Tech 3341 tone
+definitions are checked, without claiming full meter compliance.
+
 Local capture E2E emits synthetic audio by design. The default developer-safe entry points use an isolated Chrome profile, Chrome's fake audio output, and the Web Audio silent sink so the live DSP graph remains measurable without opening the system playback device. Direct audible runs remain gated behind explicit opt-in.
 
 | Layer | Scenarios | Command |

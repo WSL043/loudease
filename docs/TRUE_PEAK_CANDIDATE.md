@@ -6,6 +6,38 @@ true-peak meter, a limiter ceiling, browser performance, or listening quality.
 
 ## Chrome follow-up, 2026-09-22
 
+### Finite-record/control qualification follow-up
+
+The reference meter previously skipped filter support at both record edges;
+an input shorter than that support silently received only a sample-peak check.
+The default `interior` mode now rejects insufficient context and explicitly
+describes a crop of continuing audio. New `zero` mode reconstructs complete
+finite records including both edges and filter tails. Zero extension must not
+be used to invent a stop in the middle of a continuing programme. Calibration
+retains the original interior checks and adds short/first/last-burst checks
+against independently padded records. A 32-sample Fs/4 burst with amplitude
+1.05 is sample-safe but reconstructs above full scale; it is no longer silently
+accepted as safe. Five synthesized tone definitions (15-19) from
+[EBU Tech 3341 (2023), Table 1](https://tech.ebu.ch/docs/tech/tech3341.pdf)
+pass their stated tolerances with both reconstruction filters. These are a
+subset of the meter tests, not certification or a limiter specification.
+
+`node tools/true_peak_control_audit.js` adds 30 stereo finite-record cases:
+ten scenarios at 44.1/48/96 kHz, including volume up/down, delayed metadata,
+rapid reversal, mute/unmute, zero-volume/unmute, source reset, target and strength
+changes, and mono-to-stereo input into a fixed stereo output. Every event begins
+under active limiting; both output channels and the actually rendered silent
+delay tail are checked. Candidate passes 30/30, with worst reconstructed peak
+about -2.17 dBTP. Production exceeds full scale in 27 of these 30 deliberately extreme
+records. The suite checks absolute full-scale safety, not a guarantee that a
+variable player-relative ceiling is maintained between samples, nor recovery
+quality or arbitrary output-channel topology. It runs in the normal test suite.
+Evidence: `tmp/true-peak-control-audit.json`, including source hashes and both
+variants. Runtime files are unchanged by this measurement-only follow-up.
+
+Real/encoded-material listening, low-power Chrome performance and fallback
+agreement still block promotion; these synthetic passes do not close those gates.
+
 The later control-edge follow-up expands the matrix below from 42 to 66 cases.
 Candidate FIR history is no longer rescaled on metadata changes. Instead its
 comparison retains the greater old/current base ceiling for the bounded audio
