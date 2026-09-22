@@ -44,6 +44,12 @@ K-weighted programme levels.
 
 ## Separate acceptance dimensions
 
+The [real-audio corpus audit](REAL_AUDIO_CORPUS.md) now adds local Chrome
+evaluation of attributed Chinese/English speech and author-provided piano
+WAV/MP3 test material. Its safety and PCM-parity passes are separate from the
+retained 1.30 dB short-window candidate/production difference and remaining
+noise/intelligibility/listening gaps.
+
 | Dimension | Evidence now | Remaining work |
 |---|---|---|
 | Peak integrity | Both reconstruction filters, finite-edge and control tests | Diverse decoded/encoded real material |

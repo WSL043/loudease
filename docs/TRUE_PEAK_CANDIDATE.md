@@ -183,6 +183,11 @@ evidence. Failing stress results remain in the reports and produce exit code 1.
 
 ## Promotion remains gated
 
+The [local real-audio corpus](REAL_AUDIO_CORPUS.md) now provides twelve
+speech/piano/level combinations, including decoded MP3. This is partial material
+coverage, not completion of the diverse-material or listening gate; its retained
+short-window extra attenuation remains a review item.
+
 This candidate is ready for further evaluation, not release. Required next work:
 
 1. Measure the actual candidate AudioWorklet in Chrome, including worst-case

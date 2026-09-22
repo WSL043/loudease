@@ -2,6 +2,11 @@
 
 ## Automated matrix
 
+Optional, local corpus research: `npm run audit:audio-corpus` verifies pinned
+downloads before rendering twelve real-material/level combinations through three
+variants in Chrome. It is not an automatic network/CI dependency or a release
+quality claim; see [provenance and limits](REAL_AUDIO_CORPUS.md).
+
 Unreleased control gates: `node tools/volume_intent_tests.js` covers aligned
 manual volume at three rates/three levels, delayed metadata, zero volume and
 source-buffer clearing. `node tools/volume_edge_tests.js` additionally covers
