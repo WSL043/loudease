@@ -40,8 +40,11 @@ silence, or claim EBU compliance for this controller.
    this is not a source reset. Normal upward confidence still applies. For a
    bounded 500 ms recovery interval, upward smoothing uses a 120 ms constant.
    Downward attack, gain-increase slew bounds and peak protection remain active.
-3. Downward changes attenuate pending 5 ms audio. Upward changes never amplify
-   pending PCM, since metadata may arrive after new audio.
+3. Each delayed sample carries the player-volume base ceiling that applied when
+   it entered the buffer. A later message neither attenuates nor amplifies that
+   pending PCM. The existing 5 ms delay drains naturally; mute is immediate and
+   actual onset protection still applies. This supersedes the initial buffer
+   rescaling approach, which double-attenuated already-adjusted audio.
 4. Genuine source boundaries clear delayed PCM, K-weighting state and partial
    accumulators as well as the estimator. Old loud samples must not play under
    the next source's reset gain.
@@ -77,6 +80,48 @@ existing look-ahead to drain. Lag tests retain the original 0.5 dB recovery
 criterion. An intermediate fix failed (-4.728 dB), and rollback alone still
 failed (-0.974 dB), before bounded recovery passed. These are not green reruns
 of an unchanged implementation.
+
+### Follow-up: high-crest and sub-look-ahead regressions
+
+The initial `9456af2` integration passed the earlier matrix but introduced two
+control regressions. `node tools/volume_edge_tests.js --baseline` reproduces
+them and deliberately fails after saving `tmp/volume-edge-baseline.json`.
+The normal command saves `tmp/volume-edge-audit.json` and is now part of the
+required suite (33 rows at three rates, including real-onset safety and mute).
+
+- Clearing the previous source peak invented an onset after manual adjustment.
+  Retain a trusted source peak with the measurement checkpoint instead. In the
+  high-crest fixture the worst 10-50 ms error fell from 5.0235 dB to less than
+  0.000019 dB; genuine new loud onsets remain limited.
+- Rescaling pending PCM imposed another 12.0412 dB attenuation for a 100%-to-25%
+  adjustment. Carrying the base ceiling alongside PCM removes that attenuation;
+  the first 4 ms transport error is zero in the isolating fixtures. This is not
+  a claim that all limiter activity during a volume adjustment disappears.
+
+The Chrome matrix now contains 66 cases, adding high-crest and first-4-ms
+transport checks for both variants. The latter disables lift on both the
+reference and controlled branch to isolate buffer transport. An intermediate
+two-tone, full-lift comparison failed by 0.420 dB: lift had grown during the
+metadata delay and returning onset protection legitimately changed shared
+limiter gain. A reference deliberately retaining stale metadata cannot demand
+identical control output in that case. This fixture-design failure is recorded
+in `tmp/browser-volume-edge-reference-failure.json`, not counted as a pass.
+The separate full-strength delayed-metadata recovery checks remain unchanged.
+
+Research basis: [W3C Web Audio 1.0, asynchronous operations](https://www.w3.org/TR/webaudio-1.0/#asynchronous-operations)
+separates control and rendering work; it supplies no sample timestamp aligning
+a captured page's volume event with PCM. Carrying the boundary through the
+audio delay is our engineering choice, not a W3C-prescribed algorithm. It adds
+one preallocated float64 value per delay slot, no extra audio latency.
+
+For later work, [EBU Tech 3343 v2](https://tech.ebu.ch/docs/tech/tech3343-v2.pdf),
+sections 3.2 and 5.1, distinguishes dynamic processing from normalization and
+discusses limitations of automatic speech-anchor detection. Do not blindly
+replace cumulative programme measurement with a rolling target or assume an AI
+speech detector is infallible. A future long-stream adaptation candidate needs
+paired sustained-quiet-dialogue versus intentional quiet-bed/ambience fixtures,
+bounded upward changes, return-to-loud recovery, and diverse-material validation.
+The programme gain law and long-stream behavior are unchanged in this follow-up.
 
 Chrome 152 adds 42 stereo OfflineAudioContext cases: production and candidate
 at 44.1/48/96 kHz, including aligned controls, approximately 100 ms delayed

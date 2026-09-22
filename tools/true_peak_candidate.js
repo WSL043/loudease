@@ -40,14 +40,6 @@ class CandidatePeakDetector {
     this.currentChunkPeak = this.previousChunkPeak = this.chunkSamples = this.index = 0;
   }
 
-  rescale(ratio) {
-    for (const channel of this.history) {
-      for (let index = 0; index < channel.length; index += 1) channel[index] *= ratio;
-    }
-    this.currentChunkPeak *= ratio;
-    this.previousChunkPeak *= ratio;
-  }
-
   push(delay, delayIndex, channels, ceiling = 0) {
     let peak = 0;
     for (let channel = 0; channel < this.history.length; channel += 1) {
@@ -92,13 +84,28 @@ function candidateSource(source = fs.readFileSync(path.join(root, 'offscreen/lev
     assert.equal(result.split(anchor).length, 2, `Candidate integration anchor must occur once: ${anchor}`);
     result = result.replace(anchor, replacement);
   }
-  replaceOnce('    this.delayIndex = 0;', '    this.delayIndex = 0;\n    this.candidatePeakDetector = new CandidatePeakDetector();\n    this.candidatePeakHold = 0;');
-  replaceOnce('  rescalePendingAudio(ratio) {', '  rescalePendingAudio(ratio) {\n    this.candidatePeakDetector.rescale(ratio);');
-  replaceOnce('    this.filterState.fill(0);', '    this.filterState.fill(0);\n    this.candidatePeakDetector.reset();\n    this.candidatePeakHold = 0;');
+  replaceOnce('    this.delayIndex = 0;', '    this.delayIndex = 0;\n    this.candidatePeakDetector = new CandidatePeakDetector();\n    this.candidatePeakHold = 0;\n    this.candidateBoundaryCeiling = 0;\n    this.candidateBoundarySamples = 0;');
+  replaceOnce('    this.filterState.fill(0);', '    this.filterState.fill(0);\n    this.candidatePeakDetector.reset();\n    this.candidatePeakHold = 0;\n    this.candidateBoundarySamples = 0;\n    this.candidateBoundaryCeiling = 0;');
+  // Do not scale actual FIR history when metadata arrives. Its old PCM may
+  // already be attenuated. Retain the greater boundary only until the old
+  // audio/detector support drains; current sample checks remain independent.
+  replaceOnce('      const ratio = previousSourceVolumeGain / this.sourceVolumeGain;',
+    `      const ratio = previousSourceVolumeGain / this.sourceVolumeGain;
+      if (ratio !== 1) {
+        this.candidateBoundaryCeiling = Math.max(
+          this.candidateBoundarySamples > 0 ? this.candidateBoundaryCeiling : 0,
+          dbToLinear(BASE_LIMITER_CEILING_DB) / previousSourceVolumeGain);
+        this.candidateBoundarySamples = LOOKAHEAD_SAMPLES + this.candidatePeakDetector.length;
+      }`);
   replaceOnce('      const required = futurePeak > ceiling ? ceiling / Math.max(futurePeak, 1e-12) : 1;',
-    `      const detectedPeak = Math.max(futurePeak,
-        this.candidatePeakDetector.push(this.delay, this.delayIndex, output.length, ${prune ? 'ceiling' : '0'}));
-      const required = detectedPeak > ceiling ? ceiling / Math.max(detectedPeak, 1e-12) : 1;`);
+    `      const base = this.delayBaseCeiling[this.delayIndex];
+      const detectorCeiling = Math.max(base,
+        this.candidateBoundarySamples > 0 ? this.candidateBoundaryCeiling : 0) * ceiling / base;
+      if (this.candidateBoundarySamples > 0) this.candidateBoundarySamples -= 1;
+      const detectedPeak = this.candidatePeakDetector.push(this.delay, this.delayIndex,
+        output.length, ${prune ? 'detectorCeiling' : '0'});
+      const required = Math.min(futurePeak > ceiling ? ceiling / Math.max(futurePeak, 1e-12) : 1,
+        detectedPeak > detectorCeiling ? detectorCeiling / Math.max(detectedPeak, 1e-12) : 1);`);
   replaceOnce('        this.limiterGain = required;', `        this.limiterGain = required;
         this.candidatePeakHold = LOOKAHEAD_SAMPLES + 2 * this.candidatePeakDetector.radius;`);
   replaceOnce('        this.limiterGain += (1 - this.limiterGain) * limiterRelease;',

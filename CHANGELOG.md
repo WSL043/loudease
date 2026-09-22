@@ -4,6 +4,8 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Fix two follow-up manual-volume regressions: retain a trusted onset reference and transport the player-volume ceiling with delayed PCM instead of scaling buffered audio again. Add high-crest, first-4-ms, mute and real-onset regressions, plus expanded Chrome coverage.
+
 - Preserve manual player-volume intent in source measurement, reject bounded asynchronous-control contamination, and recover smoothly without resetting established programme history.
 - Clear delayed audio and partial measurements at genuine source boundaries; enforce reliable zero volume without a separate mute flag.
 - Add baseline-reproducing control regressions and isolated Chrome measurements. The experimental peak detector remains outside runtime builds; see `docs/VOLUME_INTENT.md`.

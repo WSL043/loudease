@@ -4,7 +4,9 @@
 
 Unreleased control gates: `node tools/volume_intent_tests.js` covers aligned
 manual volume at three rates/three levels, delayed metadata, zero volume and
-source-buffer clearing. `node tools/browser_candidate_audit.js` covers 42 Chrome
+source-buffer clearing. `node tools/volume_edge_tests.js` additionally covers
+high-crest controls, the first 4 ms of delayed PCM, hard mute and real onsets.
+`node tools/browser_candidate_audit.js` covers 66 Chrome
 offline stereo cases and four concurrent silent real-time contexts per variant.
 Candidate timing is recorded, not gated on a shared runner; production's known
 inter-sample failure is not hidden. See [measurement boundaries](VOLUME_INTENT.md).
