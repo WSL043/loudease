@@ -11,7 +11,8 @@ const root = path.resolve(__dirname, '..');
 // observation delay fits inside the existing 5 ms audio delay. It does not
 // resample the output or add to the audio delay. This is not a certified meter.
 class CandidatePeakDetector {
-  constructor() {
+  constructor(fused = true) {
+    this.fused = fused;
     this.radius = 32;
     this.length = this.radius * 2;
     this.index = 0;
@@ -58,7 +59,20 @@ class CandidatePeakDetector {
       ? this.currentChunkPeak : this.previousChunkPeak) * this.absoluteWeightSum;
     if (bound > ceiling) for (let channel = 0; channel < channels; channel += 1) {
       const history = this.history[channel];
-      for (const weights of this.weights) {
+      if (this.fused) {
+        // Read each history sample once for all three phases. Each phase keeps
+        // the original accumulation order: no approximation or shorter filter.
+        const a = this.weights[0], b = this.weights[1], c = this.weights[2];
+        let x = 0, y = 0, z = 0;
+        const start = this.index + 1;
+        for (let tap = 0; tap < this.length; tap += 1) {
+          const sample = history[start + tap];
+          x += sample * a[tap];
+          y += sample * b[tap];
+          z += sample * c[tap];
+        }
+        peak = Math.max(peak, Math.abs(x), Math.abs(y), Math.abs(z));
+      } else for (const weights of this.weights) {
         let value = 0;
         for (let tap = 0; tap < this.length; tap += 1) {
           value += history[this.index + 1 + tap] * weights[tap];
@@ -78,7 +92,7 @@ class CandidatePeakDetector {
   }
 }
 
-function candidateSource(source = fs.readFileSync(path.join(root, 'offscreen/leveler-worklet.js'), 'utf8'), { prune = true } = {}) {
+function candidateSource(source = fs.readFileSync(path.join(root, 'offscreen/leveler-worklet.js'), 'utf8'), { prune = true, fused = true } = {}) {
   let result = source.replace(/\r\n/g, '\n');
   function replaceOnce(anchor, replacement) {
     assert.equal(result.split(anchor).length, 2, `Candidate integration anchor must occur once: ${anchor}`);
@@ -111,6 +125,7 @@ function candidateSource(source = fs.readFileSync(path.join(root, 'offscreen/lev
   replaceOnce('        this.limiterGain += (1 - this.limiterGain) * limiterRelease;',
     `        if (this.candidatePeakHold > 0) this.candidatePeakHold -= 1;
         else this.limiterGain += (1 - this.limiterGain) * limiterRelease;`);
+  if (!fused) replaceOnce('new CandidatePeakDetector()', 'new CandidatePeakDetector(false)');
   return `${CandidatePeakDetector.toString()}\n${result}`;
 }
 

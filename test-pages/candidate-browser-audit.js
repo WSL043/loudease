@@ -89,6 +89,9 @@ window.renderCandidateCase = async function ({ variant, rate, kind, seconds = 4,
   if (error) throw new Error(error);
   const left = rendered.getChannelData(0);
   const right = rendered.getChannelData(1);
+  const pcmHashes = await Promise.all([left, right].map(async (pcm) =>
+    Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', pcm)),
+      (byte) => byte.toString(16).padStart(2, '0')).join('')));
   let stereoError = 0;
   let peak = 0;
   const rmsSegments = [];
@@ -133,7 +136,7 @@ window.renderCandidateCase = async function ({ variant, rate, kind, seconds = 4,
   let edgeEnergy = 0;
   const edgeSamples = Math.floor(rate * 0.004);
   for (let i = edgeFrame; i < edgeFrame + edgeSamples && i < left.length; i += 1) edgeEnergy += left[i] ** 2;
-  return { variant, rate, kind, scenario, frames: length, renderMs, peak, stereoError,
+  return { variant, rate, kind, scenario, frames: length, renderMs, peak, stereoError, pcmHashes,
     rmsSegments, windowRms, peaks, oldProgrammeLeak, toneResidualDb, lastState,
     edgeRms: Math.sqrt(edgeEnergy / edgeSamples) };
 };

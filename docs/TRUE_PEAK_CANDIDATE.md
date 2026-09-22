@@ -6,6 +6,31 @@ true-peak meter, a limiter ceiling, browser performance, or listening quality.
 
 ## Chrome follow-up, 2026-09-22
 
+### Fused phase kernel
+
+The candidate now reads each FIR history value once and accumulates all three
+fractional phases together. Coefficients, 64-tap support, per-phase addition
+order, pruning, limiter policy and delay are unchanged. The original scalar
+phase loop remains available only in research tooling with `{ fused: false }`.
+10,000 detector inputs require identical peaks; all 33 candidate Chrome scenes
+also render the scalar reference and require equal SHA-256 for both PCM channels.
+The main report still lists 66 production/candidate scenes, plus these 33
+reference renders; benchmarks compare production, fused and scalar kernels.
+
+Five alternating-order measured trials after warm-up in Chrome 152 gave fused
+improvements of 10.49/6.63/19.28% for ordinary fixtures and 17.73/9.35/2.90% for
+alternating stress at 44.1/48/96 kHz. Candidate overhead versus production was
+still 54-76% ordinary and 94-166% stress. These are same-run median wall-render
+times, not CPU percentages or guaranteed speedups. A preliminary run had a 4.4%
+ordinary 96 kHz regression, illustrating host/timing noise; do not use timing as
+a shared-runner pass threshold. JSON retains five individual trials and source
+hashes. All 66 scenes and four real-time contexts per variant passed.
+
+Nine additional tone sweeps require identical old/new candidate PCM and record
+diagnostic residual/crest/window metrics. See the new
+[objective quality research](OBJECTIVE_AUDIO_QUALITY.md) for results and limits.
+No shipped runtime module imports the candidate.
+
 ### Finite-record/control qualification follow-up
 
 The reference meter previously skipped filter support at both record edges;
