@@ -75,9 +75,10 @@ async function main() {
     }
     const failures = [];
     for (const rate of [44100, 48000, 96000]) {
-      for (const scenario of ['stress', 'volume', 'volume-lag', 'system-volume', 'reference', 'boundary', 'tone']) {
+      for (const scenario of ['stress', 'volume', 'volume-lag', 'system-volume', 'reference', 'boundary', 'tone',
+        'crest-volume', 'crest-reference', 'edge-volume', 'edge-reference']) {
         for (const variant of ['production', 'candidate']) {
-          const options = { rate, scenario, variant, kind: scenario === 'stress' ? 'alternating' : scenario === 'tone' ? 'sine' : 'ordinary', seconds: ['volume', 'volume-lag', 'system-volume', 'reference'].includes(scenario) ? 10 : 4 };
+          const options = { rate, scenario, variant, kind: scenario.startsWith('crest-') ? 'crest' : scenario === 'stress' ? 'alternating' : scenario === 'tone' ? 'sine' : 'ordinary', seconds: ['volume', 'volume-lag', 'system-volume', 'reference'].includes(scenario) ? 10 : 4 };
           const result = await evaluateValue(cdp, `window.renderCandidateCase(${JSON.stringify(options)})`);
           report.cases.push(result);
           assert(result.stereoError < 1e-6 && result.peak <= 10 ** (-3 / 20) + 1e-6);
@@ -89,6 +90,17 @@ async function main() {
         }
       }
       for (const variant of ['production', 'candidate']) {
+        const get = (scenario) => report.cases.find((row) => row.rate === rate && row.variant === variant && row.scenario === scenario);
+        const edge = get('edge-volume');
+        edge.pendingAudioErrorDb = 20 * Math.log10(edge.edgeRms / get('edge-reference').edgeRms);
+        assert(Math.abs(edge.pendingAudioErrorDb) < 0.25, 'first 4 ms after late downward metadata');
+        const crest = get('crest-volume'), crestReference = get('crest-reference');
+        const start = 3 * Math.ceil(rate / 128) * 128;
+        const errors = crest.windowRms.flatMap((value, i) => i * 960 >= start + rate * 0.01 && (i + 1) * 960 <= start + rate * 0.1
+          ? [Math.abs(20 * Math.log10(value / (0.5 * crestReference.windowRms[i])))] : []);
+        assert(errors.length > 0);
+        crest.highCrestVolumeErrorDb = Math.max(...errors);
+        assert(crest.highCrestVolumeErrorDb < 0.25, 'high-crest manual-volume transient');
         const reference = report.cases.find((row) => row.rate === rate && row.variant === variant && row.scenario === 'reference');
         for (const scenario of ['volume', 'volume-lag', 'system-volume']) {
           const actual = report.cases.find((row) => row.rate === rate && row.variant === variant && row.scenario === scenario);

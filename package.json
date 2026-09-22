@@ -36,6 +36,7 @@
     "audit:true-peak": "node tools/true_peak_audit.js",
     "audit:true-peak-candidate": "node tools/true_peak_candidate.js && node tools/true_peak_candidate_evaluation.js",
     "test:volume-intent": "node tools/volume_intent_tests.js",
+    "test:volume-edges": "node tools/volume_edge_tests.js",
     "audit:browser-candidate": "node tools/browser_candidate_audit.js",
     "audit:worklet-performance": "node tools/worklet_performance_audit.js",
     "audit:runtime": "node tools/current_runtime_audit.js --json"

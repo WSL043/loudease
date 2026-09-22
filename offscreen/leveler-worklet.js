@@ -63,7 +63,8 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.volumeCheckpoints = Array.from({ length: VOLUME_CHECKPOINT_FRAMES }, () => ({
       counts: new Uint32Array(this.programmeEstimator.binCount),
       energySums: new Float64Array(this.programmeEstimator.binCount),
-      acceptedBlocks: 0
+      acceptedBlocks: 0,
+      sourcePeak: 0
     }));
     this.volumeCheckpointIndex = 0;
     this.volumeCheckpointCount = 0;
@@ -71,6 +72,10 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.programmeStrideFrames = 0;
     this.programmeKey = '';
     this.delay = [new Float32Array(DELAY_LENGTH), new Float32Array(DELAY_LENGTH)];
+    // Carry the player-volume safety boundary with its delayed PCM. A later
+    // DOM notification must not attenuate samples that may already reflect it.
+    this.delayBaseCeiling = new Float64Array(DELAY_LENGTH);
+    this.delayBaseCeiling.fill(dbToLinear(BASE_LIMITER_CEILING_DB));
     this.delayIndex = 0;
     this.frameSamples = 0;
     this.inputEnergySum = 0;
@@ -168,9 +173,6 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     if (this.configured && !programmeChanged && previousVolumeReliable
       && this.respectPlayerVolume && this.playerVolumeReliable && this.playerVolumeCap > 0.001) {
       const ratio = previousSourceVolumeGain / this.sourceVolumeGain;
-      // Metadata can lag PCM. Never amplify already-buffered samples on an
-      // upward user adjustment; allow the existing 5 ms delay to drain instead.
-      if (ratio < 1) this.rescalePendingAudio(ratio);
       if (ratio !== 1) this.invalidateRecentVolumeMeasurement();
     }
     this.allowUnknownVolumeLift = message.allowUnknownVolumeLift === true;
@@ -199,19 +201,12 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     });
   }
 
-  rescalePendingAudio(ratio) {
-    // The 5 ms look-ahead buffer still contains the previous player attenuation.
-    // Attenuate it with the newly lowered ceiling to avoid a false limiter hold.
-    for (const channel of this.delay) {
-      for (let index = 0; index < channel.length; index += 1) channel[index] *= ratio;
-    }
-  }
-
   saveVolumeCheckpoint() {
     const checkpoint = this.volumeCheckpoints[this.volumeCheckpointIndex];
     checkpoint.counts.set(this.programmeEstimator.counts);
     checkpoint.energySums.set(this.programmeEstimator.energySums);
     checkpoint.acceptedBlocks = this.programmeEstimator.acceptedBlocks;
+    checkpoint.sourcePeak = this.sourceInputPeak;
     this.volumeCheckpointIndex = (this.volumeCheckpointIndex + 1) % VOLUME_CHECKPOINT_FRAMES;
     this.volumeCheckpointCount = Math.min(VOLUME_CHECKPOINT_FRAMES, this.volumeCheckpointCount + 1);
   }
@@ -229,6 +224,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.programmeEstimator.acceptedBlocks = checkpoint.acceptedBlocks;
       this.programmeEstimator.recompute();
       this.programmeState = this.programmeEstimator.snapshot();
+      this.previousInputFramePeak = checkpoint.sourcePeak;
     }
     this.volumeCheckpointCount = 0;
     this.programmeStrideFrames = 0;
@@ -239,7 +235,9 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.frameSamples = 0;
     this.inputEnergySum = this.inputPeak = this.sourceInputPeak = 0;
     this.outputEnergySum = this.outputPeak = 0;
-    this.previousInputFramePeak = 0;
+    // Keep a trusted source-domain onset reference. Recent peaks can themselves
+    // be contaminated by late metadata; the checkpoint predates that interval.
+    // A genuine source boundary still resets the reference.
     // Only the measurement filters are reset; the audio path is untouched.
     this.filterState.fill(0, 0, this.filterState.length);
   }
@@ -479,6 +477,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     const settingAlpha = 1 - Math.exp(-1 / (sampleRate * 0.03));
     const muteAlpha = 1 - Math.exp(-1 / (sampleRate * 0.008));
     const limiterRelease = 1 - Math.exp(-1 / (sampleRate * 0.08));
+    const baseCeiling = dbToLinear(this.baseCeilingDb());
     for (let frame = 0; frame < frames; frame += 1) {
       this.cutStrength += (this.targetCutStrength - this.cutStrength) * settingAlpha;
       this.liftStrength += (this.targetLiftStrength - this.liftStrength) * settingAlpha;
@@ -524,6 +523,7 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         this.transitionCeilingDb = this.adaptiveTransitionCeilingDb;
       }
       const ceiling = dbToLinear(this.ceilingDb());
+      this.delayBaseCeiling[this.delayIndex] = baseCeiling;
       const required = futurePeak > ceiling ? ceiling / Math.max(futurePeak, 1e-12) : 1;
       if (required < this.limiterGain) {
         this.limiterGain = required;
@@ -533,26 +533,30 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         this.limiterGain += (1 - this.limiterGain) * limiterRelease;
       }
       const readIndex = (this.delayIndex + 1) % DELAY_LENGTH;
+      // Transport only player attenuation. Real onset protection must still
+      // constrain pending samples, and absolute peak safety never relaxes.
+      const outputCeiling = this.delayBaseCeiling[readIndex]
+        * (ceiling / baseCeiling);
       let delayedPeak = 0;
       for (let channel = 0; channel < output.length; channel += 1) {
         delayedPeak = Math.max(delayedPeak, Math.abs(this.delay[channel][readIndex]));
       }
-      if (delayedPeak * this.limiterGain > ceiling) {
-        this.limiterGain = ceiling / Math.max(delayedPeak, 1e-12);
+      if (delayedPeak * this.limiterGain > outputCeiling) {
+        this.limiterGain = outputCeiling / Math.max(delayedPeak, 1e-12);
         this.limitedSamples += 1;
         this.limiterTickCount += 1;
       }
       for (let channel = 0; channel < output.length; channel += 1) {
         let sample = this.delay[channel][readIndex] * this.limiterGain * this.muteGain;
-        if (sample > ceiling) {
-          const overshoot = sample - ceiling;
+        if (sample > outputCeiling) {
+          const overshoot = sample - outputCeiling;
           this.maxHardClipOvershoot = Math.max(this.maxHardClipOvershoot, overshoot);
-          sample = ceiling;
+          sample = outputCeiling;
           if (overshoot > 1e-7) this.hardClippedSamples += 1;
-        } else if (sample < -ceiling) {
-          const overshoot = -sample - ceiling;
+        } else if (sample < -outputCeiling) {
+          const overshoot = -sample - outputCeiling;
           this.maxHardClipOvershoot = Math.max(this.maxHardClipOvershoot, overshoot);
-          sample = -ceiling;
+          sample = -outputCeiling;
           if (overshoot > 1e-7) this.hardClippedSamples += 1;
         }
         output[channel][frame] = sample;

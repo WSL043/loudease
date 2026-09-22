@@ -6,6 +6,17 @@ true-peak meter, a limiter ceiling, browser performance, or listening quality.
 
 ## Chrome follow-up, 2026-09-22
 
+The later control-edge follow-up expands the matrix below from 42 to 66 cases.
+Candidate FIR history is no longer rescaled on metadata changes. Instead its
+comparison retains the greater old/current base ceiling for the bounded audio
+delay plus detector support; current-sample safety stays independent. An initial
+browser failure after removing rescaling is retained locally as
+`tmp/browser-candidate-pre-boundary-failure.json`. The revised integration passes
+the control checks without weakening their thresholds. This remains a research
+candidate, not a certified variable-ceiling true-peak limiter; performance and
+encoded/diverse-material validation still block promotion. Timing below is the
+earlier snapshot, not a measurement of the revised integration.
+
 `node tools/browser_candidate_audit.js` now executes both variants in isolated
 Chrome 152. Its 42 stereo offline cases passed control/finite-output checks at
 44.1/48/96 kHz; candidate stress peaks stayed below full scale, while production's

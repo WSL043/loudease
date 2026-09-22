@@ -7,6 +7,10 @@ function auditConfiguration(cap = 1, extra = {}) {
 }
 
 function auditSignal(index, rate, kind) {
+  if (kind === 'crest') {
+    const period = Math.round(rate / 480), width = Math.round(period / 10);
+    return index % period < width ? 0.8 * Math.sin(2 * Math.PI * (index % period) / width) : 0;
+  }
   if (kind === 'sine') return 0.08 * Math.sin(2 * Math.PI * 997 * index / rate);
   if (kind === 'alternating') return index % 2 ? -1.2 : 1.2;
   if (kind === 'quarter-rate') return 0.95 * Math.sin(Math.PI * index / 2 + Math.PI / 4);
@@ -21,6 +25,16 @@ window.renderCandidateCase = async function ({ variant, rate, kind, seconds = 4,
   await context.audioWorklet.addModule('/policy.js');
   await context.audioWorklet.addModule(`/${variant}.js`);
   const events = [{ frame: 0, data: auditConfiguration() }];
+  const edgeFrame = 3 * second + Math.ceil(rate * 0.1 / 128) * 128;
+  if (scenario === 'crest-volume') events.push({ frame: 3 * second, data: auditConfiguration(0.5) });
+  if (scenario === 'edge-volume') events.push({ frame: edgeFrame, data: auditConfiguration(0.25) });
+  // Isolate delayed PCM transport from deliberate positive-gain onset limiting.
+  // An unchanged-metadata reference is not a valid control-law reference when
+  // lift has already grown during the lag. Full-strength recovery is tested by
+  // volume-lag; here both configurations keep lift disabled, including the event.
+  if (scenario === 'edge-volume' || scenario === 'edge-reference') {
+    for (const event of events) event.data.settings.liftStrength = 0;
+  }
   if (scenario === 'volume' || scenario === 'volume-lag') {
     const lag = scenario === 'volume-lag' ? Math.ceil(rate * 0.1 / 128) * 128 : 0;
     events.push({ frame: 3 * second + lag, data: auditConfiguration(0.25) },
@@ -47,6 +61,8 @@ window.renderCandidateCase = async function ({ variant, rate, kind, seconds = 4,
     const samples = buffer.getChannelData(channel);
     for (let i = 0; i < length; i += 1) {
       let value = auditSignal(i, rate, kind);
+      if (scenario === 'crest-volume' && i >= 3 * second) value *= 0.5;
+      if ((scenario === 'edge-volume' || scenario === 'edge-reference') && i >= 3 * second) value *= 0.25;
       if (scenario === 'stress' && i < 3 * second) value = 0.02 * Math.sin(2 * Math.PI * 997 * i / rate);
       if (scenario === 'volume' || scenario === 'volume-lag') {
         if (i >= 3 * second && i < 5 * second) value *= 0.25;
@@ -114,8 +130,12 @@ window.renderCandidateCase = async function ({ variant, rate, kind, seconds = 4,
     toneResidualDb = 10 * Math.log10(Math.max(1e-24, residual / energy));
   }
   worklet.port.close();
+  let edgeEnergy = 0;
+  const edgeSamples = Math.floor(rate * 0.004);
+  for (let i = edgeFrame; i < edgeFrame + edgeSamples && i < left.length; i += 1) edgeEnergy += left[i] ** 2;
   return { variant, rate, kind, scenario, frames: length, renderMs, peak, stereoError,
-    rmsSegments, windowRms, peaks, oldProgrammeLeak, toneResidualDb, lastState };
+    rmsSegments, windowRms, peaks, oldProgrammeLeak, toneResidualDb, lastState,
+    edgeRms: Math.sqrt(edgeEnergy / edgeSamples) };
 };
 
 window.runCandidateRealtime = async function (variant, count = 4, durationMs = 15000) {
