@@ -4,6 +4,8 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Added an optional, checksum-pinned local Chrome corpus audit for Mandarin/English speech and piano WAV/MP3, retaining candidate/production envelope differences separately from safety and exact-PCM checks. No audio files or new runtime behavior are shipped.
+
 - Fused the experimental true-peak detector's three FIR phases without changing coefficients or output PCM; added scalar-reference Chrome comparisons and objective tone diagnostics. The candidate remains unshipped.
 
 - Hardened the offline true-peak meter against short-record false passes; added explicit finite-record edge reconstruction, five EBU tone calibration definitions and 30 active-limiter control regressions. This qualification-only change does not enable the experimental limiter or change the installed DSP.

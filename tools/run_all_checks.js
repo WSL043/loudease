@@ -32,6 +32,7 @@ const syntaxTargets = [
   'tools/volume_edge_tests.js',
   'tools/browser_candidate_audit.js',
   'test-pages/candidate-browser-audit.js',
+  'test-pages/corpus-browser-audit.js',
   'tools/meter_worklet_tests.js',
   'tools/assert_test_pages.js',
   'tools/e2e_poc_smoke.js',

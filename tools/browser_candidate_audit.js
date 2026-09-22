@@ -30,19 +30,30 @@ function scheduledSource(source) {
 }
 
 async function main() {
+  const corpusMode = process.argv.includes('--corpus');
+  const corpus = corpusMode ? require('./quality-corpus.json') : [];
   fs.mkdirSync(tmp, { recursive: true });
   const production = fs.readFileSync(path.join(root, 'offscreen/leveler-worklet.js'), 'utf8');
   const candidate = candidateSource(production);
   const reference = candidateSource(production, { fused: false });
   const routes = {
-    '/': ['text/html', '<!doctype html><title>LoudEase isolated audit</title><script src="/measure.js"></script><script src="/harness.js"></script>'],
+    '/': ['text/html', '<!doctype html><title>LoudEase isolated audit</title><script src="/measure.js"></script><script src="/harness.js"></script><script src="/corpus.js"></script>'],
     '/policy.js': ['text/javascript', fs.readFileSync(path.join(root, 'shared/programme-leveler-policy.js'), 'utf8')],
     '/production.js': ['text/javascript', scheduledSource(production)],
     '/candidate.js': ['text/javascript', scheduledSource(candidate)],
     '/reference.js': ['text/javascript', scheduledSource(reference)],
     '/measure.js': ['text/javascript', `const TRUE_PEAK_LIMIT = 1;\n${samplePeak}\n${estimatedTruePeak}\n${measurePeaks}`],
-    '/harness.js': ['text/javascript', fs.readFileSync(path.join(root, 'test-pages/candidate-browser-audit.js'), 'utf8')]
+    '/harness.js': ['text/javascript', fs.readFileSync(path.join(root, 'test-pages/candidate-browser-audit.js'), 'utf8')],
+    '/corpus.js': ['text/javascript', fs.readFileSync(path.join(root, 'test-pages/corpus-browser-audit.js'), 'utf8')]
   };
+  for (const item of corpus) {
+    const target = path.join(tmp, 'quality-corpus', item.file);
+    assertInside(path.join(tmp, 'quality-corpus'), target);
+    assert(fs.existsSync(target), `Missing ${item.file}; explicitly download from ${item.url} to ${target}`);
+    const bytes = fs.readFileSync(target);
+    assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), item.sha256, 'Corpus hash mismatch');
+    routes[`/corpus/${item.file}`] = [item.file.endsWith('.mp3') ? 'audio/mpeg' : 'audio/wav', bytes];
+  }
   const server = http.createServer((request, response) => {
     const route = routes[new URL(request.url, 'http://127.0.0.1').pathname];
     response.writeHead(route ? 200 : 404, { 'content-type': route?.[0] || 'text/plain' });
@@ -73,10 +84,47 @@ async function main() {
     sockets.push(cdp);
     await cdp.command('Runtime.enable');
     for (let i = 0; i < 100; i += 1) {
-      if (await evaluateValue(cdp, "typeof window.renderCandidateCase === 'function'")) break;
+      if (await evaluateValue(cdp, corpusMode ? "typeof window.renderCorpusCase === 'function'"
+        : "typeof window.renderCandidateCase === 'function'")) break;
       await sleep(100);
     }
     const failures = [];
+    if (corpusMode) {
+      report.corpus = corpus;
+      report.reviewFindings = [];
+      for (const item of corpus) for (const level of [0.05, 0.25, 0.95]) {
+        const group = {};
+        for (const variant of ['production', 'candidate', 'reference']) {
+          const result = await evaluateValue(cdp, `window.renderCorpusCase(${JSON.stringify({ file: item.file, level, variant })})`);
+          group[variant] = result;
+          report.cases.push(result);
+        }
+        assert.deepEqual(group.candidate.hashes, group.reference.hashes, 'Corpus fused/scalar PCM mismatch');
+        assert(group.candidate.tailDrained, 'Corpus audio delay not drained');
+        assert(group.candidate.peaks.every((v) => v.measuredSamplePeak > 0), 'Corpus output unexpectedly silent');
+        if (group.candidate.peaks.some((v) => v.fullScaleExceeded || v.measuredSamplePeak > 10 ** (-3 / 20) + 1e-6)) {
+          failures.push(`${item.file}/${level}: candidate peak violation`);
+        }
+        const changes = group.candidate.windows.flatMap((v, i) => v.seconds >= 2 && v.inputDb > -45
+          ? [{ seconds: v.seconds, deltaDb: v.outputDb - group.production.windows[i].outputDb }] : []);
+        changes.sort((a, b) => Math.abs(a.deltaDb) - Math.abs(b.deltaDb));
+        group.candidate.maxActiveWindowChangeDb = changes.length ? Math.abs(changes.at(-1).deltaDb) : null;
+        group.candidate.worstActiveWindow = changes.at(-1) || null;
+        group.candidate.p95ActiveWindowChangeDb = changes.length
+          ? Math.abs(changes[Math.min(changes.length - 1, Math.floor(changes.length * 0.95))].deltaDb) : null;
+        group.candidate.activeWindowsAboveOneDb = changes.filter((v) => Math.abs(v.deltaDb) > 1).length;
+        if (group.candidate.activeWindowsAboveOneDb > 0) report.reviewFindings.push({
+          file: item.file, level, worst: group.candidate.worstActiveWindow,
+          reason: 'Candidate/production envelope difference needs review; not a perceptual failure threshold'
+        });
+        console.log(JSON.stringify({ file: item.file, level, matched: true,
+          maxActiveWindowChangeDb: group.candidate.maxActiveWindowChangeDb,
+          truePeak: Math.max(...group.candidate.peaks.map((v) => Math.max(v.referencePeak, v.measuredTruePeak))) }));
+      }
+      report.failures = failures;
+      if (failures.length) process.exitCode = 1;
+      return;
+    }
     for (const rate of [44100, 48000, 96000]) {
       for (const scenario of ['stress', 'volume', 'volume-lag', 'system-volume', 'reference', 'boundary', 'tone',
         'crest-volume', 'crest-reference', 'edge-volume', 'edge-reference']) {
@@ -161,7 +209,7 @@ async function main() {
     console.error(error);
     process.exitCode = 1;
   } finally {
-    const target = path.join(tmp, 'browser-candidate-audit.json');
+    const target = path.join(tmp, corpusMode ? 'browser-corpus-audit.json' : 'browser-candidate-audit.json');
     fs.writeFileSync(target, `${JSON.stringify(report, null, 2)}\n`);
     console.log(`Report: ${target}`);
     for (const socket of sockets) socket.close();
