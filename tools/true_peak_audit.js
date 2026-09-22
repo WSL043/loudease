@@ -77,8 +77,23 @@ function samplePeak(samples) {
 
 // A bounded 8x windowed-sinc estimate. This is an engineering stress detector,
 // not a claim of standards-compliant BS.1770 true-peak metering.
-function estimatedTruePeak(samples, factor = 8, radius = 32, windowKind = 'hann') {
+function estimatedTruePeak(samples, factor = 8, radius = 32, windowKind = 'hann', boundary = 'interior') {
   if (samples.some((sample) => !Number.isFinite(sample))) throw new Error('Non-finite PCM in peak audit');
+  if (!Number.isInteger(factor) || factor < 2 || !Number.isInteger(radius) || radius < 1
+    || !['hann', 'blackman'].includes(windowKind) || !['interior', 'zero'].includes(boundary)) {
+    throw new Error('Invalid peak reconstruction parameters');
+  }
+  // Interior mode describes a crop of a continuing signal, not a complete
+  // recording. Never silently fall back to sample-only measurement on a crop
+  // too short for the reconstruction filter. Finite records explicitly use
+  // zero extension, including filter support before the start and after the end.
+  if (boundary === 'zero') {
+    const padded = new Float64Array(samples.length + 4 * radius + 4);
+    padded.set(samples, 2 * radius + 2);
+    samples = padded;
+  } else if (samples.length < 2 * radius + 2) {
+    throw new Error('Insufficient context for interior true-peak measurement');
+  }
   // Each phase uses the same coefficients at every sample. Preparing them once
   // avoids millions of identical trigonometric calls during regression runs.
   const phases = Array.from({ length: factor - 1 }, (_, phase) => {
@@ -115,12 +130,12 @@ function assert(name, condition, details = '') {
   process.exitCode = 1;
 }
 
-function measurePeaks(output) {
+function measurePeaks(output, boundary = 'interior') {
   const measuredSamplePeak = samplePeak(output);
-  const measuredTruePeak = estimatedTruePeak(output);
+  const measuredTruePeak = estimatedTruePeak(output, 8, 32, 'hann', boundary);
   // A short-filter pass must not hide a long-filter fail.
-  const referencePeak = estimatedTruePeak(output, 16, 128, 'blackman');
-  return { measuredSamplePeak, measuredTruePeak, referencePeak,
+  const referencePeak = estimatedTruePeak(output, 16, 128, 'blackman', boundary);
+  return { boundary, measuredSamplePeak, measuredTruePeak, referencePeak,
     fullScaleExceeded: measuredTruePeak >= TRUE_PEAK_LIMIT || referencePeak >= TRUE_PEAK_LIMIT };
 }
 
@@ -136,10 +151,45 @@ function calibrate() {
   let rejected = false;
   try { estimatedTruePeak(new Float32Array([0, NaN, 0])); } catch { rejected = true; }
   assert('detector rejects non-finite PCM instead of reporting a safe peak', rejected);
+  for (const [factor, radius, window] of [[8, 32, 'hann'], [16, 128, 'blackman']]) {
+    const burst = Float32Array.from({ length: 32 }, (_, i) => 1.05 * Math.sin(Math.PI * i / 2 + Math.PI / 4));
+    let shortRejected = false;
+    try { estimatedTruePeak(burst, factor, radius, window); } catch { shortRejected = true; }
+    assert(`${factor}x rejects a short interior crop rather than reporting sample-only safety`, shortRejected);
+    const finitePeak = estimatedTruePeak(burst, factor, radius, window, 'zero');
+    const reference = new Float32Array(burst.length + 1024);
+    reference.set(burst, 512);
+    assert(`${factor}x finite short burst catches hidden full-scale overshoot`, samplePeak(burst) < 1 && finitePeak > 1);
+    assert(`${factor}x finite boundary matches explicit silent context`,
+      Math.abs(finitePeak - estimatedTruePeak(reference, factor, radius, window)) < 1e-12);
+    for (const offset of [0, 2048 - burst.length]) {
+      const edgeBurst = new Float32Array(2048);
+      edgeBurst.set(burst, offset);
+      assert(`${factor}x measures burst at record edge ${offset}`,
+        Math.abs(estimatedTruePeak(edgeBurst, factor, radius, window, 'zero') - finitePeak) < 1e-12);
+    }
+  }
   const edge = Float32Array.from({ length: 4096 }, (_, index) => index < 512 ? 0 : (index % 2 ? -0.58 : 0.58));
   const measurements = measurePeaks(edge);
   assert('long-filter-only overshoot cannot pass the audit',
     measurements.measuredTruePeak < 1 && measurements.referencePeak > 1 && measurements.fullScaleExceeded);
+  // Independently synthesized tone definitions from EBU Tech 3341 (2023),
+  // Table 1, cases 15-19. This subset is not full EBU/ITU certification.
+  for (const [test, divisor, phaseDegrees, amplitude, expectedDb] of [
+    [15, 4, 0, 0.5, -6], [16, 4, 45, 0.5, -6], [17, 6, 60, 0.5, -6],
+    [18, 8, 67.5, 0.5, -6], [19, 4, 45, 1.41, 3]
+  ]) {
+    const tone = Float32Array.from({ length: 2400 }, (_, i) => amplitude
+      * Math.min(1, i / 480, (2399 - i) / 480)
+      * Math.sin(2 * Math.PI * i / divisor + phaseDegrees * Math.PI / 180));
+    const peaks = measurePeaks(tone, 'zero');
+    for (const [label, peak] of [['8x', peaks.measuredTruePeak], ['16x', peaks.referencePeak]]) {
+      const measuredDb = 20 * Math.log10(peak);
+      assert(`${label} EBU tone definition ${test} falls within stated tolerance`,
+        measuredDb >= expectedDb - 0.4 && measuredDb <= expectedDb + 0.2,
+        `${measuredDb.toFixed(6)} dBTP`);
+    }
+  }
 }
 
 function audit({ loader = loadProcessor, reportName = 'true-peak-audit', label = 'production' } = {}) {
