@@ -2,6 +2,12 @@
 
 This document describes the `programme-leveler-v4` controller used by LoudEase version `0.8.2`.
 
+Unreleased 2026-09-22: player attenuation is compensated before K-weighting;
+bounded measurement rollback handles delayed volume metadata without a source
+reset, and real source boundaries clear delayed PCM and partial measurements.
+The gain policy remains unchanged. See [volume intent](VOLUME_INTENT.md) for
+implementation, before/after evidence and qualification limits.
+
 ## Design goal
 
 LoudEase should make different web programmes feel closer in average loudness while retaining a smaller, useful amount of dynamics inside each programme. Enabling the extension should not push ordinary content several decibels below its unprocessed average.

@@ -5,6 +5,9 @@ const HISTORY_SIZE = 150;
 const MOMENTARY_FRAMES = 20;
 const SHORT_TERM_FRAMES = 150;
 const PROGRAMME_BLOCK_STRIDE_FRAMES = 5;
+// Bounded rollback for player-state messages that trail captured PCM. This is
+// measurement history, not added audio latency (the audio delay stays 5 ms).
+const VOLUME_CHECKPOINT_FRAMES = 8;
 const SILENCE_HOLD_FRAMES = 50;
 const LOOKAHEAD_SAMPLES = Math.max(1, Math.round(sampleRate * 0.005));
 const DELAY_LENGTH = LOOKAHEAD_SAMPLES + 1;
@@ -57,6 +60,14 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.programmeEstimator = new ProgrammeLoudnessEstimator();
     this.programmeParams = PROGRAMME_PARAMS;
     this.programmeState = this.programmeEstimator.snapshot();
+    this.volumeCheckpoints = Array.from({ length: VOLUME_CHECKPOINT_FRAMES }, () => ({
+      counts: new Uint32Array(this.programmeEstimator.binCount),
+      energySums: new Float64Array(this.programmeEstimator.binCount),
+      acceptedBlocks: 0
+    }));
+    this.volumeCheckpointIndex = 0;
+    this.volumeCheckpointCount = 0;
+    this.volumeRecoverySamples = 0;
     this.programmeStrideFrames = 0;
     this.programmeKey = '';
     this.delay = [new Float32Array(DELAY_LENGTH), new Float32Array(DELAY_LENGTH)];
@@ -64,6 +75,8 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.frameSamples = 0;
     this.inputEnergySum = 0;
     this.inputPeak = 0;
+    this.sourceInputPeak = 0;
+    this.sourceVolumeGain = 1;
     this.previousInputFramePeak = 0;
     this.outputEnergySum = 0;
     this.outputPeak = 0;
@@ -129,6 +142,9 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
 
   configure(message) {
     if (message.type !== 'configure') return;
+    const previousSourceVolumeGain = this.sourceVolumeGain;
+    const previousVolumeReliable = this.respectPlayerVolume && this.playerVolumeReliable
+      && this.playerVolumeCap > 0.001;
     const settings = message.settings || {};
     const nextProgrammeKey = String(message.programmeKey || '');
     const programmeChanged = this.configured
@@ -143,8 +159,23 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.targetPlayerVolumeCap = clamp(Number(message.playerVolumeCap), 0, 1);
     if (!Number.isFinite(this.targetPlayerVolumeCap)) this.targetPlayerVolumeCap = 1;
     this.playerVolumeReliable = message.playerVolumeReliable === true;
+    // Player attenuation is already present in captured PCM. Align measurement
+    // and ceilings with that attenuation; smoothing the metadata creates a
+    // false source-level jump when the user turns the player back up.
+    this.playerVolumeCap = this.targetPlayerVolumeCap;
+    this.sourceVolumeGain = this.respectPlayerVolume && this.playerVolumeReliable
+      && this.playerVolumeCap > 0.001 ? 1 / this.playerVolumeCap : 1;
+    if (this.configured && !programmeChanged && previousVolumeReliable
+      && this.respectPlayerVolume && this.playerVolumeReliable && this.playerVolumeCap > 0.001) {
+      const ratio = previousSourceVolumeGain / this.sourceVolumeGain;
+      // Metadata can lag PCM. Never amplify already-buffered samples on an
+      // upward user adjustment; allow the existing 5 ms delay to drain instead.
+      if (ratio < 1) this.rescalePendingAudio(ratio);
+      if (ratio !== 1) this.invalidateRecentVolumeMeasurement();
+    }
     this.allowUnknownVolumeLift = message.allowUnknownVolumeLift === true;
-    this.targetMuteGain = this.respectPlayerVolume && message.playerMuted === true ? 0 : 1;
+    this.targetMuteGain = this.respectPlayerVolume && (message.playerMuted === true
+      || (this.playerVolumeReliable && this.playerVolumeCap <= 0.001)) ? 0 : 1;
     if (nextProgrammeKey) this.programmeKey = nextProgrammeKey;
     if (programmeChanged || message.resetProgramme === true) this.resetProgramme();
     if (!this.configured) {
@@ -157,13 +188,73 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     } else if (this.targetMuteGain === 0) {
       this.muteGain = 0;
     }
+    this.transitionInput.baseCeilingDb = this.baseCeilingDb();
+    this.transitionInput.cutStrength = this.cutStrength;
+    this.transitionInput.programmeTargetDb = this.programmeParams.programmeTargetDb + this.volumeDb();
+    this.adaptiveTransitionCeilingDb = computeTransitionCeilingDb(this.transitionInput, this.programmeParams);
+    this.transitionCeilingDb = this.adaptiveTransitionCeilingDb;
     this.port.postMessage({
       type: 'configured',
       configSequence: Math.max(0, Math.floor(Number(message.configSequence) || 0))
     });
   }
 
+  rescalePendingAudio(ratio) {
+    // The 5 ms look-ahead buffer still contains the previous player attenuation.
+    // Attenuate it with the newly lowered ceiling to avoid a false limiter hold.
+    for (const channel of this.delay) {
+      for (let index = 0; index < channel.length; index += 1) channel[index] *= ratio;
+    }
+  }
+
+  saveVolumeCheckpoint() {
+    const checkpoint = this.volumeCheckpoints[this.volumeCheckpointIndex];
+    checkpoint.counts.set(this.programmeEstimator.counts);
+    checkpoint.energySums.set(this.programmeEstimator.energySums);
+    checkpoint.acceptedBlocks = this.programmeEstimator.acceptedBlocks;
+    this.volumeCheckpointIndex = (this.volumeCheckpointIndex + 1) % VOLUME_CHECKPOINT_FRAMES;
+    this.volumeCheckpointCount = Math.min(VOLUME_CHECKPOINT_FRAMES, this.volumeCheckpointCount + 1);
+  }
+
+  invalidateRecentVolumeMeasurement() {
+    // PCM and DOM volume notifications do not have a shared sample clock.
+    // Discard the uncertain recent measurements, not the established programme
+    // or the audible gain. Never reinterpret them as a new source or boost PCM.
+    if (this.volumeCheckpointCount) {
+      const index = (this.volumeCheckpointIndex - this.volumeCheckpointCount
+        + VOLUME_CHECKPOINT_FRAMES) % VOLUME_CHECKPOINT_FRAMES;
+      const checkpoint = this.volumeCheckpoints[index];
+      this.programmeEstimator.counts.set(checkpoint.counts);
+      this.programmeEstimator.energySums.set(checkpoint.energySums);
+      this.programmeEstimator.acceptedBlocks = checkpoint.acceptedBlocks;
+      this.programmeEstimator.recompute();
+      this.programmeState = this.programmeEstimator.snapshot();
+    }
+    this.volumeCheckpointCount = 0;
+    this.programmeStrideFrames = 0;
+    // Recover a metadata-induced cut smoothly, without waiting for the normal
+    // programme release. Downward attack and both peak protections still win.
+    this.volumeRecoverySamples = Math.round(sampleRate * 0.5);
+    this.historyCount = 0;
+    this.frameSamples = 0;
+    this.inputEnergySum = this.inputPeak = this.sourceInputPeak = 0;
+    this.outputEnergySum = this.outputPeak = 0;
+    this.previousInputFramePeak = 0;
+    // Only the measurement filters are reset; the audio path is untouched.
+    this.filterState.fill(0, 0, this.filterState.length);
+  }
+
   resetProgramme() {
+    // A real source boundary must not replay old gained PCM at the new source's
+    // reset gain, or mix a partial old measurement frame into the new programme.
+    for (const channel of this.delay) channel.fill(0);
+    this.filterState.fill(0);
+    this.frameSamples = 0;
+    this.inputEnergySum = 0;
+    this.inputPeak = 0;
+    this.sourceInputPeak = 0;
+    this.outputEnergySum = 0;
+    this.outputPeak = 0;
     this.energyHistory.fill(0);
     this.inputPeakHistory.fill(0);
     this.outputEnergyHistory.fill(0);
@@ -171,6 +262,8 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
     this.historyIndex = 0;
     this.historyCount = 0;
     this.programmeEstimator.reset();
+    this.volumeCheckpointCount = 0;
+    this.volumeRecoverySamples = 0;
     this.programmeState = this.programmeEstimator.snapshot();
     this.programmeStrideFrames = 0;
     this.targetGainDb = 0;
@@ -229,12 +322,10 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
   }
 
   finishFrame() {
-    const capturedEnergy = this.inputEnergySum / Math.max(1, this.frameSamples);
+    const sourceEnergy = this.inputEnergySum / Math.max(1, this.frameSamples);
     const outputEnergy = this.outputEnergySum / Math.max(1, this.frameSamples);
     const volumeDb = this.volumeDb();
-    const sourceCompensation = dbToLinear(-volumeDb);
-    const sourceEnergy = capturedEnergy * sourceCompensation * sourceCompensation;
-    const sourcePeak = this.inputPeak * sourceCompensation;
+    const sourcePeak = this.sourceInputPeak;
     this.energyHistory[this.historyIndex] = sourceEnergy;
     this.inputPeakHistory[this.historyIndex] = this.inputPeak;
     this.outputEnergyHistory[this.historyIndex] = outputEnergy;
@@ -281,6 +372,8 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         this.targetGainDb = this.lastControl?.programmeBaselineGainDb || 0;
       }
     }
+
+    this.saveVolumeCheckpoint();
 
     this.transitionInput.baseCeilingDb = this.baseCeilingDb();
     this.transitionInput.cutStrength = this.cutStrength;
@@ -360,10 +453,11 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.reportHardClippedSamples = 0;
       this.reportMaxHardClipOvershoot = 0;
     }
-    this.previousInputFramePeak = this.inputPeak;
+    this.previousInputFramePeak = this.sourceInputPeak;
     this.frameSamples = 0;
     this.inputEnergySum = 0;
     this.inputPeak = 0;
+    this.sourceInputPeak = 0;
     this.outputEnergySum = 0;
     this.outputPeak = 0;
     this.limitedSamples = 0;
@@ -389,13 +483,16 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
       this.cutStrength += (this.targetCutStrength - this.cutStrength) * settingAlpha;
       this.liftStrength += (this.targetLiftStrength - this.liftStrength) * settingAlpha;
       this.enabled += (this.targetEnabled - this.enabled) * settingAlpha;
-      this.playerVolumeCap += (this.targetPlayerVolumeCap - this.playerVolumeCap) * settingAlpha;
       this.muteGain += (this.targetMuteGain - this.muteGain) * muteAlpha;
       let gainAlpha;
       if (this.targetGainDb < this.currentGainDb && this.targetGainDb < 0) gainAlpha = CUT_ATTACK_ALPHA;
       else if (this.targetGainDb > this.currentGainDb && this.currentGainDb < 0) gainAlpha = CUT_RELEASE_ALPHA;
       else if (this.targetGainDb > this.currentGainDb) gainAlpha = LIFT_ATTACK_ALPHA;
       else gainAlpha = LIFT_RELEASE_ALPHA;
+      if (this.volumeRecoverySamples > 0) {
+        if (this.targetGainDb > this.currentGainDb) gainAlpha = LIFT_RELEASE_ALPHA;
+        this.volumeRecoverySamples -= 1;
+      }
       const gainDelta = (this.targetGainDb - this.currentGainDb) * gainAlpha;
       this.currentGainDb += Math.min(gainDelta, MAX_GAIN_INCREASE_PER_SAMPLE_DB);
       const levelGain = dbToLinear(this.currentGainDb) * this.enabled + (1 - this.enabled);
@@ -406,13 +503,15 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         const sample = source ? source[frame] || 0 : 0;
         this.delay[channel][this.delayIndex] = sample * levelGain;
         futurePeak = Math.max(futurePeak, Math.abs(sample * levelGain));
-        rawInputPeak = Math.max(rawInputPeak, Math.abs(sample));
-        const weighted = this.weightedSample(sample, Math.min(channel, 1));
+        const sourceSample = sample * this.sourceVolumeGain;
+        rawInputPeak = Math.max(rawInputPeak, Math.abs(sourceSample));
+        const weighted = this.weightedSample(sourceSample, Math.min(channel, 1));
         this.inputEnergySum += weighted * weighted / output.length;
         this.inputPeak = Math.max(this.inputPeak, Math.abs(sample));
+        this.sourceInputPeak = Math.max(this.sourceInputPeak, Math.abs(sourceSample));
       }
       const liftedJump = this.currentGainDb > 0.01 && futurePeak > dbToLinear(this.adaptiveTransitionCeilingDb);
-      const newSignalOnset = !this.signalActive && futurePeak > ONSET_PROTECTION_THRESHOLD;
+      const newSignalOnset = !this.signalActive && futurePeak * this.sourceVolumeGain > ONSET_PROTECTION_THRESHOLD;
       const activeProgrammeJump = this.signalActive
         && this.cutStrength > 0.01
         && rawInputPeak > ONSET_PROTECTION_THRESHOLD

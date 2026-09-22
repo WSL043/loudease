@@ -8,6 +8,12 @@ Unreleased integration (`2026-09-12`): the audio worklet precomputes fixed coeff
 
 ## Decision
 
+Unreleased 2026-09-22: manual-volume measurement and source-boundary fixes are
+qualified separately in [VOLUME_INTENT.md](VOLUME_INTENT.md). These change PCM
+during control transitions; historical coefficient-only parity is not a claim
+about these functional changes. Existing release checksums and store publication
+remain unchanged. Candidate true-peak detection is still not shipped.
+
 | Target | Decision | Reason |
 |---|---|---|
 | Published `0.8.2` package | Existing verified beta | The archived ZIP and checksum identify the published runtime; later main-branch work is not a new release |

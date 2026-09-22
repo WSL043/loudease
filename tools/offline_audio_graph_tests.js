@@ -392,7 +392,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+if (require.main === module) main().catch((error) => {
   console.error(`FAIL offline audio graph test: ${error.stack || error}`);
   process.exit(1);
 });
+
+module.exports = { findChrome, waitForDevToolsPort, waitForCdp, CdpSocket, connectTarget, evaluateValue, sleep, assertInside };

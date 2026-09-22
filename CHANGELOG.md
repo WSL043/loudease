@@ -4,6 +4,10 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Preserve manual player-volume intent in source measurement, reject bounded asynchronous-control contamination, and recover smoothly without resetting established programme history.
+- Clear delayed audio and partial measurements at genuine source boundaries; enforce reliable zero volume without a separate mute flag.
+- Add baseline-reproducing control regressions and isolated Chrome measurements. The experimental peak detector remains outside runtime builds; see `docs/VOLUME_INTENT.md`.
+
 - Made capture tests wait for the correct extension document and API context before querying tabs or configuring the silent sink, fixing an initialization race without retrying failed capture scenarios.
 - Precomputed fixed AudioWorklet smoothing and onset coefficients to reduce sample-loop work; stereo PCM and diagnostic state match the previous runtime exactly in the three-rate comparison audit.
 - Restored the original inter-sample peak counterexample, calibrated the detector, and added a strict `audit:true-peak` command that reports unresolved overshoot instead of replacing failing fixtures.
