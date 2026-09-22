@@ -42,6 +42,11 @@ These differences are engineering depth, not an uncopyable secret. A public impl
 
 ## Evidence policy
 
+The [objective quality follow-up](OBJECTIVE_AUDIO_QUALITY.md) maps Audio Precision,
+BBC, Google and EBU research to executable diagnostics and explicit remaining
+perceptual gaps. It does not treat a single loudness or similarity score as sound
+quality, and does not add external services or runtime models.
+
 - Synthetic PCM proves mathematical invariants and regressions.
 - OfflineAudioContext proves browser graph behavior.
 - Isolated Chrome E2E proves capture and extension lifecycle.

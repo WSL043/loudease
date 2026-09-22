@@ -27,12 +27,14 @@ function detectorTests() {
   assert.throws(() => candidateSource('changed runtime'), /anchor/);
   const full = new CandidatePeakDetector();
   const pruned = new CandidatePeakDetector();
+  const reference = new CandidatePeakDetector(false);
   for (let i = 0; i < 10000; i += 1) {
     const amplitude = i % 211 < 37 ? 1.2 : 0.01;
     const stereo = [[amplitude * Math.sin(i * 2.13)], [amplitude * Math.cos(i * 1.71)]];
     const ceiling = i % 97 < 20 ? 0.1 : 0.708;
     const expected = full.push(stereo, 0, 2);
     const actual = pruned.push(stereo, 0, 2, ceiling);
+    assert.equal(actual, reference.push(stereo, 0, 2, ceiling), 'fused detector changes peak');
     assert.equal(Math.min(1, ceiling / Math.max(actual, 1e-12)),
       Math.min(1, ceiling / Math.max(expected, 1e-12)), 'bounded pruning changes required gain');
   }

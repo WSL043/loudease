@@ -35,6 +35,7 @@
     "audit": "node tools/acceptance_audit.js --json",
     "audit:true-peak": "node tools/true_peak_audit.js",
     "audit:true-peak-controls": "node tools/true_peak_control_audit.js",
+    "audit:candidate-quality": "node tools/candidate_quality_metrics.js",
     "audit:true-peak-candidate": "node tools/true_peak_candidate.js && node tools/true_peak_candidate_evaluation.js",
     "test:volume-intent": "node tools/volume_intent_tests.js",
     "test:volume-edges": "node tools/volume_edge_tests.js",

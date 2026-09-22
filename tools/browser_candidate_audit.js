@@ -33,11 +33,13 @@ async function main() {
   fs.mkdirSync(tmp, { recursive: true });
   const production = fs.readFileSync(path.join(root, 'offscreen/leveler-worklet.js'), 'utf8');
   const candidate = candidateSource(production);
+  const reference = candidateSource(production, { fused: false });
   const routes = {
     '/': ['text/html', '<!doctype html><title>LoudEase isolated audit</title><script src="/measure.js"></script><script src="/harness.js"></script>'],
     '/policy.js': ['text/javascript', fs.readFileSync(path.join(root, 'shared/programme-leveler-policy.js'), 'utf8')],
     '/production.js': ['text/javascript', scheduledSource(production)],
     '/candidate.js': ['text/javascript', scheduledSource(candidate)],
+    '/reference.js': ['text/javascript', scheduledSource(reference)],
     '/measure.js': ['text/javascript', `const TRUE_PEAK_LIMIT = 1;\n${samplePeak}\n${estimatedTruePeak}\n${measurePeaks}`],
     '/harness.js': ['text/javascript', fs.readFileSync(path.join(root, 'test-pages/candidate-browser-audit.js'), 'utf8')]
   };
@@ -58,6 +60,7 @@ async function main() {
   const sockets = [];
   const report = { date: new Date().toISOString(), productionSha256: crypto.createHash('sha256').update(production).digest('hex'),
     candidateSha256: crypto.createHash('sha256').update(candidate).digest('hex'),
+    referenceSha256: crypto.createHash('sha256').update(reference).digest('hex'),
     hardwareOutputUsed: false, cases: [], benchmarks: [], realtime: [] };
   try {
     const port = await waitForDevToolsPort(profile, child, () => stderr);
@@ -87,6 +90,11 @@ async function main() {
           if (scenario === 'boundary') assert.equal(result.oldProgrammeLeak, 0, 'old programme buffer cleared');
           if (scenario === 'tone') assert(result.toneResidualDb < -50, 'steady ordinary-tone residual below -50 dB');
           console.log(JSON.stringify({ rate, scenario, variant, peaks: result.peaks, oldProgrammeLeak: result.oldProgrammeLeak, renderMs: result.renderMs }));
+          if (variant === 'candidate') {
+            const prior = await evaluateValue(cdp, `window.renderCandidateCase(${JSON.stringify({ ...options, variant: 'reference' })})`);
+            assert.deepEqual(result.pcmHashes, prior.pcmHashes, 'fused/reference stereo PCM must be byte-identical');
+            result.referencePcmMatch = true;
+          }
         }
       }
       for (const variant of ['production', 'candidate']) {
@@ -117,15 +125,20 @@ async function main() {
         }
       }
       for (const kind of ['ordinary', 'alternating']) {
-        const times = { production: [], candidate: [] };
-        for (let trial = -1; trial < 3; trial += 1) for (const variant of trial % 2 ? ['candidate', 'production'] : ['production', 'candidate']) {
+        const times = { production: [], candidate: [], reference: [] };
+        const hashes = {};
+        for (let trial = -1; trial < 5; trial += 1) for (const variant of trial % 2 ? ['candidate', 'reference', 'production'] : ['production', 'reference', 'candidate']) {
           const options = { rate, kind, variant, seconds: 4, scenario: kind === 'alternating' ? 'benchmark-stress' : 'steady' };
           const result = await evaluateValue(cdp, `window.renderCandidateCase(${JSON.stringify(options)})`);
+          hashes[variant] = result.pcmHashes;
+          if (hashes.candidate && hashes.reference) assert.deepEqual(hashes.candidate, hashes.reference,
+            'benchmark fused/reference PCM must be byte-identical');
           if (trial >= 0) times[variant].push(result.renderMs);
         }
-        const median = (values) => [...values].sort((a, b) => a - b)[1];
+        const median = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
         const result = { rate, kind, audioSeconds: 4, channels: 2, trialsMs: times,
-          medianOverheadPercent: (median(times.candidate) / median(times.production) - 1) * 100 };
+          medianOverheadPercent: (median(times.candidate) / median(times.production) - 1) * 100,
+          improvementVsReferencePercent: (1 - median(times.candidate) / median(times.reference)) * 100 };
         report.benchmarks.push(result);
         console.log(JSON.stringify(result));
       }
