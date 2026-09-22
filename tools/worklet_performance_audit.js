@@ -9,10 +9,14 @@ const root = path.resolve(__dirname, '..');
 // Last published, unoptimized runtime; pin the comparison rather than silently
 // comparing the new code with itself after its commit lands.
 const baseline = 'afcfff1cfd2456048c1b80de43286076beb9e6fa';
-const policy = fs.readFileSync(path.join(root, 'shared/programme-leveler-policy.js'), 'utf8');
+// Freeze this historical coefficient-only equivalence experiment. Later volume
+// intent / source-boundary fixes deliberately change PCM and cannot be compared
+// byte-for-byte with the old functional baseline.
+const optimized = '7769fad5c3d0aaa5cbe73d6872fbaea9d12f2b84';
+const policy = execFileSync('git', ['show', `${optimized}:shared/programme-leveler-policy.js`], { cwd: root, encoding: 'utf8' });
 const sources = {
   baseline: execFileSync('git', ['show', `${baseline}:offscreen/leveler-worklet.js`], { cwd: root, encoding: 'utf8' }),
-  current: fs.readFileSync(path.join(root, 'offscreen/leveler-worklet.js'), 'utf8')
+  current: execFileSync('git', ['show', `${optimized}:offscreen/leveler-worklet.js`], { cwd: root, encoding: 'utf8' })
 };
 assert.equal(policy.replace(/\r\n/g, '\n'), execFileSync('git', ['show', `${baseline}:shared/programme-leveler-policy.js`], { cwd: root, encoding: 'utf8' }).replace(/\r\n/g, '\n'), 'This benchmark requires an unchanged control policy');
 
@@ -83,7 +87,7 @@ for (const sampleRate of [44100, 48000, 96000]) {
   const currentMs = median(times.current);
   results.push({ sampleRate, audioSeconds: blocks.length * 128 / sampleRate, channels: 2, exactPcmAndStateMatch: true, trials: times, baselineMedianMs: baselineMs, currentMedianMs: currentMs, elapsedReductionPercent: (1 - currentMs / baselineMs) * 100 });
 }
-const report = { baseline, environment: `Node ${process.version} VM on ${process.platform}; not a browser CPU measurement`, results };
+const report = { baseline, optimized, historicalExperiment: true, environment: `Node ${process.version} VM on ${process.platform}; not current runtime or browser CPU`, results };
 const reportPath = path.join(root, 'tmp', 'worklet-performance-audit.json');
 fs.mkdirSync(path.dirname(reportPath), { recursive: true });
 fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);

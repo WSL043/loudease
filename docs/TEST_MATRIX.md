@@ -2,6 +2,13 @@
 
 ## Automated matrix
 
+Unreleased control gates: `node tools/volume_intent_tests.js` covers aligned
+manual volume at three rates/three levels, delayed metadata, zero volume and
+source-buffer clearing. `node tools/browser_candidate_audit.js` covers 42 Chrome
+offline stereo cases and four concurrent silent real-time contexts per variant.
+Candidate timing is recorded, not gated on a shared runner; production's known
+inter-sample failure is not hidden. See [measurement boundaries](VOLUME_INTENT.md).
+
 Local capture E2E emits synthetic audio by design. The default developer-safe entry points use an isolated Chrome profile, Chrome's fake audio output, and the Web Audio silent sink so the live DSP graph remains measurable without opening the system playback device. Direct audible runs remain gated behind explicit opt-in.
 
 | Layer | Scenarios | Command |

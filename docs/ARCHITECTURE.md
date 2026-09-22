@@ -2,6 +2,10 @@
 
 This document describes the current `0.8.2` runtime. The runtime files and executable checks are the source of truth.
 
+Unreleased control fixes retain this same capture path. Windows/session volume
+remains downstream and user-owned; page-player attenuation is accounted for in
+worklet measurement, not canceled in playback. See [volume intent](VOLUME_INTENT.md).
+
 ## Product boundary
 
 The public store runtime processes audio from a user-authorized Chrome tab. Chrome normally requires `tabCapture` to start from a user invocation.

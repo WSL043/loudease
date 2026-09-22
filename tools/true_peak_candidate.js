@@ -35,6 +35,19 @@ class CandidatePeakDetector {
       weights.reduce((sum, value) => sum + Math.abs(value), 0)));
   }
 
+  reset() {
+    for (const channel of this.history) channel.fill(0);
+    this.currentChunkPeak = this.previousChunkPeak = this.chunkSamples = this.index = 0;
+  }
+
+  rescale(ratio) {
+    for (const channel of this.history) {
+      for (let index = 0; index < channel.length; index += 1) channel[index] *= ratio;
+    }
+    this.currentChunkPeak *= ratio;
+    this.previousChunkPeak *= ratio;
+  }
+
   push(delay, delayIndex, channels, ceiling = 0) {
     let peak = 0;
     for (let channel = 0; channel < this.history.length; channel += 1) {
@@ -80,6 +93,8 @@ function candidateSource(source = fs.readFileSync(path.join(root, 'offscreen/lev
     result = result.replace(anchor, replacement);
   }
   replaceOnce('    this.delayIndex = 0;', '    this.delayIndex = 0;\n    this.candidatePeakDetector = new CandidatePeakDetector();\n    this.candidatePeakHold = 0;');
+  replaceOnce('  rescalePendingAudio(ratio) {', '  rescalePendingAudio(ratio) {\n    this.candidatePeakDetector.rescale(ratio);');
+  replaceOnce('    this.filterState.fill(0);', '    this.filterState.fill(0);\n    this.candidatePeakDetector.reset();\n    this.candidatePeakHold = 0;');
   replaceOnce('      const required = futurePeak > ceiling ? ceiling / Math.max(futurePeak, 1e-12) : 1;',
     `      const detectedPeak = Math.max(futurePeak,
         this.candidatePeakDetector.push(this.delay, this.delayIndex, output.length, ${prune ? 'ceiling' : '0'}));

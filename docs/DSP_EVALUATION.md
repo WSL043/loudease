@@ -1,5 +1,11 @@
 # DSP evaluation contract
 
+The coefficient-only performance audit is pinned to historical `afcfff1` and
+`7769fad5` so later intentional control changes are not mislabeled as parity
+regressions. It does not benchmark the current worklet. Current control evidence
+is in [VOLUME_INTENT.md](VOLUME_INTENT.md); current candidate Chrome wall-render
+measurements are in [TRUE_PEAK_CANDIDATE.md](TRUE_PEAK_CANDIDATE.md).
+
 LoudEase is optimized for comfortable web listening, not for maximizing standards compliance or flattening every moment. A DSP candidate enters the runtime only when reproducible evidence shows that it improves the product objective without hiding a material regression.
 
 ## Product objective

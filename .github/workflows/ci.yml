@@ -34,5 +34,7 @@ jobs:
           node tools/true_peak_candidate_evaluation.js --stress-only
       - name: Supported capture integration
         run: npm run test:capture
+      - name: Chrome volume intent and candidate research (not shipped)
+        run: npm run audit:browser-candidate
       - name: Store release build
         run: npm run test:release

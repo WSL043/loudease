@@ -21,7 +21,7 @@ const checks = [
   ['one gain law combines programme correction and internal dynamics', /programmeCorrectionDb \+ dynamicsCorrectionDb/.test(policy) && /dynamicsAmount: 0\.86/.test(policy)],
   ['onset protection uses a stable relative crest and lookahead', /computeTransitionCeilingDb/.test(worklet) && /transitionDefaultCrestDb/.test(policy) && !/recentOutputPeakDb/.test(policy) && /LOOKAHEAD_SAMPLES/.test(worklet) && /TRANSITION_PROTECTION_SECONDS = 0\.04/.test(worklet)],
   ['strong lift and cut remain explicitly bounded', /maxLiftDb: 25/.test(policy) && /maxCutDb: 24/.test(policy) && /liftLimiterBudgetDb: 10/.test(policy)],
-  ['player-volume compensation stays in source-domain measurement only', /sourceCompensation/.test(worklet) && /controlInput\.limiterCeilingDb = this\.baseCeilingDb\(\)/.test(worklet) && /controlInput\.peakDb = linearToDb\(this\.inputPeak\)/.test(worklet)],
+  ['player-volume compensation precedes source measurement but not captured peak headroom', /sourceSample = sample \* this\.sourceVolumeGain/.test(worklet) && /weightedSample\(sourceSample/.test(worklet) && /controlInput\.limiterCeilingDb = this\.baseCeilingDb\(\)/.test(worklet) && /controlInput\.peakDb = linearToDb\(this\.inputPeak\)/.test(worklet)],
   ['startup gate waits for the first measured control frame', /meterSequence < 0/.test(offscreen) && /this\.openStartupGateIfReady\(\);/.test(offscreen)],
   ['diagnostics are throttled separately from audio-rate processing', /STATE_REPORT_INTERVAL_FRAMES = 5/.test(worklet) && /type: 'state'/.test(worklet) && /reportLimitedSamples \+= this\.limitedSamples/.test(worklet)]
 ];

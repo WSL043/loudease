@@ -1,8 +1,27 @@
-# Offline detector-only limiter candidate
+# Experimental detector-only limiter candidate
 
-Status: experimental tooling, not shipped. The production worklet and the public
-0.8.2 package have not changed. Passing this experiment does not certify a
+Status: experimental tooling, not shipped. The public 0.8.2 package has not
+changed; current main includes separate volume/source-boundary fixes. Passing this experiment does not certify a
 true-peak meter, a limiter ceiling, browser performance, or listening quality.
+
+## Chrome follow-up, 2026-09-22
+
+`node tools/browser_candidate_audit.js` now executes both variants in isolated
+Chrome 152. Its 42 stereo offline cases passed control/finite-output checks at
+44.1/48/96 kHz; candidate stress peaks stayed below full scale, while production's
+retained counterexample reached about +2.74 dBTP with the long cross-check.
+Steady 997 Hz tone residuals were below -99 dB in this fixture, not a perceptual
+score. Four concurrent contexts per variant ran for 15 seconds with fresh
+state and no processor errors, using a silent sink (not four captured tabs).
+
+After warm-up, three alternating-order trials per rate measured candidate
+offline wall-render overhead of 67.7-96.2% for ordinary material and 128.0-175.4%
+for sustained alternating stress with dynamics disabled. Four seconds of stereo
+audio took about 19-48 ms for production versus 49-95 ms for the candidate.
+These are render elapsed times on this host, not OS CPU percentages, render-quantum
+deadline guarantees or low-power laptop qualification. The earlier Node cost
+estimate must not substitute for Chrome measurements. The candidate therefore
+remains unpromoted. The JSON report includes source hashes and trial values.
 
 ## Hypothesis and implementation
 
@@ -11,7 +30,7 @@ can exceed full scale, and release during the look-ahead interval can weaken
 protection before a transient leaves the delay buffer.
 
 `tools/true_peak_candidate.js` evaluates a replacement detector in a copy of the
-current worklet loaded into a Node VM. Source anchors must each occur exactly
+current worklet loaded into a Node VM or the isolated Chrome audit. Source anchors must each occur exactly
 once; a changed integration point fails instead of silently testing production.
 No extension source imports the candidate. Both build targets exclude `tools`.
 
