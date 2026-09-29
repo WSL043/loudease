@@ -23,7 +23,7 @@ Steps:
 3. Open `chrome://extensions`.
 4. Enable **Developer mode**.
 5. Select **Load unpacked** and choose the extracted directory that contains `manifest.json`.
-6. Pin LoudEase if desired, then open it once on each new tab you want to balance.
+6. Pin LoudEase if desired. It balances audible media on its own; the toolbar icon shows **ON** while it is working.
 
 No local web server or diagnostics receiver is required. Chrome may show the normal warning used for developer-mode extensions.
 
@@ -61,9 +61,9 @@ For that reason, Greasy Fork is not a second LoudEase distribution channel. Its 
 
 ## Using the extension
 
-1. Open a normal `http` or `https` page that is playing audio.
-2. Open LoudEase to authorize the current tab.
-3. Confirm that the waveform is moving and a current dB value is shown.
-4. Adjust **Reduce loud sounds** or **Lift quiet sounds** only when the defaults do not fit the material.
+1. Play something on a normal `http` or `https` page. LoudEase attaches automatically; the toolbar icon shows **ON**.
+2. Open LoudEase to see the waveform and current dB value, or to turn a single site off with **Balance this site automatically**.
+3. Adjust **Reduce loud sounds** or **Lift quiet sounds** only when the defaults do not fit the material.
+4. For audio automatic mode cannot attach to (cross-origin media without CORS, DRM streams, pages with their own Web Audio graph), the popup offers full-tab capture. Chrome requires a user gesture before `tabCapture` can start on a tab, so that fallback needs one click per tab; after that it keeps processing while another tab is active.
 
-Chrome requires a user gesture before `tabCapture` can start on a new tab. After authorization, LoudEase can continue processing that tab while another tab is active. LoudEase does not modify browser shortcuts or install a native helper.
+LoudEase does not modify browser shortcuts or install a native helper.

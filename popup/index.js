@@ -20,6 +20,8 @@ const elements = {
   reviewButton: document.getElementById('reviewButton'),
   githubButton: document.getElementById('githubButton'),
   respectPlayerVolume: document.getElementById('respectPlayerVolume'),
+  autoSite: document.getElementById('autoSite'),
+  autoRow: document.getElementById('autoRow'),
   cutDial: document.getElementById('cutDial'),
   liftDial: document.getElementById('liftDial'),
   cutRange: document.getElementById('cutRange'),
@@ -361,6 +363,26 @@ function render() {
   renderDials();
 }
 
+function renderAutoSite(status = {}) {
+  const auto = status.auto;
+  const available = Boolean(auto && auto.siteKey && auto.globalEnabled !== false);
+  elements.autoRow.hidden = !available;
+  if (available && document.activeElement !== elements.autoSite) {
+    elements.autoSite.checked = auto.siteEnabled !== false;
+  }
+}
+
+async function setAutoSite(enabled) {
+  await message({
+    type: 'WVB_SET_AUTO_MODE',
+    siteEnabled: enabled,
+    tabId: activeTabId,
+    tabUrl: activeTabUrl
+  }).catch(() => {});
+  autoCaptureAttempted = !enabled ? autoCaptureAttempted : false;
+  await refreshStatus({ allowAutoCapture: false });
+}
+
 function renderDials() {
   if (!settings) {
     return;
@@ -640,6 +662,19 @@ function shouldAutoStartCapture(status) {
   if (Boolean(status.playerMuted) || finiteNumber(status.playerVolumeCap, 1) <= 0) {
     return false;
   }
+  if (status.autoActive) {
+    return false;
+  }
+  const auto = status.auto || {};
+  if (auto.globalEnabled !== false && auto.siteEnabled !== false && auto.responding) {
+    // Automatic mode owns this tab. Fall back to user-invoked tab capture only
+    // when it cannot attach: cross-origin/DRM media, a blocked AudioContext,
+    // or an engine failure.
+    return finiteNumber(auto.blockedAudibleCount) > 0
+      || auto.waitingForGesture === true
+      || (finiteNumber(auto.failedCount) > 0 && finiteNumber(auto.processingCount) <= 0)
+      || Boolean(auto.engineFailure);
+  }
   return finiteNumber(status.mediaCount) > 0
     || finiteNumber(status.audibleCount) > 0
     || Boolean(status.tabAudibleHint)
@@ -725,6 +760,10 @@ function getTabCaptureStreamId(tabId) {
 function bind() {
   elements.enabled.addEventListener('change', () => {
     save({ ...settings, enabled: elements.enabled.checked }, { globalOnly: true });
+  });
+
+  elements.autoSite.addEventListener('change', () => {
+    setAutoSite(elements.autoSite.checked).catch(() => {});
   });
 
   elements.respectPlayerVolume.addEventListener('change', () => {
@@ -832,6 +871,7 @@ async function ensureObserverOnce() {
 }
 
 function renderStatus(status) {
+  renderAutoSite(status);
   const enabled = settings?.enabled !== false;
   const processed = finiteNumber(status.processedCount);
   const media = finiteNumber(status.mediaCount);
@@ -839,6 +879,7 @@ function renderStatus(status) {
   const active = finiteNumber(status.activeProcessorCount);
   const frames = finiteNumber(status.respondingFrames);
   const captureActive = Boolean(status.captureActive);
+  const engineActive = captureActive || Boolean(status.autoActive);
   const captureAvailable = status.captureAvailable !== false;
   const failedErrors = Array.isArray(status.failedErrors) ? status.failedErrors.filter(Boolean) : [];
   const needsReload = Boolean(status.needsPageReload) || failedErrors.some((error) => /already connected previously|different MediaElementSourceNode/i.test(String(error)));
@@ -868,17 +909,17 @@ function renderStatus(status) {
     setCaptureVisible(captureAvailable, false);
     return;
   }
-  if (captureActive && playerMuted) {
+  if (engineActive && playerMuted) {
     setHeadline({ state: 'watching', label: t('statusMuted', undefined, 'Muted'), title: t('statusPlayerMuted', undefined, 'Player is muted'), sub: t('statusNoAudioOutput', undefined, 'No audio is being output') });
     setEffect({ value: '0', caption: 'dB', amount: 0 });
     return;
   }
-  if (captureActive && !hasFreshSignal) {
+  if (engineActive && !hasFreshSignal) {
     setHeadline({ state: 'watching', label: t('statusConnected', undefined, 'Connected'), title: t('statusWaitingForAudio', undefined, 'Waiting for audio'), sub: t('statusNoSignalConfirmed', undefined, 'Connected, but no signal is detected') });
     setEffect({ value: '--', caption: 'dB', amount: 0 });
     return;
   }
-  if (captureActive && hasFreshSignal && percentValue(settings?.cutStrength) <= 0 && percentValue(settings?.liftStrength) <= 0) {
+  if (engineActive && hasFreshSignal && percentValue(settings?.cutStrength) <= 0 && percentValue(settings?.liftStrength) <= 0) {
     setHeadline({
       state: 'watching',
       label: t('statusConnected', undefined, 'Connected'),
@@ -888,7 +929,7 @@ function renderStatus(status) {
     setEffect({ value: '0', caption: 'dB', amount: 0 });
     return;
   }
-  if (captureActive || (active > 0 && processed > 0 && audible > 0)) {
+  if (engineActive || (active > 0 && processed > 0 && audible > 0)) {
     const blockedNotice = liftBlockedNotice(status);
     if (blockedNotice) setNotices([blockedNotice]);
     const reduction = percentValue(settings?.cutStrength) > 0 ? Math.max(0, finiteNumber(status.averageReductionDb)) : 0;
@@ -911,6 +952,12 @@ function renderStatus(status) {
     setHeadline({ state: 'warning', label: t('statusActionRequired', undefined, 'Action required'), title: t('statusNotConnected', undefined, 'Audio is not connected'), sub: t('captureRecoveryHelp', undefined, 'Reconnect to try again') });
     setEffect({ value: '--', caption: 'dB', amount: 0 });
     setCaptureVisible(captureAvailable, false);
+    return;
+  }
+  const autoOn = status.auto && status.auto.globalEnabled !== false && status.auto.siteEnabled !== false && status.auto.responding;
+  if (autoOn && !captureActive) {
+    setHeadline({ state: 'watching', label: t('statusReady', undefined, 'Ready'), title: t('statusAutoReady', undefined, 'Automatic mode is on'), sub: t('statusPlayToBegin', undefined, 'Play audio to begin balancing') });
+    setEffect({ value: '--', caption: 'dB', amount: 0 });
     return;
   }
   setHeadline({ state: 'watching', label: t('statusReady', undefined, 'Ready'), title: media > 0 ? t('statusMediaDetected', undefined, 'Media detected') : t('statusWaitingForMedia', undefined, 'Waiting for media'), sub: frames > 0 ? t('statusPlayToBegin', undefined, 'Play audio to begin balancing') : t('statusCheckingConnection', undefined, 'Checking the page connection') });

@@ -8,9 +8,9 @@ worklet measurement, not canceled in playback. See [volume intent](VOLUME_INTENT
 
 ## Product boundary
 
-The public store runtime processes audio from a user-authorized Chrome tab. Chrome normally requires `tabCapture` to start from a user invocation.
+LoudEase has two entry points into one DSP. **Automatic mode** (default) attaches to eligible audible media elements from a content script and needs no click. **Tab capture** processes a whole tab after the user invokes LoudEase; it is the fallback for media automatic mode cannot safely attach to. Chrome requires `tabCapture` to start from a user invocation.
 
-The production audio path is:
+The tab-capture audio path is:
 
 ```text
 tabCapture MediaStream
@@ -21,7 +21,16 @@ tabCapture MediaStream
   -> local AudioDestinationNode
 ```
 
-The old page-level `createMediaElementSource()` engine is no longer part of the runtime. `content/bridge.js` observes media and player-volume state only; it does not own the audio graph.
+The automatic-mode path is:
+
+```text
+<audio>/<video> element (audible, eligible)
+  -> MediaElementAudioSourceNode (content script AudioContext)
+  -> unified programme-leveler-v4 AudioWorklet (same files as above)
+  -> AudioDestinationNode
+```
+
+`content/bridge.js` still only observes media and player-volume state for the capture path; it does not own an audio graph. See [Automatic mode](#automatic-mode-contentauto-enginejs).
 
 ## Components
 
@@ -43,6 +52,18 @@ The offscreen document is the source of truth for active audio sessions. Each au
 `offscreen/leveler-worklet.js` is the normal processing path. It performs continuous measurement, gated programme estimation, stable programme-baseline correction, floor-qualified quiet-detail correction capped at 16 dB, independent fast loud protection, linked gain smoothing, mute/player-volume enforcement, and sample-peak look-ahead limiting on the audio render thread. `shared/programme-leveler-policy.js` is loaded into both the AudioWorklet scope and fallback page so the control law has one source of truth.
 
 If the unified worklet cannot load, `offscreen/index.js` falls back to the older meter/controller/limiter graph. The fallback is intentionally conservative and is reported in diagnostics.
+
+### Automatic mode (`content/auto-engine.js`)
+
+A static content script on HTTP(S) frames (`all_frames`, `document_idle`). It is inert on pages without media: it only listens for media events and DOM additions and never messages the service worker until a candidate is audible.
+
+An element is attached only when it is audible and eligible. `createMediaElementSource` silences cross-origin media without CORS and protected (EME) media, so these are never attached; the popup then falls back to tab capture. Attachment order is fixed: create the `AudioContext`, confirm it is `running` (otherwise wait for a user gesture), load the leveler worklet from a web-accessible resource, configure the node, wait for its `configured` acknowledgement, and only then create the element source and connect it. A `processorerror` or stale worklet state routes the element straight to the destination.
+
+Settings, per-site rules, and the automatic-mode switches (`webVolumeBalancer.autoMode`) are resolved by the service worker (`WVB_AUTO_CONFIG`). The engine never talks to the service worker on a timer: it reports on attach/detach/block, and the service worker pulls a summary when the popup opens. When a tab capture is live, the service worker sends `WVB_AUTO_REFRESH` and the engine bypasses processing so audio is never processed twice. The action badge shows `ON` while automatic mode is processing a tab.
+
+The worklet loads from `chrome-extension://` URLs listed in `web_accessible_resources` (with `use_dynamic_url`); this works under strict page CSP, unlike blob URLs, which strict CSP blocks (`tools/e2e_auto_mode.js`).
+
+Known scope limits: elements created with `new Audio()` and never attached to the DOM are not observed (no prototype patching), and pages that build their own Web Audio graph are not attached. Both fall back to tab capture.
 
 ### Content bridge (`content/bridge.js`)
 

@@ -336,7 +336,7 @@
     "message": "موازن مستوى الصوت"
   },
   "appDescription": {
-    "message": "يوحّد تلقائيًا الأصوات المرتفعة والمنخفضة في علامات التبويب مع احترام الكتم ومستوى صوت المشغل."
+    "message": "يوازن مستوى الصوت تلقائيًا: يخفض الإعلانات العالية والذروات ويرفع الحوار الخافت. بدون نقرات، ومعالجة محلية."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — مفعّل"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "عام" },
   "sitesTab": { "message": "قواعد المواقع" },
   "diagnosticsTab": { "message": "الدعم والتشخيص" },
-  "captureGestureTitle": { "message": "النقر مرة واحدة لكل علامة تبويب جديدة" },
-  "captureGestureHelp": { "message": "يتطلب Chrome نقرة واحدة قبل موازنة علامة تبويب جديدة. يستخدم مراقب محلي خفيف عنوان الصفحة وحالة تشغيل الوسائط وكتمها ومستوى صوتها؛ ولا تُرسل بيانات التصفح أو الصوت إلى المطوّر." },
+  "captureGestureTitle": { "message": "تلقائي في معظم المواقع" },
+  "captureGestureHelp": { "message": "يوازن LoudEase الفيديو والصوت قيد التشغيل تلقائيًا دون أي نقر. عندما يحمي Chrome الصوت (عبر النطاقات أو DRM أو Web Audio الخاص بالصفحة)، افتح LoudEase مرة واحدة في تلك التبويبة لاستخدام التقاط التبويبة كاملة. يستخدم مراقب محلي خفيف حالة وسائط الصفحة فقط، ولا تُرسل بيانات التصفح أو الصوت إلى المطوّر." },
   "generalHelp": { "message": "اختر المظهر والسلوك الافتراضيين للإضافة." },
   "appearanceHeading": { "message": "المظهر" },
   "languageLabel": { "message": "اللغة" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "مراجعة في Chrome Web Store" },
   "starGitHub": { "message": "إضافة نجمة على GitHub" },
   "storeReviewOpened": { "message": "تم فتح مراجعات Chrome Web Store." },
-  "githubOpened": { "message": "تم فتح مشروع GitHub." }
+  "githubOpened": { "message": "تم فتح مشروع GitHub." },
+  "appStoreName": { "message": "LoudEase: موازن الصوت التلقائي" },
+  "autoSiteLabel": { "message": "موازنة هذا الموقع تلقائيًا دون نقر." },
+  "statusAutoReady": { "message": "الوضع التلقائي قيد التشغيل" }
 }

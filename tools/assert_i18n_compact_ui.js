@@ -28,7 +28,7 @@ const checks = [
   ['non-English catalogs contain translated UI copy', locales.slice(1).every((locale) => englishKeys.filter((key) => catalogs[locale][key]?.message !== catalogs.en[key]?.message).length >= englishKeys.length * 0.9)],
   ['i18n helper uses Chrome messages and explicit English fallback', /chrome\?\.i18n/.test(helper) && /getMessage/.test(helper) && /fallback/.test(helper)],
   ['RTL direction and logical CSS are present', /activeLocale === 'ar'/.test(helper) && /dir =/.test(helper) && /inline-size|margin-inline|padding-inline/.test(popupCss)],
-  ['popup status requires runtime evidence before claiming active', /captureActive \|\| \(active > 0 && processed > 0 && audible > 0\)/.test(popupJs) && /hasFreshSignal/.test(popupJs)],
+  ['popup status requires runtime evidence before claiming active', /engineActive \|\| \(active > 0 && processed > 0 && audible > 0\)/.test(popupJs) && /hasFreshSignal/.test(popupJs)],
   ['popup has one canonical compact status renderer', (popupJs.match(/function renderStatus\(/g) || []).length === 1 && !/renderCompactStatus|renderStatus\s*=/.test(popupJs)],
   ['recovery actions are hidden by default and shown from failure branches', /id="captureButton"[^>]*hidden/.test(popupHtml) && /id="reloadButton"[^>]*hidden/.test(popupHtml) && /needsReload/.test(popupJs)],
   ['selected AI logo has separate light and dark production assets', /logo-ai-a-light\.png/.test(popupHtml) && /logo-ai-a-dark\.png/.test(popupHtml) && fs.existsSync(path.join(root, 'assets', 'logo-ai-a-light.png')) && fs.existsSync(path.join(root, 'assets', 'logo-ai-a-dark.png'))],

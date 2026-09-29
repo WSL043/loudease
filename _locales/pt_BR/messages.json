@@ -336,7 +336,7 @@
     "message": "Balanceador de volume"
   },
   "appDescription": {
-    "message": "Normaliza automaticamente sons altos e baixos das abas, respeitando o mudo e o volume do player."
+    "message": "Normaliza o volume automaticamente: reduz anúncios e picos altos, realça falas baixas. Sem cliques, processamento local."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — ativado"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "Geral" },
   "sitesTab": { "message": "Regras de sites" },
   "diagnosticsTab": { "message": "Suporte e diagnóstico" },
-  "captureGestureTitle": { "message": "Um clique para cada nova guia" },
-  "captureGestureHelp": { "message": "O Chrome exige um clique antes de equilibrar uma nova guia. Um observador local leve usa a URL da página e o estado de reprodução, silêncio e volume da mídia; dados de navegação e áudio não são enviados ao desenvolvedor." },
+  "captureGestureTitle": { "message": "Automático na maioria dos sites" },
+  "captureGestureHelp": { "message": "O LoudEase equilibra sozinho vídeos e áudio em reprodução, sem cliques. Onde o Chrome protege o áudio (origem cruzada, DRM ou Web Audio próprio da página), abra o LoudEase uma vez nessa guia para usar a captura da guia. Um observador local leve usa apenas o estado de mídia da página; dados de navegação e áudio não são enviados ao desenvolvedor." },
   "generalHelp": { "message": "Escolha a aparência e o comportamento padrão da extensão." },
   "appearanceHeading": { "message": "Aparência" },
   "languageLabel": { "message": "Idioma" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "Avaliar na Chrome Web Store" },
   "starGitHub": { "message": "Dar estrela no GitHub" },
   "storeReviewOpened": { "message": "Avaliações da Chrome Web Store abertas." },
-  "githubOpened": { "message": "Projeto do GitHub aberto." }
+  "githubOpened": { "message": "Projeto do GitHub aberto." },
+  "appStoreName": { "message": "LoudEase: normalizador de volume automático" },
+  "autoSiteLabel": { "message": "Equilibrar este site automaticamente, sem cliques." },
+  "statusAutoReady": { "message": "O modo automático está ativado" }
 }

@@ -336,7 +336,7 @@
     "message": "Balanceador de volumen"
   },
   "appDescription": {
-    "message": "Normaliza automáticamente el audio fuerte y suave de las pestañas respetando el silencio y el volumen del reproductor."
+    "message": "Normaliza el volumen automáticamente: reduce anuncios y picos fuertes, realza diálogos bajos. Sin clics, procesado local."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — activado"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "General" },
   "sitesTab": { "message": "Reglas de sitios" },
   "diagnosticsTab": { "message": "Soporte y diagnóstico" },
-  "captureGestureTitle": { "message": "Un clic para cada pestaña nueva" },
-  "captureGestureHelp": { "message": "Chrome exige un clic antes de equilibrar una pestaña nueva. Un observador local ligero usa la URL de la página y el estado de reproducción, silencio y volumen del contenido multimedia; no se envían datos de navegación ni audio al desarrollador." },
+  "captureGestureTitle": { "message": "Automático en la mayoría de sitios" },
+  "captureGestureHelp": { "message": "LoudEase equilibra por sí solo el vídeo y el audio en reproducción, sin clics. Donde Chrome protege el audio (origen cruzado, DRM o Web Audio propio de la página), abre LoudEase una vez en esa pestaña para usar la captura de pestaña. Un observador local ligero usa solo el estado multimedia de la página; los datos de navegación y audio no se envían al desarrollador." },
   "generalHelp": { "message": "Elige la apariencia y el comportamiento predeterminados de la extensión." },
   "appearanceHeading": { "message": "Apariencia" },
   "languageLabel": { "message": "Idioma" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "Reseñar en Chrome Web Store" },
   "starGitHub": { "message": "Dar una estrella en GitHub" },
   "storeReviewOpened": { "message": "Se abrieron las reseñas de Chrome Web Store." },
-  "githubOpened": { "message": "Se abrió el proyecto de GitHub." }
+  "githubOpened": { "message": "Se abrió el proyecto de GitHub." },
+  "appStoreName": { "message": "LoudEase: normalizador de volumen automático" },
+  "autoSiteLabel": { "message": "Equilibrar este sitio automáticamente, sin clics." },
+  "statusAutoReady": { "message": "El modo automático está activado" }
 }

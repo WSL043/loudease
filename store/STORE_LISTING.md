@@ -6,45 +6,49 @@ This document contains the canonical Chrome Web Store copy for LoudEase. Version
 
 **Product name**
 
-LoudEase
+LoudEase: Auto Volume Normalizer
 
-**Summary**
+(localized through `appStoreName`; the in-popup product name stays `LoudEase`)
 
-Automatically normalizes loud and quiet tab audio while respecting mute and player volume.
+**Summary** (132 characters maximum)
+
+Auto volume normalizer: tames loud ads and sudden peaks, lifts quiet dialogue, on any tab. Works automatically, no clicks.
 
 **Single purpose**
 
-Make audio in user-authorized browser tabs more comfortable by reducing sudden loud sections and applying bounded, strength-controlled lift to genuine quiet passages while respecting mute and the player's current volume.
+Make web audio more comfortable by reducing sudden loud sections and applying bounded, strength-controlled lift to genuine quiet passages while respecting mute and the player's current volume.
 
 **Category**
 
-Accessibility
+Tools
+
+Rationale: the `Accessibility` category has almost no organic browsing traffic and is not where people look for volume tools. The comparable volume-normalizer listings are in `Tools`. Category does not change search ranking, but it decides which browse lists the item appears in. The change is made in the Developer Dashboard, not in the package.
 
 **Detailed description**
 
-LoudEase is an automatic volume normalizer for Chrome tabs: it lifts genuinely quiet programmes and reduces loud sections so you reach for the volume control less often.
+LoudEase is an automatic volume normalizer for Chrome. It pulls loud ads and sudden peaks down and lifts quiet dialogue, so you stop reaching for the volume control.
 
-Open the extension on a tab to authorize local audio balancing. LoudEase then analyzes that tab's audio in real time, reduces sudden loud sections, and lifts genuine quiet passages according to the selected strength. Lower settings preserve more original dynamics; full strength targets closer program-level consistency.
+Install it and play something. No clicks, no setup. LoudEase balances audible video and audio on ordinary web pages by itself, and the toolbar icon shows ON while it is working.
 
-Choose a calibrated target in advanced settings: Gentle (`-22 dB`), Balanced (`-19 dB`, default), or Strong (`-16 dB`). Save it globally or override it for individual sites.
+WHAT YOU GET
+- Loud ads, jump scares and peaks come down (fast protection plus a 5 ms look-ahead limiter)
+- Quiet dialogue and quiet videos come up (bounded, strength-controlled lift)
+- Steadier volume from one video, stream or creator to the next
+- Your mute and player volume stay in charge; LoudEase never overrides them
+- Three calibrated targets (Gentle, Balanced, Strong), per-site rules, and a per-site off switch
+- 100% on-device processing with Web Audio and AudioWorklet: no accounts, no ads, no analytics
+- 11 interface languages
 
-What it does:
+HOW IT DIFFERS FROM A VOLUME BOOSTER
+A booster makes everything louder, peaks included. LoudEase measures programme loudness and moves loud and quiet passages toward a common level, so you choose the overall volume with the player as usual.
 
-- reduces sudden loud sections with a fast safety path;
-- lifts genuine quiet passages with a bounded, strength-scaled peak-compression budget;
-- respects page mute and the player's current volume;
-- keeps authorized tabs balanced when you switch to another tab;
-- works with ordinary video, music, live streams, and other tab audio;
-- processes PCM audio locally with Web Audio and AudioWorklet;
-- includes no advertising, analytics, or remote executable code.
+WORKS WITH
+HTML5 video, music and live streams on ordinary web pages. Verified with no clicks on YouTube and Bilibili. Some audio cannot be attached automatically because Chrome protects it (cross-origin media without CORS, DRM streams, pages that build their own audio graph). There, open LoudEase once on that tab to use full-tab capture instead.
 
-Chrome requires a user gesture before a new tab can be captured. Open LoudEase once on each new tab you want to balance. LoudEase keeps processing while Chrome keeps that tab-capture session live, and the popup shows when reconnection is needed.
+PRIVACY
+Audio is processed on your device and never recorded or uploaded. A lightweight local observer reads only page media state (playing, muted, volume) and never page text, forms, cookies or credentials. No advertising, analytics or remote code.
 
-To respect in-player mute and volume and recover an authorized session after navigation, a lightweight local observer handles the page URL plus media playback, mute, and volume state only in audible, recognized-media, captured, or explicitly opened HTTP(S) tabs. Merely being active is not enough. It does not read page text, forms, cookies, or credentials. Browsing and audio data are not sent to the developer.
-
-Audio quality varies with source material and listening equipment. LoudEase is a listening-comfort tool, not hearing protection or a medical device.
-
-This is a public beta. Core capture, mute, player-volume, multi-tab, source-switching, limiter, and baseline site paths are covered by automated release checks, but site behavior and listening preference still vary. Please use the support route to report compatibility or audio-quality issues without including private URLs or browsing data.
+LoudEase is a listening-comfort tool, not hearing protection or a medical device. It is a public beta: please report compatibility or audio-quality problems through the support link without including private URLs.
 
 ## URLs
 
@@ -61,7 +65,7 @@ These URLs are public and must remain reachable for store users and reviewers.
 - UI locales already bundled: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Russian, German, French, Spanish, Brazilian Portuguese, and Arabic
 - Store listing localization: English is source-ready; copy-ready drafts for the other 10 UI locales are tracked in `store/LOCALIZATION_STATUS.md` and must not be published before native or fluent review
 
-Do not claim support for a named site unless current-version evidence exists for its video and live-audio paths. Use the broader claim "ordinary web tab audio" until the public compatibility matrix supports stronger wording.
+Do not claim support for a named site unless current-version evidence exists. The named claim above (YouTube and Bilibili, no clicks) is backed by `node tools/e2e_auto_mode.js --url <page>`; re-run it before each release and use the broader claim "ordinary web audio" if it fails.
 
 Developer registration and account-owner requirements remain documented in `store/ACCOUNT_SETUP.md` for future publisher maintenance.
 

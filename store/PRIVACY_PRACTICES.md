@@ -6,7 +6,7 @@ Dashboard review (`2026-09-12`): the published item declares no remote code, sel
 
 ## Single purpose
 
-LoudEase balances audio in browser tabs explicitly authorized by the user. It reduces sudden loud sections, applies bounded strength-controlled lift to genuine quiet passages, and enforces mute and player-volume boundaries.
+LoudEase balances web audio. It reduces sudden loud sections, applies bounded strength-controlled lift to genuine quiet passages, and enforces mute and player-volume boundaries. It does this automatically for audible media on the page and, where Chrome protects the audio, through user-invoked tab capture.
 
 ## Permission justifications
 
@@ -14,14 +14,15 @@ LoudEase balances audio in browser tabs explicitly authorized by the user. It re
 | --- | --- |
 | `storage` | Saves the enabled state, appearance and language choices, two balance strengths, and per-site rules. Settings use Chrome Sync when the user has Sync enabled; LoudEase operates no settings server. |
 | `activeTab` | Grants temporary access to the tab on which the user invokes LoudEase. Chrome uses that user-authorized tab as the target of `tabCapture`; the grant is not used to read unrelated tabs. |
-| `scripting` | Restores the lightweight media-state observer after navigation when Chrome did not instantiate the declared content script. It does not inject the DSP engine or remote code. |
+| `scripting` | Injects the bundled automatic-mode content script into pages that were already open when the extension was installed or updated, and restores the media-state observer after navigation. It never injects remote code. |
 | `tabCapture` | Obtains the audio stream for the current tab after the user invokes LoudEase. The stream is processed and played locally. |
 | `offscreen` | Hosts the local Web Audio and AudioWorklet graph because an MV3 service worker cannot own the required DOM audio context. |
-| `http://*/*`, `https://*/*` | Lets the lightweight observer follow media, mute, player-volume, and SPA navigation state on ordinary web pages so the DSP can preserve user intent. It also provides current-page access needed for per-site rules and authorized-session recovery. No page text, form data, cookies, or credentials are read. |
+| `http://*/*`, `https://*/*` | Lets the bundled automatic-mode content script attach to audible `<audio>`/`<video>` elements on ordinary web pages and follow their mute, volume, and source state so the DSP preserves user intent. It also provides current-page access needed for per-site rules and capture-session recovery. No page text, form data, cookies, or credentials are read. |
+| `web_accessible_resources` (`offscreen/leveler-worklet.js`, `shared/programme-leveler-policy.js`) | Let the content script load the bundled AudioWorklet processor into the page's own audio context. This is the only way to run the processor there under strict page CSP. The files are inert without the extension and contain no page or user data. |
 
 The store build does not request `tabs`. Matching HTTP(S) host access already exposes the limited tab fields used by the implemented observer and session recovery. `activeTab` remains because it is the explicit user-invocation grant for the `tabCapture` target.
 
-For the `0.8.2` public beta, required HTTP(S) host access is retained because the implemented product supports arbitrary ordinary web-audio pages and must restore its media-state observer after navigation in an already authorized capture session. The observer is still injected only into audible, recognized-media, captured, or explicitly opened tabs, and it is limited to the single audio-balancing purpose described above.
+HTTP(S) host access is required because automatic mode must attach to media on arbitrary ordinary web pages; there is no fixed site list. The automatic-mode content script does nothing on pages without an audible `<audio>` or `<video>` element and sends no message to the service worker until one plays. Host access is limited to the single audio-balancing purpose described above.
 
 ## Remote code declaration
 

@@ -24,7 +24,7 @@ const checks = [
   ['known limitations cite the current public-beta version', limitations.includes(`Version \`${currentVersion}\` remains a public beta`)],
   ['research documents established methods without novelty inflation', /established browser and audio engineering techniques/.test(research) && /not an uncopyable secret/.test(research)],
   ['legacy page engine is not present', !fs.existsSync(path.join(root, 'content', 'engine.js'))],
-  ['architecture records the observer-only content bridge', /old page-level \`createMediaElementSource\(\)\` engine is no longer part of the runtime/.test(architecture) && /does not process PCM audio/.test(architecture)],
+  ['architecture records the observer-only content bridge', /content\/bridge\.js\` still only observes media/.test(architecture) && /sole page-side owner|Automatic mode \(\`content\/auto-engine\.js\`\)/.test(architecture) && /never attached/.test(architecture)],
   ['active docs do not present retired 0.4 releases as current', !/current[^\n]*0\.4\.|Version \`0\.4\./i.test(activeDocs)]
 ];
 

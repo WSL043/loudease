@@ -98,6 +98,8 @@ output { font-size: 10px; font-weight: 760; font-variant-numeric: tabular-nums; 
 .footerRow { min-block-size: 29px; justify-content: space-between; gap: 7px; }
 .limitSetting { min-inline-size: 0; gap: 7px; color: var(--muted); font-size: 9px; font-weight: 650; line-height: 1.25; cursor: pointer; }
 .limitSetting input { inline-size: 14px; block-size: 14px; flex: none; margin: 0; accent-color: var(--input); }
+.autoSetting { margin-block: 2px 4px; }
+.autoSetting[hidden] { display: none; }
 .supportActions { flex: none; gap: 1px; }
 .supportActions .iconButton { inline-size: 24px; block-size: 24px; padding: 4px; }
 .supportActions .iconButton img { inline-size: 15px; block-size: 15px; }

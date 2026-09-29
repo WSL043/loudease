@@ -7,11 +7,11 @@
 
 <h1 align="center">LoudEase</h1>
 
-<p align="center"><strong>Automatic volume normalization for Chrome tabs — quiet dialogue up, loud surprises down.</strong></p>
+<p align="center"><strong>Automatic volume normalizer for Chrome — loud ads and sudden peaks down, quiet dialogue up. No clicks.</strong></p>
 
 <p align="center">
-  Open a tab, click LoudEase once, and keep listening at a more consistent level.<br>
-  Processing stays local, while player volume and mute remain authoritative.
+  Install it and forget it. LoudEase evens out video and audio volume on the sites you watch,<br>
+  so you stop reaching for the volume control. Processing stays on your device, and player volume and mute stay yours.
 </p>
 
 <p align="center">
@@ -46,6 +46,24 @@
 > [!NOTE]
 > LoudEase is publicly available as a beta. Compatibility statements below distinguish verified behavior from community test targets.
 
+## What it fixes
+
+- **Loud ads and jump scares** that arrive 10 dB hotter than the video you were watching.
+- **Whispered dialogue** you have to crank up, right before an explosion you then have to turn down.
+- **Creator-to-creator differences**: one channel is quiet, the next is blasting.
+- **Late-night listening** where you want a narrower range without turning everything into mush.
+
+It works automatically on video and audio elements in ordinary web pages (verified today on YouTube and Bilibili); nothing to click per tab. For sites where Chrome protects the audio, one click on that tab switches to full-tab capture.
+
+| | LoudEase | Typical volume booster | Typical fixed compressor |
+|---|---|---|---|
+| Adapts to each video and ad | Yes, measures programme loudness | No, one gain for everything | Partly, fixed threshold |
+| Lifts quiet sources | Bounded, confidence-gated lift | Boosts everything, including peaks | Makeup gain only |
+| Protects against sudden peaks | 5 ms look-ahead limiter | Often clips | Depends on settings |
+| Respects mute and player volume | Hard boundary | Usually not | Usually not |
+| Needs per-tab clicks | No (automatic) | Often | Often |
+| Audio leaves your device | Never | Varies | Varies |
+
 ## A calmer listening range
 
 Web audio rarely agrees on one comfortable level. Dialogue disappears, effects jump out, ads arrive hot, and the next creator or stream can sound completely different. A normal volume slider moves everything together; LoudEase works on the difference between moments.
@@ -64,11 +82,14 @@ LoudEase is not a simple volume booster, an equalizer, or a calibrated hearing-p
   <img src="docs/processing-flow.png" width="960" alt="Uneven input is measured, balanced, and peak limited into a narrower output range while retaining variation">
 </p>
 
-The authorized tab is captured as one audio stream, then processed locally in an `AudioWorklet`. K-weighted gated measurement establishes a stable programme baseline, a floor-qualified 16 dB detail term handles clearly audible quiet passages, and independent fast protection plus a 5 ms look-ahead limiter catch loud onsets. Transient blob or `srcObject` replacement inside one page does not reset the programme. Upward lift still waits for representative signal, but now reaches full confidence after about 1.5 seconds of continuous accepted audio so short quiet videos are not left behind. No raw audio is uploaded.
+Eligible audible media is routed through a local `AudioWorklet` automatically; when Chrome protects the audio, the authorized tab is captured as one audio stream and processed by the same worklet. K-weighted gated measurement establishes a stable programme baseline, a floor-qualified 16 dB detail term handles clearly audible quiet passages, and independent fast protection plus a 5 ms look-ahead limiter catch loud onsets. Transient blob or `srcObject` replacement inside one page does not reset the programme. Upward lift still waits for representative signal, but now reaches full confidence after about 1.5 seconds of continuous accepted audio so short quiet videos are not left behind. No raw audio is uploaded.
 
 For implementation details, assumptions, and current gaps, read [Audio DSP](docs/AUDIO_DSP.md), [Architecture](docs/ARCHITECTURE.md), and [Known limitations](docs/KNOWN_LIMITATIONS.md).
 
-## One audio core, two distributions
+## One audio core, two entry points, two distributions
+
+LoudEase attaches to audible video and audio elements on its own (automatic mode). Media that Chrome would silence when routed through Web Audio — cross-origin media without CORS, DRM streams, and pages that build their own audio graph — is never touched by automatic mode; there, opening LoudEase once on the tab uses full-tab capture instead. Both use the identical DSP.
+
 
 | Chrome Web Store build | GitHub development build |
 |---|---|
@@ -102,12 +123,10 @@ npm run build:dev
 
 Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `dist/github-dev`.
 
-1. Open a normal `http` or `https` tab that is playing audio.
-2. Click LoudEase once to authorize that tab.
-3. A moving waveform and a current dB value confirm live processing.
-4. Adjust **Reduce loud sounds** and **Lift quiet sounds** only when the defaults do not fit.
-
-The public store runtime requires a user gesture before `tabCapture` starts. A completely new store tab cannot be captured silently; after authorization, LoudEase can keep processing while you switch to another tab.
+1. Play something on a normal `http` or `https` page.
+2. The toolbar icon shows **ON** when LoudEase is balancing that tab; open it for the live waveform and dB value.
+3. Adjust **Reduce loud sounds** and **Lift quiet sounds** only when the defaults do not fit. Use **Balance this site automatically** to turn a single site off.
+4. If the popup says the audio cannot be attached automatically, it offers to reconnect through full-tab capture; that path needs one click per tab because Chrome requires a user gesture for `tabCapture`.
 
 LoudEase does not publish a Tampermonkey, Violentmonkey, or Greasy Fork core edition. A userscript cannot access the extension-only `chrome.tabCapture` and offscreen-document pipeline or the complete tab mix, so it would reintroduce iframe, Web Audio, protected-player, and pre-play gaps. A non-audio site-UI companion would only be considered if it later has a distinct use case.
 
@@ -117,7 +136,9 @@ See [Installation](docs/INSTALLATION.md) for the store, packaged-beta, and sourc
 
 | Evidence | Current scope |
 |---|---|
-| Public beta baseline | YouTube video/live, Bilibili video/live, Douyin video/live |
+| Automatic mode, real sites (no click) | YouTube video, Bilibili video (`node tools/e2e_auto_mode.js --url <page>`) |
+| Automatic mode, local fixtures | Same-origin media, strict page CSP, shadow DOM, CORS-enabled cross-origin media, declined cross-origin media, muted media, per-site switch |
+| Tab-capture baseline | YouTube video/live, Bilibili video/live, Douyin video/live |
 | Automated regression | HTML5 media, SPA source replacement, iframes, Web Audio, mute, zero player volume, slider persistence, and offline DSP graphs |
 | Community test targets | Twitch, TikTok, Spotify Web Player, Vimeo, social video, regional services, and protected streaming |
 
@@ -155,6 +176,7 @@ WSL043 maintains the official project. Use [Support](SUPPORT.md) and the GitHub 
 npm test              # contracts, DSP tests, and offline audio graphs
 npm run test:dsp      # focused DSP verification
 npm run test:silent   # isolated live capture with no system audio output
+npm run test:auto     # automatic mode: no-click attach, CSP, shadow DOM, CORS, per-site switch
 npm run test:capture  # silent local loud/lift/mute/player-volume/burst matrix
 npm run test:sites    # silent YouTube/Bilibili/Douyin video/live matrix
 npm run test:long     # configurable isolated stability/endurance run
@@ -169,7 +191,7 @@ Open beta and store gates are tracked in the evidence-based [Release readiness r
 
 ## Privacy, safety, and license
 
-- Audio stays inside the local extension audio graph.
+- Audio stays inside the local audio graph; automatic mode never records or transmits it.
 - There is no advertising, analytics, silent telemetry, or remote executable code.
 - Settings use `chrome.storage.sync`, subject to the user's Chrome Sync configuration.
 - LoudEase cannot control operating-system gain, hardware amplification, or acoustic output at the ear.

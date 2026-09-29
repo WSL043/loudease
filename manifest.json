@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "__MSG_appName__",
+  "name": "__MSG_appStoreName__",
   "short_name": "__MSG_appShortName__",
   "description": "__MSG_appDescription__",
   "version": "0.8.2",
@@ -33,6 +33,32 @@
     "http://*/*",
     "https://*/*",
     "http://127.0.0.1/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content/auto-engine.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "shared/programme-leveler-policy.js",
+        "offscreen/leveler-worklet.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "use_dynamic_url": true
+    }
   ],
   "icons": {
     "16": "assets/icon-16.png",
