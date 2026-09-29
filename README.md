@@ -136,7 +136,7 @@ See [Installation](docs/INSTALLATION.md) for the store, packaged-beta, and sourc
 
 | Evidence | Current scope |
 |---|---|
-| Automatic mode, real sites (no click) | YouTube video, Bilibili video (`node tools/e2e_auto_mode.js --url <page>`) |
+| Automatic mode, real sites (no click) | YouTube, Bilibili and Dailymotion video (`node tools/e2e_auto_mode.js --url <page>`) |
 | Automatic mode, local fixtures | Same-origin media, strict page CSP, shadow DOM, CORS-enabled cross-origin media, declined cross-origin media, muted media, per-site switch |
 | Tab-capture baseline | YouTube video/live, Bilibili video/live, Douyin video/live |
 | Automated regression | HTML5 media, SPA source replacement, iframes, Web Audio, mute, zero player volume, slider persistence, and offline DSP graphs |

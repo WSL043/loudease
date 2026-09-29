@@ -407,5 +407,6 @@
   "welcomeStep1": { "message": "동영상이나 음악 페이지를 열고 재생하세요." },
   "welcomeStep2": { "message": "도구 모음 아이콘에 ON이 보이면 이 탭을 조절 중입니다." },
   "welcomeStep3": { "message": "퍼즐 아이콘 메뉴에서 LoudEase를 고정하면 아이콘이 항상 표시됩니다." },
-  "welcomeNote": { "message": "오디오는 기기에서만 처리됩니다. 자동으로 연결되지 않는 사이트는 해당 탭에서 LoudEase를 한 번 열어 전체 탭 캡처를 사용하세요." }
+  "welcomeNote": { "message": "오디오는 기기에서만 처리됩니다. 자동으로 연결되지 않는 사이트는 해당 탭에서 LoudEase를 한 번 열어 전체 탭 캡처를 사용하세요." },
+  "noticeFullTabCapture": { "message": "이 사이트의 오디오는 자동으로 연결할 수 없어 전체 탭 캡처를 사용 중입니다." }
 }

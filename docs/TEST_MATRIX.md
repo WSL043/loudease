@@ -7,7 +7,7 @@ in an isolated Chrome profile and, with no popup click and no `tabCapture`, chec
 same-origin loud reduction, quiet lift under a strict page CSP, shadow-DOM media,
 declined cross-origin media without CORS (never silenced), attached CORS-enabled
 cross-origin media, untouched muted media, and the per-site off/on switch.
-`node tools/e2e_auto_mode.js --url <page>` probes one real site; YouTube and
+`node tools/e2e_auto_mode.js --url <page>` probes one real site; YouTube, Bilibili and Dailymotion
 Bilibili video pass at 0.8.2 + automatic mode. Twitch, Vimeo and Reddit directory
 pages did not autoplay in the harness and are not claimed.
 `node tools/assert_auto_engine.js` statically pins the engine's safety invariants.
