@@ -8,6 +8,7 @@
 - If Chrome's autoplay policy keeps the `AudioContext` suspended, LoudEase does not attach until the first click or key press on the page, or the user opens the popup, which falls back to tab capture.
 - Automatic mode processes the element's own output, so it follows the element's volume and mute exactly; volume set outside the page (operating system, hardware) is unaffected.
 - Media played in a cross-origin iframe is evaluated against that frame's own origin.
+- Video-call sites (Google Meet, Zoom, Teams, Webex, Whereby, Discord, Slack) are excluded from automatic mode so live call audio is left untouched.
 
 ## Browser authorization (tab capture)
 
