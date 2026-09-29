@@ -67,3 +67,26 @@ The public beta remains visible below the stable release. This is normal project
 - changing the official version, release channel, or product identity.
 
 Automation may prepare files and verify packages. It may perform an account or publication action only after WSL043 explicitly authorizes the relevant public operation and the exact target has been verified.
+
+## Automated upload (Chrome Web Store API v2)
+
+`tools/publish_store.js` uploads the verified ZIP and submits it for review. The API covers only the package and submission; listing text, category, screenshots and privacy answers stay in the Developer Dashboard.
+
+One-time setup (about 10 minutes, done by the account owner; never share or commit these values):
+
+1. Google Cloud Console: create or pick a project and enable **Chrome Web Store API**.
+2. OAuth consent screen: user type **External**, fill the required app fields, add the publisher account as a test user.
+3. Credentials: create an OAuth client of type **Web application** with the redirect URI `https://developers.google.com/oauthplayground`. Note the client ID and secret.
+4. Open the [OAuth Playground](https://developers.google.com/oauthplayground), click the gear, tick **Use your own OAuth credentials**, paste the client ID and secret, authorize the scope `https://www.googleapis.com/auth/chromewebstore` with the publisher account, then **Exchange authorization code for tokens** and copy the **refresh token**.
+5. Developer Dashboard, **Publisher > Settings**: copy the **publisher ID**.
+
+Then, per release, after `npm run package:store`:
+
+```bash
+export CWS_CLIENT_ID=... CWS_CLIENT_SECRET=... CWS_REFRESH_TOKEN=... CWS_PUBLISHER_ID=...
+node tools/publish_store.js upload      # uploads dist/loudease-store.zip
+node tools/publish_store.js status      # wait for a successful upload state
+node tools/publish_store.js publish     # submit for review (add --staged to publish manually after approval)
+```
+
+Upload and publish are public operations: run them only for the exact ZIP attached to the matching GitHub release.
