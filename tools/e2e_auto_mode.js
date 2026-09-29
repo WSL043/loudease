@@ -83,7 +83,11 @@ async function main() {
       '/cors': `<audio id=a src="${remote}&cors=1" crossorigin="anonymous" loop></audio>`,
       '/shadow': '<div id=h></div><script>const r=document.getElementById("h").attachShadow({mode:"open"});'
         + `r.innerHTML='<audio id=a src="/tone.wav?gain=${gain}" loop></audio>';window.a=r.getElementById("a");</script>`,
-      '/muted': `<audio id=a src="/tone.wav?gain=${gain}" loop muted></audio>`
+      '/muted': `<audio id=a src="/tone.wav?gain=${gain}" loop muted></audio>`,
+      // Protected media is silenced by createMediaElementSource: a ClearKey MediaKeys object stands in for EME.
+      '/drm': `<audio id=a loop></audio><script>(async()=>{const e=document.getElementById('a');const k=await navigator.requestMediaKeySystemAccess('org.w3.clearkey',[{initDataTypes:['keyids'],audioCapabilities:[{contentType:'audio/mp4; codecs="mp4a.40.2"'}]}]);await e.setMediaKeys(await k.createMediaKeys());e.src='/tone.wav?gain=${gain}';setTimeout(()=>e.play().catch(()=>{}),300);})();</script>`,
+      // A page that already routes the element through Web Audio owns it; a second source node would throw.
+      '/ownedgraph': `<audio id=a src="/tone.wav?gain=${gain}" loop></audio><script>const c=new AudioContext();c.createMediaElementSource(document.getElementById('a')).connect(c.destination);</script>`
     }[url.pathname];
     if (!body) { response.writeHead(404); response.end(); return; }
     response.writeHead(200, headers);
@@ -238,6 +242,14 @@ async function main() {
     await sleep(2500);
     status = await statusFor('/muted');
     check('muted media is not attached', status.autoActive !== true && (status.auto?.attachedCount || 0) === 0, status.auto);
+
+    // 6b. Protected media and page-owned graphs are declined, never silenced.
+    await open('/drm?gain=0.8');
+    status = await waitStatus('/drm', (s) => (s.auto?.blockedAudibleCount || 0) > 0, 8000);
+    check('DRM (MediaKeys) media is declined', status.autoActive !== true && status.auto?.blockedReasons?.drm > 0, status.auto?.blockedReasons);
+    await open('/ownedgraph?gain=0.8');
+    status = await waitStatus('/ownedgraph', (s) => (s.auto?.blockedAudibleCount || 0) > 0, 8000);
+    check('page-owned Web Audio graph is declined', status.autoActive !== true && status.auto?.blockedReasons?.['page-audio-graph'] > 0, status.auto?.blockedReasons);
 
     // 7. Disabling a site detaches processing without breaking playback.
     await inWorker(`chrome.runtime.sendMessage({type:'WVB_SET_AUTO_MODE',siteEnabled:false,tabUrl:'http://127.0.0.1:${site.port}/same'})`);

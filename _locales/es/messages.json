@@ -407,5 +407,6 @@
   "welcomeStep1": { "message": "Abre cualquier página de vídeo o música y pulsa reproducir." },
   "welcomeStep2": { "message": "Si ves ON en el icono de la barra, LoudEase está equilibrando esta pestaña." },
   "welcomeStep3": { "message": "Fija LoudEase desde el menú del puzle para mantener el icono a la vista." },
-  "welcomeNote": { "message": "El audio se procesa solo en tu dispositivo. Si el audio de un sitio no se puede conectar automáticamente, abre LoudEase una vez en esa pestaña para usar la captura de pestaña." }
+  "welcomeNote": { "message": "El audio se procesa solo en tu dispositivo. Si el audio de un sitio no se puede conectar automáticamente, abre LoudEase una vez en esa pestaña para usar la captura de pestaña." },
+  "noticeFullTabCapture": { "message": "El audio de este sitio no se puede conectar automáticamente, por lo que se usa la captura de pestaña." }
 }
