@@ -336,7 +336,7 @@
     "message": "볼륨 밸런서"
   },
   "appDescription": {
-    "message": "음소거와 플레이어 볼륨을 유지하면서 탭의 큰 소리와 작은 소리를 자동으로 균일화합니다."
+    "message": "자동 볼륨 평준화: 갑작스러운 큰 소리와 광고는 줄이고 작은 대사는 키웁니다. 클릭 없이 자동, 기기 내 처리."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — 사용"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "일반" },
   "sitesTab": { "message": "사이트 규칙" },
   "diagnosticsTab": { "message": "지원 및 진단" },
-  "captureGestureTitle": { "message": "새 탭은 한 번 클릭 필요" },
-  "captureGestureHelp": { "message": "Chrome 제한으로 새 탭을 조정하기 전에 한 번 클릭해야 합니다. 가벼운 로컬 관찰기는 페이지 URL과 미디어 재생, 음소거, 볼륨 상태를 사용하며 탐색 및 오디오 데이터는 개발자에게 전송되지 않습니다." },
+  "captureGestureTitle": { "message": "대부분의 사이트에서 자동" },
+  "captureGestureHelp": { "message": "LoudEase는 재생 중인 동영상과 오디오를 클릭 없이 자동으로 조절합니다. Chrome이 보호하는 오디오(교차 출처, DRM, 페이지 자체 Web Audio)는 해당 탭에서 LoudEase를 한 번 열면 전체 탭 캡처로 전환됩니다. 가벼운 로컬 관찰기는 페이지 미디어 상태만 사용하며 탐색·오디오 데이터는 개발자에게 전송되지 않습니다." },
   "generalHelp": { "message": "확장 프로그램의 기본 모양과 동작을 설정합니다." },
   "appearanceHeading": { "message": "모양" },
   "languageLabel": { "message": "언어" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "Chrome 웹 스토어에서 리뷰" },
   "starGitHub": { "message": "GitHub에서 Star" },
   "storeReviewOpened": { "message": "Chrome 웹 스토어 리뷰를 열었습니다." },
-  "githubOpened": { "message": "GitHub 프로젝트를 열었습니다." }
+  "githubOpened": { "message": "GitHub 프로젝트를 열었습니다." },
+  "appStoreName": { "message": "LoudEase: 자동 볼륨 노멀라이저" },
+  "autoSiteLabel": { "message": "이 사이트 볼륨을 자동으로 조절합니다(클릭 불필요)." },
+  "statusAutoReady": { "message": "자동 모드가 켜져 있습니다" }
 }

@@ -22,7 +22,7 @@ const checks = [
   ['background limited count uses filtered failures', /total\.limitedCount \+= failedErrors\.length > 0/.test(background)],
   ['background reload signal uses filtered failures', /if \(failedErrors\.some\(isAlreadyConnectedError\)\)/.test(background)],
   ['background no longer stops stale page engines from MAIN world', !/function stopStaleEngine\(tabId/.test(background) && !/__WEB_VOLUME_BALANCER_ENGINE_STOP__/.test(background)],
-  ['GET_STATUS is a read-only status query', /message\.type === 'WVB_GET_STATUS'[\s\S]*?return aggregateStatus\(tabId\);/.test(background) && !/message\.ensure === true[\s\S]*?ensureInjected/.test(background)],
+  ['GET_STATUS is a read-only status query', /message\.type === 'WVB_GET_STATUS'[\s\S]*?return mergeAutoStatus\(aggregateStatus\(tabId\), tabId, await autoModeForUrl\(tabUrl\)\);/.test(background) && !/message\.ensure === true[\s\S]*?ensureInjected/.test(background)],
   ['observer injection is an explicit action', /message\.type === 'WVB_ENSURE_OBSERVER'[\s\S]*?ensureInjected\(tabId, tabUrl, \{ clearStatus: true, force: true \}\)/.test(background) && /observer:ensure-ok/.test(background)],
   ['extension install restores lightweight observers only for useful tabs', /function ensureOpenTabsInjected\(options = \{\}\)/.test(background) && /hint\.mediaTarget && !hint\.audible && !captureStatuses\.get\(hint\.tabId\)\?\.active/.test(background) && /onInstalled\.addListener[\s\S]*?ensureOpenTabsInjected\(\{ clearStatus: true \}\)/.test(background)],
   ['background aggregates analyser silent status', /analysisSilentCount/.test(background) && /averageInputDb/.test(background) && /averageInputPeak/.test(background)],

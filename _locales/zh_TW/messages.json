@@ -336,7 +336,7 @@
     "message": "音量平衡器"
   },
   "appDescription": {
-    "message": "自動均衡分頁中的大聲和小聲，同時遵循靜音與播放器音量。"
+    "message": "自動音量平衡：壓低突然的大聲與廣告，提亮聽不清的小聲對白。無需逐一點擊分頁，本機處理不上傳。"
   },
   "actionTitleEnabled": {
     "message": "LoudEase — 已啟用"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "一般" },
   "sitesTab": { "message": "網站規則" },
   "diagnosticsTab": { "message": "支援與診斷" },
-  "captureGestureTitle": { "message": "新分頁需要點擊一次" },
-  "captureGestureHelp": { "message": "受 Chrome 限制，新分頁首次平衡前需要點擊一次。輕量本機觀察器會使用頁面網址及媒體播放、靜音和音量狀態；瀏覽與音訊資料不會傳送給開發者。" },
+  "captureGestureTitle": { "message": "大多數網站自動生效" },
+  "captureGestureHelp": { "message": "LoudEase 會自動平衡正在播放的影片與音訊，無需點擊。遇到 Chrome 保護的音訊（跨來源、DRM 或頁面自建 Web Audio）時，在該分頁開啟一次 LoudEase 即可改用整頁接管。輕量本機觀察器只讀取頁面媒體狀態；瀏覽與音訊資料不會傳送給開發者。" },
   "generalHelp": { "message": "設定擴充功能的預設外觀和行為。" },
   "appearanceHeading": { "message": "外觀" },
   "languageLabel": { "message": "語言" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "在 Chrome 商店評價" },
   "starGitHub": { "message": "在 GitHub 點 Star" },
   "storeReviewOpened": { "message": "已開啟 Chrome 商店評價頁。" },
-  "githubOpened": { "message": "已開啟 GitHub 專案頁。" }
+  "githubOpened": { "message": "已開啟 GitHub 專案頁。" },
+  "appStoreName": { "message": "LoudEase：自動音量平衡器" },
+  "autoSiteLabel": { "message": "自動平衡此網站的音量，無需點擊。" },
+  "statusAutoReady": { "message": "自動模式已開啟" }
 }

@@ -336,7 +336,7 @@
     "message": "ボリュームバランサー"
   },
   "appDescription": {
-    "message": "ミュートとプレーヤー音量を尊重しながら、タブの大きな音と小さな音を自動で均一化します。"
+    "message": "自動で音量を均一化。突然の大音量や広告を抑え、小さなセリフを聞き取りやすく。クリック不要、処理は端末内で完結。"
   },
   "actionTitleEnabled": {
     "message": "LoudEase — 有効"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "一般" },
   "sitesTab": { "message": "サイトルール" },
   "diagnosticsTab": { "message": "サポートと診断" },
-  "captureGestureTitle": { "message": "新しいタブでは1回クリック" },
-  "captureGestureHelp": { "message": "Chrome の制限により、新しいタブを調整する前に1回クリックする必要があります。軽量なローカル監視機能はページ URL とメディアの再生・ミュート・音量状態を使用しますが、閲覧データや音声データを開発者へ送信しません。" },
+  "captureGestureTitle": { "message": "ほとんどのサイトで自動" },
+  "captureGestureHelp": { "message": "LoudEase は再生中の動画・音声をクリックなしで自動的に調整します。Chrome が保護する音声（クロスオリジン、DRM、ページ独自の Web Audio）では、そのタブで LoudEase を一度開くとタブ全体のキャプチャに切り替わります。軽量なローカル監視はページのメディア状態のみを使用し、閲覧・音声データは開発者に送信されません。" },
   "generalHelp": { "message": "拡張機能の既定の外観と動作を設定します。" },
   "appearanceHeading": { "message": "外観" },
   "languageLabel": { "message": "言語" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "Chrome ウェブストアでレビュー" },
   "starGitHub": { "message": "GitHub で Star" },
   "storeReviewOpened": { "message": "Chrome ウェブストアのレビューを開きました。" },
-  "githubOpened": { "message": "GitHub プロジェクトを開きました。" }
+  "githubOpened": { "message": "GitHub プロジェクトを開きました。" },
+  "appStoreName": { "message": "LoudEase： 自動音量ノーマライザー" },
+  "autoSiteLabel": { "message": "このサイトの音量を自動で調整（クリック不要）。" },
+  "statusAutoReady": { "message": "自動モードがオンです" }
 }

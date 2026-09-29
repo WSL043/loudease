@@ -2,6 +2,16 @@
 
 ## Automated matrix
 
+Automatic mode (`npm run test:auto`, `tools/e2e_auto_mode.js`): loads `dist/github-dev`
+in an isolated Chrome profile and, with no popup click and no `tabCapture`, checks
+same-origin loud reduction, quiet lift under a strict page CSP, shadow-DOM media,
+declined cross-origin media without CORS (never silenced), attached CORS-enabled
+cross-origin media, untouched muted media, and the per-site off/on switch.
+`node tools/e2e_auto_mode.js --url <page>` probes one real site; YouTube and
+Bilibili video pass at 0.8.2 + automatic mode. Twitch, Vimeo and Reddit directory
+pages did not autoplay in the harness and are not claimed.
+`node tools/assert_auto_engine.js` statically pins the engine's safety invariants.
+
 Optional, local corpus research: `npm run audit:audio-corpus` verifies pinned
 downloads before rendering twelve real-material/level combinations through three
 variants in Chrome. It is not an automatic network/CI dependency or a release

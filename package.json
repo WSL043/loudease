@@ -27,6 +27,7 @@
     "test:release": "node tools/assert_release_build.js",
     "test": "node tools/run_all_checks.js",
     "test:dsp": "node tools/dsp_unit_tests.js && node tools/programme_leveler_experiment.js && node tools/leveler_worklet_tests.js && node tools/offline_audio_graph_tests.js",
+    "test:auto": "node tools/build_extension.js dev && node tools/e2e_auto_mode.js",
     "test:silent": "node tools/e2e_silent_sink.js",
     "test:capture": "node tools/e2e_local_capture_matrix.js",
     "test:sites": "node tools/e2e_real_site_matrix.js",
