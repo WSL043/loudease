@@ -224,6 +224,22 @@ function stageExtensionForE2e() {
   manifest.permissions = Array.from(new Set([...(manifest.permissions || []), 'tabs']));
   manifest.host_permissions = Array.from(new Set([...(manifest.host_permissions || []), 'http://127.0.0.1/*']));
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  if (process.env.WVB_E2E_REAL_QUALITY === '1') {
+    const workletPath = path.join(extensionDir, 'offscreen/leveler-worklet.js');
+    const { instrument } = require('./real_quality_meter.js');
+    fs.writeFileSync(workletPath, instrument(fs.readFileSync(workletPath, 'utf8')));
+    const indexPath = path.join(extensionDir, 'offscreen/index.js');
+    const source = fs.readFileSync(indexPath, 'utf8');
+    const anchor = '  handleLevelerMessage(message) {';
+    if (!source.includes(anchor)) throw new Error('Missing audit message anchor');
+    fs.writeFileSync(indexPath, source.replace(anchor, `${anchor}
+    if (message.type === 'quality-audit') {
+      const queue = globalThis.__qualityAudit || (globalThis.__qualityAudit = []);
+      queue.push({ ...message, receivedAt: Date.now() });
+      if (queue.length > 1000) { queue.shift(); globalThis.__qualityAuditDropped = (globalThis.__qualityAuditDropped || 0) + 1; }
+      return;
+    }`));
+  }
 }
 
 function httpJson(url, options = {}) {
@@ -353,7 +369,11 @@ class CdpSocket {
         length = this.buffer.readUInt16BE(2);
         offset = 4;
       } else if (length === 127) {
-        throw new Error('Large WebSocket frames are not supported by this smoke test.');
+        if (this.buffer.length < 10) return;
+        const largeLength = this.buffer.readBigUInt64BE(2);
+        if (largeLength > 16n * 1024n * 1024n) throw new Error('CDP frame exceeds 16 MiB diagnostic limit');
+        length = Number(largeLength);
+        offset = 10;
       }
       const masked = Boolean(second & 0x80);
       const maskOffset = masked ? 4 : 0;
@@ -375,6 +395,7 @@ class CdpSocket {
 
   onMessage(text) {
     const message = JSON.parse(text);
+    if (message.method && this.onEvent) this.onEvent(message);
     if (message.id && this.pending.has(message.id)) {
       const pending = this.pending.get(message.id);
       this.pending.delete(message.id);
@@ -690,6 +711,22 @@ async function stopPopupCapture(cdp, targetPrefix, fallbackPageUrl) {
 }
 
 async function holdCapture({ debugPort, extensionId, popupCdp, pageCdp, targetPrefix, pageUrl, sockets, initialStatus }) {
+  if (process.env.WVB_E2E_REAL_QUALITY === '1') {
+    const offscreen = await connectTarget(debugPort, target => target.url === `chrome-extension://${extensionId}/offscreen/index.html`);
+    sockets.push(offscreen.cdp);
+    return require('./real_site_quality_hold.js')(
+      { popupCdp, pageCdp, offscreenCdp: offscreen.cdp, targetPrefix, pageUrl, initialStatus },
+      { evaluateValue, readPopupCaptureStatus, readExternalMediaState, prepareExternalMedia, sleep,
+        reportPath: path.join(tmpDir, `real-quality-${reportId}-${runSuffix}.json`) }
+    );
+  }
+  if (process.env.WVB_E2E_REAL_SWITCH === '1') {
+    return require('./real_site_switch_hold.js')(
+      { popupCdp, pageCdp, targetPrefix, pageUrl, initialStatus },
+      { evaluateValue, readPopupCaptureStatus, readExternalMediaState, prepareExternalMedia, sleep,
+        reportPath: path.join(tmpDir, `real-switch-${reportId}-${runSuffix}.json`) }
+    );
+  }
   const offscreenUrl = `chrome-extension://${extensionId}/offscreen/index.html`;
   const offscreen = await connectTarget(debugPort, (target) => target.url === offscreenUrl);
   sockets.push(offscreen.cdp);
@@ -854,6 +891,36 @@ async function main() {
     const browserCdp = new CdpSocket(version.webSocketDebuggerUrl);
     await browserCdp.connect();
     sockets.push(browserCdp);
+
+    if (process.env.WVB_E2E_SITE_BASELINE === '1') {
+      const created = await browserCdp.command('Target.createTarget', { url: pageUrl, forTab: true });
+      const baseline = await connectTarget(debugPort, target => target.type === 'page' && (target.id === created.targetId || target.url.startsWith(targetPrefix)));
+      sockets.push(baseline.cdp);
+      const diagnostics = [];
+      baseline.cdp.onEvent = event => {
+        if (event.method === 'Network.responseReceived' && event.params.response.status >= 400) {
+          const response = event.params.response;
+          const url = new URL(response.url);
+          diagnostics.push({ at: Date.now(), type: 'http-error', host: url.hostname, path: url.pathname, status: response.status });
+        }
+        if (event.method === 'Network.loadingFailed') diagnostics.push({ at:Date.now(), type:'network-failure', resourceType:event.params.type, error:event.params.errorText });
+        if (event.method === 'Media.playerErrorsRaised') diagnostics.push({ at:Date.now(), type:'media-error',
+          errors:(event.params.errors || []).map(error => ({ errorType:error.errorType, code:error.code })) });
+      };
+      await baseline.cdp.command('Network.enable');
+      await baseline.cdp.command('Media.enable');
+      const playback = await prepareExternalMedia(baseline.cdp, 20000);
+      const records = [];
+      const start = Date.now();
+      while (Date.now() - start < 105000) {
+        const media = await readExternalMediaState(baseline.cdp);
+        const visibleError = await evaluateValue(baseline.cdp, `document.body.innerText.slice(0,6000)`);
+        records.push({ atMs: Date.now() - start, media, visibleError });
+        writeJson(path.join(tmpDir, `${new URL(pageUrl).hostname}-no-extension-${runSuffix}.json`), { browser:version.Browser, playback, records, diagnostics, durationMs: Date.now() - start, extensionLoaded: false });
+        await sleep(1000);
+      }
+      return;
+    }
 
     const loaded = await browserCdp.command('Extensions.loadUnpacked', { path: extensionDir, enableInIncognito: false });
     const extensionId = loaded.id;
@@ -1605,7 +1672,8 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+module.exports = { CdpSocket, connectTarget, evaluateValue, httpJson, readExternalMediaState };
+if (require.main === module) main().catch((error) => {
   console.error(`[e2e] FAIL ${error.message}`);
   process.exit(1);
 });

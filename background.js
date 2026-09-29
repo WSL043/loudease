@@ -1692,7 +1692,31 @@ async function ensureOpenTabsInjected(options = {}) {
   return results;
 }
 
-chrome.runtime.onInstalled.addListener(async () => {
+const UI_PREFERENCES_KEY = 'webVolumeBalancer.uiPreferences';
+const UI_LOCALES = new Set(['en', 'zh_CN', 'zh_TW', 'ja', 'ko', 'de', 'fr', 'es', 'pt_BR', 'ru', 'ar']);
+
+function browserLocale() {
+  const tag = String(chrome.i18n.getUILanguage?.() || 'en').replace('-', '_');
+  const lower = tag.toLowerCase();
+  if (/^zh_(tw|hk|mo|hant)/.test(lower)) return 'zh_TW';
+  if (lower.startsWith('zh')) return 'zh_CN';
+  if (lower.startsWith('pt')) return 'pt_BR';
+  const base = lower.split('_')[0];
+  return UI_LOCALES.has(base) ? base : 'en';
+}
+
+// A fresh install follows the browser language instead of always showing English.
+async function seedUiLanguage() {
+  const data = await chrome.storage.sync.get({ [UI_PREFERENCES_KEY]: null });
+  if (data[UI_PREFERENCES_KEY]) return;
+  await chrome.storage.sync.set({ [UI_PREFERENCES_KEY]: { locale: browserLocale(), theme: 'system' } });
+}
+
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details?.reason === 'install') {
+    await seedUiLanguage().catch(() => {});
+    chrome.tabs.create({ url: chrome.runtime.getURL('popup/welcome.html') }).catch(() => {});
+  }
   await writeSettings(await readSettings());
   await ensureOpenTabsInjected({ clearStatus: true });
   await injectAutoEngineIntoOpenTabs();

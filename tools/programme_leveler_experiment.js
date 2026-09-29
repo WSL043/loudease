@@ -299,7 +299,8 @@ class ProgrammeCandidateProcessor {
             : 0
         )
       });
-      const liftedJump = this.currentGainDb > 0.01 && Math.abs(futureSample) > dbToLinear(protectedCeilingDb);
+      const liftedJump = this.currentGainDb > 0.01 && Math.abs(futureSample) > dbToLinear(protectedCeilingDb)
+        && Math.abs(sample) > this.previousInputFramePeak * dbToLinear(6);
       const coldLoudOnset = !this.signalActive && Math.abs(sample) > dbToLinear(-18);
       const activeJump = this.signalActive
         && Math.abs(sample) > dbToLinear(-18)

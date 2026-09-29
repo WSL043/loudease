@@ -401,5 +401,11 @@
   "githubOpened": { "message": "Projeto do GitHub aberto." },
   "appStoreName": { "message": "LoudEase: normalizador de volume automático" },
   "autoSiteLabel": { "message": "Equilibrar este site automaticamente, sem cliques." },
-  "statusAutoReady": { "message": "O modo automático está ativado" }
+  "statusAutoReady": { "message": "O modo automático está ativado" },
+  "welcomeTitle": { "message": "O LoudEase está pronto" },
+  "welcomeLead": { "message": "Nada para configurar. Reproduza um vídeo ou música e o LoudEase equilibra sozinho anúncios altos e falas baixas." },
+  "welcomeStep1": { "message": "Abra qualquer página de vídeo ou música e toque em reproduzir." },
+  "welcomeStep2": { "message": "Se aparecer ON no ícone da barra, o LoudEase está equilibrando esta guia." },
+  "welcomeStep3": { "message": "Fixe o LoudEase no menu de quebra-cabeça para manter o ícone visível." },
+  "welcomeNote": { "message": "O áudio é processado apenas no seu dispositivo. Se o áudio de um site não puder ser conectado automaticamente, abra o LoudEase uma vez nessa guia para usar a captura da guia." }
 }
