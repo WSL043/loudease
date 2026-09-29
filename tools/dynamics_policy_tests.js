@@ -39,5 +39,6 @@ for(const rate of [44100,48000,96000])for(const cap of [1,.44]){
   }
 }
 const destination=path.join(root,'tmp/transition-crest-candidate/dynamics-policy-regression.json');
+fs.mkdirSync(path.dirname(destination),{recursive:true});
 fs.writeFileSync(destination,JSON.stringify({at:new Date().toISOString(),note:'Generated signals; no real audio or listening acceptance',records},null,2));
 console.log(`PASS ${records.length} production-worklet cases: moderate lift, floor-qualified bed, programme centres, onset, player cap and rates`);
