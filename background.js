@@ -3,6 +3,9 @@ import './shared/programme-leveler-policy.js';
 
 const STORAGE_KEY = 'webVolumeBalancer.settings';
 const SITE_SETTINGS_KEY = 'webVolumeBalancer.siteSettings';
+const AUTO_MODE_KEY = 'webVolumeBalancer.autoMode';
+const AUTO_SUMMARY_TTL_MS = 20000;
+const MAX_AUTO_DISABLED_SITES = 500;
 const STATUS_TTL_MS = 8000;
 const INJECTION_RETRY_MS = 1600;
 const DIAGNOSTIC_EVENT_LIMIT = 160;
@@ -1391,6 +1394,7 @@ async function startTabCapture(tabId, tabUrl, providedStreamId = '', popupStream
     engineVersion: captureStatus.engineVersion || CURRENT_VERSION
   });
   addEvent('capture:start', { tabId });
+  notifyAutoEngine(tabId);
   return { ok: true };
 }
 
@@ -1404,6 +1408,7 @@ async function stopTabCapture(tabId) {
         captureStatuses.delete(tabId);
         captureSettingsResyncAt.delete(tabId);
         addEvent('capture:already-stopped', { tabId });
+        notifyAutoEngine(tabId);
         return { ok: true, alreadyStopped: true };
       }
     } catch (error) {
@@ -1428,6 +1433,7 @@ async function stopTabCapture(tabId) {
   captureStatuses.delete(tabId);
   captureSettingsResyncAt.delete(tabId);
   addEvent('capture:stop', { tabId });
+  notifyAutoEngine(tabId);
   if (Number(response.remainingSessions) === 0) {
     scheduleOffscreenIdleClose();
   }
@@ -1483,6 +1489,168 @@ async function clearTabState(tabId) {
   return { ok: true };
 }
 
+// Automatic mode: the content-script engine attaches to eligible media without
+// a tab-capture gesture. The service worker only stores its latest summary,
+// resolves its settings, and tells it when a user-invoked capture takes over.
+const autoSummaries = new Map();
+
+async function readAutoMode() {
+  const data = await chrome.storage.sync.get({ [AUTO_MODE_KEY]: {} });
+  const value = data[AUTO_MODE_KEY] && typeof data[AUTO_MODE_KEY] === 'object' ? data[AUTO_MODE_KEY] : {};
+  const disabledSites = Array.isArray(value.disabledSites)
+    ? value.disabledSites.map(normalizeSiteKey).filter(Boolean).slice(0, MAX_AUTO_DISABLED_SITES)
+    : [];
+  return { enabled: value.enabled !== false, disabledSites };
+}
+
+async function writeAutoMode(next) {
+  const value = {
+    enabled: next.enabled !== false,
+    disabledSites: Array.from(new Set((next.disabledSites || []).map(normalizeSiteKey).filter(Boolean)))
+      .slice(0, MAX_AUTO_DISABLED_SITES)
+  };
+  await chrome.storage.sync.set({ [AUTO_MODE_KEY]: value });
+  return value;
+}
+
+async function autoModeForUrl(tabUrl = '') {
+  const mode = await readAutoMode();
+  const siteKey = siteKeyFromUrl(tabUrl);
+  const siteDisabled = Boolean(siteKey && mode.disabledSites.includes(siteKey));
+  return { globalEnabled: mode.enabled, siteKey, siteDisabled, enabled: mode.enabled && !siteDisabled };
+}
+
+async function autoConfigForTab(tabId, tabUrl = '') {
+  const [mode, settings] = await Promise.all([autoModeForUrl(tabUrl), readSettingsForUrl(tabUrl)]);
+  return {
+    ok: true,
+    autoEnabled: mode.enabled,
+    settings,
+    captured: Boolean(captureStatus(tabId)?.active)
+  };
+}
+
+async function setAutoMode(message = {}, tabUrl = '') {
+  const mode = await readAutoMode();
+  if (typeof message.globalEnabled === 'boolean') mode.enabled = message.globalEnabled;
+  const siteKey = normalizeSiteKey(message.siteKey || tabUrl);
+  if (siteKey && typeof message.siteEnabled === 'boolean') {
+    const sites = new Set(mode.disabledSites);
+    if (message.siteEnabled) sites.delete(siteKey); else sites.add(siteKey);
+    mode.disabledSites = Array.from(sites);
+  }
+  await writeAutoMode(mode);
+  return { ok: true, ...(await autoModeForUrl(tabUrl || (siteKey ? `https://${siteKey}/` : ''))) };
+}
+
+function rememberAutoSummary(sender, summary) {
+  const tabId = sender.tab?.id;
+  if (!Number.isInteger(tabId) || !summary || typeof summary !== 'object') return;
+  let frames = autoSummaries.get(tabId);
+  if (!frames) {
+    frames = new Map();
+    autoSummaries.set(tabId, frames);
+  }
+  frames.set(sender.frameId || 0, { summary, receivedAt: Date.now() });
+  updateAutoBadge(tabId);
+}
+
+function freshAutoSummaries(tabId) {
+  const frames = autoSummaries.get(tabId);
+  if (!frames) return [];
+  const now = Date.now();
+  const fresh = [];
+  for (const [frameId, item] of frames.entries()) {
+    if (now - item.receivedAt > AUTO_SUMMARY_TTL_MS) {
+      frames.delete(frameId);
+      continue;
+    }
+    fresh.push(item.summary);
+  }
+  return fresh;
+}
+
+function updateAutoBadge(tabId) {
+  const summaries = freshAutoSummaries(tabId);
+  const processing = summaries.reduce((total, item) => total + (Number(item.processingCount) || 0), 0);
+  const text = processing > 0 && !captureStatus(tabId)?.active ? 'ON' : '';
+  chrome.action.setBadgeBackgroundColor({ tabId, color: '#159669' }).catch(() => {});
+  chrome.action.setBadgeText({ tabId, text }).catch(() => {});
+}
+
+async function collectAutoNow(tabId) {
+  const frameIds = new Set([0, ...(autoSummaries.get(tabId)?.keys() || [])]);
+  await Promise.all([...frameIds].map(async (frameId) => {
+    try {
+      const response = await chrome.tabs.sendMessage(tabId, { type: 'WVB_AUTO_COLLECT' }, { frameId });
+      if (response?.summary) rememberAutoSummary({ tab: { id: tabId }, frameId }, response.summary);
+    } catch (_) {
+      // No engine in this frame (restricted page, or not yet injected).
+    }
+  }));
+}
+
+function notifyAutoEngine(tabId) {
+  if (!Number.isInteger(tabId)) return;
+  chrome.tabs.sendMessage(tabId, { type: 'WVB_AUTO_REFRESH' }).catch(() => {});
+  setTimeout(() => updateAutoBadge(tabId), 600);
+}
+
+function mergeAutoStatus(status, tabId, mode) {
+  const summaries = freshAutoSummaries(tabId);
+  const sum = (key) => summaries.reduce((total, item) => total + (Number(item[key]) || 0), 0);
+  const blockedReasons = {};
+  for (const item of summaries) {
+    for (const [reason, count] of Object.entries(item.blockedReasons || {})) {
+      blockedReasons[reason] = (blockedReasons[reason] || 0) + (Number(count) || 0);
+    }
+  }
+  const primary = summaries
+    .filter((item) => Number(item.processingCount) > 0)
+    .sort((a, b) => (b.signalActive ? 1 : 0) - (a.signalActive ? 1 : 0))[0] || null;
+  status.auto = {
+    globalEnabled: mode.globalEnabled,
+    siteEnabled: !mode.siteDisabled,
+    siteKey: mode.siteKey,
+    responding: summaries.length > 0,
+    attachedCount: sum('attachedCount'),
+    processingCount: sum('processingCount'),
+    bypassCount: sum('bypassCount'),
+    failedCount: sum('failedCount'),
+    blockedAudibleCount: sum('blockedAudibleCount'),
+    blockedReasons,
+    waitingForGesture: summaries.some((item) => item.waitingForGesture === true),
+    engineFailure: summaries.map((item) => item.engineFailure).find(Boolean) || ''
+  };
+  if (primary && !status.captureActive) {
+    status.autoActive = true;
+    for (const key of [
+      'averageInputDb', 'averageOutputDb', 'currentGainDb', 'averageLiftDb', 'averageReductionDb',
+      'signalTickCount', 'lastSignalAgeMs', 'quietDeficitDb', 'requestedLiftDb', 'effectiveMaxLiftDb',
+      'playerMuted', 'playerVolumeCap'
+    ]) {
+      status[key] = primary[key];
+    }
+    status.playerVolumeKnown = true;
+    status.playerVolumeConflict = false;
+    status.audibleCount = Math.max(Number(status.audibleCount) || 0, sum('audibleCount'));
+  }
+  return status;
+}
+
+async function injectAutoEngineIntoOpenTabs() {
+  try {
+    const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+    for (const tab of tabs.slice(0, 200)) {
+      if (!Number.isInteger(tab.id)) continue;
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        files: ['content/auto-engine.js']
+      }).catch(() => {});
+    }
+  } catch (_) {}
+}
+
 async function ensureInjected(tabId, tabUrl, options = {}) {
   if (!Number.isInteger(tabId) || !supportedPage(tabUrl)) {
     return { ok: false, skipped: true, error: '当前页面不是普通网页' };
@@ -1527,6 +1695,7 @@ async function ensureOpenTabsInjected(options = {}) {
 chrome.runtime.onInstalled.addListener(async () => {
   await writeSettings(await readSettings());
   await ensureOpenTabsInjected({ clearStatus: true });
+  await injectAutoEngineIntoOpenTabs();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
@@ -1535,6 +1704,7 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 chrome.tabs?.onRemoved?.addListener((tabId) => {
+  autoSummaries.delete(tabId);
   frameStatuses.delete(tabId);
   injectionAttempts.delete(tabId);
   captureSettingsResyncAt.delete(tabId);
@@ -1550,6 +1720,7 @@ chrome.tabs?.onUpdated?.addListener((tabId, changeInfo, tab) => {
     captureNavigationRevisions.set(tabId, navigationRevision);
     const navigationUrl = String(changeInfo.url || '');
     frameStatuses.delete(tabId);
+    autoSummaries.delete(tabId);
     injectionAttempts.delete(tabId);
     lastProgrammeKeys.delete(tabId);
     const previous = tabHints.get(tabId) || {};
@@ -1682,8 +1853,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.refreshFrame === true) {
         await collectFrameStatusNow(tabId, tabUrl);
       }
+      await collectAutoNow(tabId);
 
-      return aggregateStatus(tabId);
+      return mergeAutoStatus(aggregateStatus(tabId), tabId, await autoModeForUrl(tabUrl));
     }
 
     if (message.type === 'WVB_ENSURE_OBSERVER') {
@@ -1782,6 +1954,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           } else {
             captureStatuses.delete(tabId);
           }
+          notifyAutoEngine(tabId);
         } else {
           captureStatuses.set(tabId, {
             ...status,
@@ -1792,6 +1965,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       }
       return { ok: true };
+    }
+
+    if (message.type === 'WVB_AUTO_CONFIG') {
+      return await autoConfigForTab(sender.tab?.id, String(sender.tab?.url || message.href || ''));
+    }
+
+    if (message.type === 'WVB_AUTO_CHANGED') {
+      rememberAutoSummary(sender, message.summary);
+      return { ok: true };
+    }
+
+    if (message.type === 'WVB_SET_AUTO_MODE') {
+      const result = await setAutoMode(message, String(message.tabUrl || ''));
+      const tabId = Number(message.tabId);
+      if (Number.isInteger(tabId)) notifyAutoEngine(tabId);
+      return result;
     }
 
     if (message.type === 'WVB_FRAME_STATUS') {

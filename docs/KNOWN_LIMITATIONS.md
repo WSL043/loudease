@@ -1,10 +1,18 @@
 # Known limitations
 
-## Browser authorization
+## Automatic mode
 
-- Every new tab requires a user invocation before it can start `tabCapture`.
-- After authorization, the captured tab can remain processed while the user switches tabs.
-- Other tabs remain outside the extension until the user invokes LoudEase there.
+- Automatic mode attaches to audible `<audio>`/`<video>` elements without a click. It never attaches to cross-origin media without CORS, DRM/EME media, or an element the page already routes through Web Audio; Chrome would silence those.
+- Elements created with `new Audio()` and never inserted into the document are not observed, because LoudEase does not patch page prototypes.
+- Pages that generate sound purely with Web Audio (games, some synthesizers, some music services) are not covered; use tab capture.
+- If Chrome's autoplay policy keeps the `AudioContext` suspended, LoudEase does not attach until the first click or key press on the page, or the user opens the popup, which falls back to tab capture.
+- Automatic mode processes the element's own output, so it follows the element's volume and mute exactly; volume set outside the page (operating system, hardware) is unaffected.
+- Media played in a cross-origin iframe is evaluated against that frame's own origin.
+
+## Browser authorization (tab capture)
+
+- Tab capture is the fallback for media automatic mode cannot attach to. Every new tab requires a user invocation before it can start `tabCapture`.
+- After authorization, the captured tab can remain processed while the user switches tabs; automatic mode steps aside for that tab.
 - Chrome internal pages and other protected surfaces cannot be captured.
 
 ## Player volume
@@ -32,7 +40,7 @@
 - Tab-wide capture is more resilient than media-element attachment, but site or Chrome changes can still affect authorization, player-volume hints, or playback.
 - The `0.8.2` release adds an adjustable target-loudness baseline while retaining the existing bounded programme-leveler controller. Its current-version automated DSP, 8/8 capture matrix, 6/6 site matrix, 30-minute Bilibili live endurance, persistence, and package checks passed before submission. The project-defined two-hour mixed-content run and broader listening remain stable-release gates rather than claims of universal preference. Anonymous headless YouTube has unloaded its media element after roughly 45–60 seconds in endurance attempts, so such attempts are recorded as source failures rather than extension passes.
 - DRM/protected media behavior depends on Chrome and the site; no bypass is attempted.
-- Tampermonkey, Violentmonkey, and Greasy Fork are not supported core distribution channels because userscripts cannot access the whole-tab capture/offscreen pipeline. No weaker page-hook edition is advertised as equivalent.
+- Tampermonkey, Violentmonkey, and Greasy Fork are not supported core distribution channels because userscripts cannot access the whole-tab capture/offscreen pipeline or load the extension's AudioWorklet under strict CSP.
 
 ## Product status
 

@@ -336,7 +336,7 @@
     "message": "Lautstärkeausgleich"
   },
   "appDescription": {
-    "message": "Normalisiert laute und leise Tab-Audios automatisch und respektiert Stummschaltung und Player-Lautstärke."
+    "message": "Gleicht die Lautstärke automatisch an: dämpft laute Werbung und Spitzen, hebt leise Dialoge an. Ohne Klicks, lokal verarbeitet."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — aktiviert"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "Allgemein" },
   "sitesTab": { "message": "Website-Regeln" },
   "diagnosticsTab": { "message": "Support & Diagnose" },
-  "captureGestureTitle": { "message": "Neue Tabs brauchen einen Klick" },
-  "captureGestureHelp": { "message": "Chrome verlangt einen Klick, bevor ein neuer Tab ausgeglichen werden kann. Ein schlanker lokaler Beobachter verwendet die Seiten-URL sowie Wiedergabe-, Stumm- und Lautstärkestatus; Browser- und Audiodaten werden nicht an den Entwickler gesendet." },
+  "captureGestureTitle": { "message": "Auf den meisten Websites automatisch" },
+  "captureGestureHelp": { "message": "LoudEase gleicht hörbare Videos und Audio selbstständig aus, ohne Klicks. Wo Chrome das Audio schützt (Cross-Origin, DRM oder eigenes Web Audio der Seite), öffnen Sie LoudEase einmal auf diesem Tab, um die Tab-Erfassung zu nutzen. Ein schlanker lokaler Beobachter nutzt nur den Medienstatus der Seite; Browser- und Audiodaten werden nicht an den Entwickler gesendet." },
   "generalHelp": { "message": "Lege das Standardaussehen und -verhalten der Erweiterung fest." },
   "appearanceHeading": { "message": "Darstellung" },
   "languageLabel": { "message": "Sprache" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "Im Chrome Web Store bewerten" },
   "starGitHub": { "message": "Star auf GitHub" },
   "storeReviewOpened": { "message": "Chrome-Web-Store-Bewertungen geöffnet." },
-  "githubOpened": { "message": "GitHub-Projekt geöffnet." }
+  "githubOpened": { "message": "GitHub-Projekt geöffnet." },
+  "appStoreName": { "message": "LoudEase: Automatischer Lautstärke-Normalisierer" },
+  "autoSiteLabel": { "message": "Diese Website automatisch ausgleichen, ohne Klick." },
+  "statusAutoReady": { "message": "Automatikmodus ist aktiv" }
 }

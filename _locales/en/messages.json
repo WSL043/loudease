@@ -336,7 +336,7 @@
     "message": "Volume Balancer"
   },
   "appDescription": {
-    "message": "Automatically normalizes loud and quiet tab audio while respecting mute and player volume."
+    "message": "Auto volume normalizer: tames loud ads and sudden peaks, lifts quiet dialogue, on any tab. Works automatically, no clicks."
   },
   "actionTitleEnabled": {
     "message": "LoudEase — enabled"
@@ -347,8 +347,8 @@
   "generalTab": { "message": "General" },
   "sitesTab": { "message": "Site rules" },
   "diagnosticsTab": { "message": "Support & diagnostics" },
-  "captureGestureTitle": { "message": "New tabs need one click" },
-  "captureGestureHelp": { "message": "Chrome requires one click before a new tab can be balanced. A lightweight local observer uses the page URL and media play, mute, and volume state; browsing and audio data are not sent to the developer." },
+  "captureGestureTitle": { "message": "Automatic on most sites" },
+  "captureGestureHelp": { "message": "LoudEase balances audible video and audio on its own, with no clicks. Where Chrome protects the audio (cross-origin, DRM or page-owned Web Audio), open LoudEase once on that tab to use full-tab capture. A lightweight local observer uses only page media state; browsing and audio data are not sent to the developer." },
   "generalHelp": { "message": "Choose how the extension looks and behaves by default." },
   "appearanceHeading": { "message": "Appearance" },
   "languageLabel": { "message": "Language" },
@@ -398,5 +398,8 @@
   "rateStore": { "message": "Review on Chrome Web Store" },
   "starGitHub": { "message": "Star on GitHub" },
   "storeReviewOpened": { "message": "Chrome Web Store reviews opened." },
-  "githubOpened": { "message": "GitHub project opened." }
+  "githubOpened": { "message": "GitHub project opened." },
+  "appStoreName": { "message": "LoudEase: Auto Volume Normalizer" },
+  "autoSiteLabel": { "message": "Balance this site automatically, no click needed." },
+  "statusAutoReady": { "message": "Automatic mode is on" }
 }

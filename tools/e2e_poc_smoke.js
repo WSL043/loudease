@@ -218,6 +218,9 @@ function stageExtensionForE2e() {
   const manifestPath = path.join(extensionDir, 'manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   manifest.options_page = 'e2e/harness.html';
+  // These harnesses exercise the user-invoked tabCapture path. Automatic mode owns
+  // the tab when its content script responds, so it is removed here unless requested.
+  if (process.env.WVB_E2E_WITH_AUTO !== '1') delete manifest.content_scripts;
   manifest.permissions = Array.from(new Set([...(manifest.permissions || []), 'tabs']));
   manifest.host_permissions = Array.from(new Set([...(manifest.host_permissions || []), 'http://127.0.0.1/*']));
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
