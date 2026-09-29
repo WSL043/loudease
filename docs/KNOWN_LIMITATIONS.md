@@ -44,6 +44,6 @@
 
 ## Product status
 
-- Version `0.9.0` remains a public beta, not a hearing-protection or medical product.
+- Version `0.9.1` remains a public beta, not a hearing-protection or medical product.
 - The GitHub build contains optional localhost diagnostics and trusted automatic-capture orchestration; the store build removes both.
 - Version `1.0.0` requires the gates documented in `docs/VERSIONING.md`.

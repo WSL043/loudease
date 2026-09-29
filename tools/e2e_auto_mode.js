@@ -163,6 +163,25 @@ async function main() {
       await command('Target.createTarget', { url: `http://127.0.0.1:${site.port}${pathname}` });
     };
 
+    // Fresh install opens the welcome page and seeds the UI language from the browser.
+    let welcome = null;
+    for (let attempt = 0; attempt < 20 && !welcome; attempt += 1) {
+      const { targetInfos } = await command('Target.getTargets');
+      welcome = targetInfos.find((target) => target.url === `chrome-extension://${extensionId}/popup/welcome.html`);
+      if (!welcome) await sleep(300);
+    }
+    check('install opens the welcome page', Boolean(welcome));
+    if (welcome) {
+      const { sessionId: welcomeSession } = await command('Target.attachToTarget', { targetId: welcome.targetId, flatten: true });
+      await sleep(800);
+      const heading = await command('Runtime.evaluate', { expression: 'document.querySelector("h1").textContent', returnByValue: true }, welcomeSession);
+      check('welcome page renders localized text', /LoudEase/.test(heading.result.value || ''), heading.result.value);
+      if (process.env.WVB_E2E_SHOT) {
+        const shot = await command('Page.captureScreenshot', { format: 'png' }, welcomeSession);
+        fs.writeFileSync(process.env.WVB_E2E_SHOT, Buffer.from(shot.data, 'base64'));
+      }
+    }
+
     // Optional real-site probe: node tools/e2e_auto_mode.js --url https://example.com/watch
     const urlIndex = process.argv.indexOf('--url');
     if (urlIndex > 0) {

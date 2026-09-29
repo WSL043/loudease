@@ -14,7 +14,7 @@
     histogramBinDb: 0.5,
     programmeDeadbandDb: 1,
     dynamicsDeadbandDb: 1,
-    dynamicsAmount: 0.86,
+    dynamicsAmount: 0.92,
     maxDynamicsLiftDb: 16,
     dynamicsLiftFloorDb: -48,
     dynamicsLiftFloorKneeDb: 8,

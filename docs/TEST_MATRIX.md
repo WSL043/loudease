@@ -57,6 +57,67 @@ Local capture E2E emits synthetic audio by design. The default developer-safe en
 
 ## Real-site release baseline
 
+Extended 120-second-per-video manual-link and loudness qualification is recorded
+in [REAL_SITE_QUALITY.md](REAL_SITE_QUALITY.md). It found under-target windows
+and retained YouTube/Bilibili no-extension playback failures; it is not a
+three-platform quality pass.
+
+The later [personal-Chrome 0.92 developer-candidate retest](PERSONAL_CHROME_DYNAMICS_092_20260923.md)
+used the user's logged-in Chrome and qualified three distinct real videos per
+platform for at least one minute each. It confirms live capture and matching
+input/output meters, while sustained quiet content still misses the internal
+target. This unreleased candidate is not a release-quality pass or listening
+test; shorter failed windows, ads, site errors and transport gaps remain in
+the record.
+
+The [sustained-quiet counterfactual](SUSTAINED_QUIET_COUNTERFACTUAL_20260923.md)
+uses those exact eligible numeric rows and matched synthetic PCM. It rejects an
+extra quiet-detail lift because a same-level ambience fixture is raised by the
+same amount. This is offline analysis, not a newly installed candidate.
+
+The [product balance review](BALANCE_OBJECTIVE_REVIEW_20260923.md) and
+`node tools/analyze_balance_objective.js` report cross-video centre narrowing,
+paired input/output within-video contrast and loss-of-contrast warnings. The
+`-19±2 dB` window-hit rate remains a diagnostic for labelled stable foreground,
+not a pass criterion for every audible window. The analysis test runs in the
+complete local checks; no new runtime DSP is implied.
+
+### Local three-video navigation check (2026-09-22)
+
+Current main runtime (not the offline true-peak candidate) was tested in isolated,
+silent Chrome for 180 seconds per platform. The same captured tab navigated to
+distinct public video links discovered on the page at approximately 60 and 120
+seconds, without restarting capture. The clock includes page loading, so this
+is not 60 seconds of decoded content per video. It tests full navigation, not
+feed swipes or in-page SPA clicks. Ordinary snapshots are one second apart;
+the first ten seconds after navigation are sampled about every 250 ms.
+
+| Platform | Result | Navigation-to-playing observation |
+|---|---|---|
+| Bilibili | Passed, three videos, 180014 ms | 2361 / 1889 ms |
+| Douyin | Passed, three videos, 180006 ms | 6288 / 5418 ms |
+| YouTube | Failed continuity, three videos, 180017 ms | 2695 / 2683 ms |
+
+YouTube's media element paused and unloaded during the minute segments while
+the extension context and meters remained running. Navigation restored input;
+nine stale-input observations were retained, rather than turning recovery into
+a pass. All three runs' sampled counters showed zero hard-clipped samples.
+This does not measure reconstructed true peak, prove absence of sub-snapshot
+artifacts, or establish subjective loudness equality. Playback readiness is
+not an audio-settling measurement. No runtime DSP changes were made.
+
+Reproduce locally with `WVB_E2E_REAL_SWITCH=1`,
+`WVB_REAL_SCENARIO_TIMEOUT_MS=300000`, and
+`node tools/e2e_real_site_matrix.js --scenario bilibili-video --hold-ms 180000`
+(substitute `youtube-video` or `douyin-short`). The switch mode is fixed at three
+minutes. It saves timestamped `tmp/real-switch-*.json` snapshots including
+partial failures. These local records include public page URLs/titles and must
+not be uploaded as automatic telemetry. Page recommendations vary; later runs
+are not guaranteed to select identical material. Missing distinct links fail
+the scenario rather than silently replaying one video.
+
+### Historical release baseline
+
 Development follow-up (`2026-09-12`): [CI run 34681266561](https://github.com/WSL043/loudease/actions/runs/34681266561) failed the first capture scenario with `Cannot read properties of undefined (reading 'query')` after discovering the popup target; its remaining seven scenarios passed. The harness queried tabs without waiting for the extension execution context. It now waits for the exact document URL, extension ID, document readiness, and required APIs before evaluating extension code. A deterministic context-transition regression and the local 8/8 silent capture matrix passed after this change. Capture scenarios are not retried and persistent API absence remains a failure.
 
 The following rows require current `0.8.2` evidence before Chrome Web Store submission. A previous-version run is useful history but does not pass a current release gate unless the affected runtime is byte-identical and the release review records that limited carry-forward explicitly.

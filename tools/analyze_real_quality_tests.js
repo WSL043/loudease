@@ -1,0 +1,16 @@
+const assert=require('assert/strict');
+const {analyze}=require('./analyze_real_quality');
+const fixture=(output=-19,cap=1)=>({generatedAt:'test',passed:true,failures:[],transitions:[],samples:[{segment:0,atMs:0,media:{title:'synthetic',media:[{paused:false,muted:false,volume:cap,readyState:4}]}}],measurements:Array.from({length:100},(_,i)=>({segment:0,atMs:i*100,audioSeconds:i*0.1,resetCount:0,cap,reliable:true,muted:false,targetDb:-19,confidence:1,shortTerm:[-30+20*Math.log10(cap),output+20*Math.log10(cap)],momentary:[-30+20*Math.log10(cap),output+20*Math.log10(cap)],peaks:[0.1,0.1],limiterReductionDb:0}))});
+assert.equal(analyze(fixture()).segments[0].eligible.inBandPercent,100);
+assert.equal(analyze(fixture(-19,0.5)).segments[0].eligible.inBandPercent,100,'respect half player volume');
+assert.equal(analyze(fixture(-24)).segments[0].eligible.belowBandPercent,100);
+assert.equal(analyze(fixture(-14)).segments[0].eligible.aboveBandPercent,100);
+const paused=fixture();paused.samples[0].media.media[0].paused=true;
+assert.equal(analyze(paused).segments[0].eligible.count,0);
+const unknown=fixture();unknown.measurements.forEach(x=>x.reliable=false);
+assert.equal(analyze(unknown).segments[0].eligible.count,0);
+const invalid=fixture();invalid.measurements[5].shortTerm[1]=null;
+assert.throws(()=>analyze(invalid));
+assert(analyze(fixture(-24)).segments[0].longExcursions.length>0);
+assert.equal(analyze(fixture(-24)).segments[0].firstOneSecondMomentaryBandCompletedAfterActiveSeconds,null);
+console.log('PASS target bands, volume normalization, exclusion, retained misses and invalid measurements');

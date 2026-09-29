@@ -1,0 +1,16 @@
+const assert=require('assert/strict');
+const {CdpSocket}=require('./e2e_poc_smoke');
+const cdp=new CdpSocket('ws://127.0.0.1:1/test');
+const received=[];
+cdp.onEvent=e=>received.push(e);
+const payload=Buffer.from(JSON.stringify({method:'test.large',params:{value:'x'.repeat(70000)}}));
+const header=Buffer.alloc(10);header[0]=0x81;header[1]=127;header.writeBigUInt64BE(BigInt(payload.length),2);
+const frame=Buffer.concat([header,payload]);
+cdp.onData(frame.subarray(0,5));assert.equal(received.length,0);
+cdp.onData(frame.subarray(5,100));assert.equal(received.length,0);
+cdp.onData(frame.subarray(100));assert.equal(received.length,1);
+assert.equal(received[0].params.value.length,70000);
+assert.equal(cdp.buffer.length,0);
+const oversized=Buffer.from(header);oversized.writeBigUInt64BE(17n*1024n*1024n,2);
+assert.throws(()=>cdp.onData(oversized),/16 MiB/);
+console.log('PASS fragmented large CDP event and bounded rejection');

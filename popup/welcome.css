@@ -1,0 +1,15 @@
+:root { color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; --bg: #f4f6f8; --surface: #fff; --text: #17202b; --muted: #687581; --line: #d8dfe5; --green: #159669; }
+@media (prefers-color-scheme: dark) { :root { --bg: #14181d; --surface: #1c2229; --text: #eef2f5; --muted: #a2adb8; --line: #2c353e; } }
+:root[data-theme="light"] { --bg: #f4f6f8; --surface: #fff; --text: #17202b; --muted: #687581; --line: #d8dfe5; }
+:root[data-theme="dark"] { --bg: #14181d; --surface: #1c2229; --text: #eef2f5; --muted: #a2adb8; --line: #2c353e; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--text); }
+.card { box-sizing: border-box; width: min(560px, calc(100vw - 32px)); padding: 36px 36px 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+h1 { margin: 14px 0 8px; font-size: 26px; }
+.lead { margin: 0 0 20px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+ol { margin: 0 0 20px; padding-inline-start: 22px; line-height: 1.7; font-size: 15px; }
+li::marker { color: var(--green); font-weight: 700; }
+.note { margin: 0; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.5; }
+.logoDark { display: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logoLight { display: none; } :root:not([data-theme="light"]) .logoDark { display: inline; } }
+:root[data-theme="dark"] .logoLight { display: none; }
+:root[data-theme="dark"] .logoDark { display: inline; }

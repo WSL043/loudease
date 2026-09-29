@@ -401,5 +401,11 @@
   "githubOpened": { "message": "已打开 GitHub 项目页。" },
   "appStoreName": { "message": "LoudEase：自动音量均衡器" },
   "autoSiteLabel": { "message": "自动平衡此网站的音量，无需点击。" },
-  "statusAutoReady": { "message": "自动模式已开启" }
+  "statusAutoReady": { "message": "自动模式已开启" },
+  "welcomeTitle": { "message": "LoudEase 已就绪" },
+  "welcomeLead": { "message": "无需设置。播放视频或音乐，LoudEase 会自动拉平突然的广告大声和听不清的小声对白。" },
+  "welcomeStep1": { "message": "打开任意视频或音乐页面并点击播放。" },
+  "welcomeStep2": { "message": "看工具栏图标上的 ON，表示 LoudEase 正在平衡当前标签页。" },
+  "welcomeStep3": { "message": "在拼图图标菜单里固定 LoudEase，图标就会一直显示。" },
+  "welcomeNote": { "message": "音频只在你的设备上处理。如果某个网站的音频无法自动接入，在该标签页打开一次 LoudEase 即可改用整页接管。" }
 }

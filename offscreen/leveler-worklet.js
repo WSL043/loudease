@@ -509,7 +509,11 @@ class WebVolumeBalancerLevelerProcessor extends AudioWorkletProcessor {
         this.inputPeak = Math.max(this.inputPeak, Math.abs(sample));
         this.sourceInputPeak = Math.max(this.sourceInputPeak, Math.abs(sourceSample));
       }
-      const liftedJump = this.currentGainDb > 0.01 && futurePeak > dbToLinear(this.adaptiveTransitionCeilingDb);
+      // Sustained lifted crests are handled by the ordinary limiter. Only a
+      // source-level jump may renew the temporary transition ceiling; otherwise
+      // normal high-crest programmes keep the short protection alive forever.
+      const liftedJump = this.currentGainDb > 0.01 && futurePeak > dbToLinear(this.adaptiveTransitionCeilingDb)
+        && rawInputPeak > this.previousInputFramePeak * PROGRAMME_JUMP_RATIO;
       const newSignalOnset = !this.signalActive && futurePeak * this.sourceVolumeGain > ONSET_PROTECTION_THRESHOLD;
       const activeProgrammeJump = this.signalActive
         && this.cutStrength > 0.01

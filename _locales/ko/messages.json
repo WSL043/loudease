@@ -401,5 +401,11 @@
   "githubOpened": { "message": "GitHub 프로젝트를 열었습니다." },
   "appStoreName": { "message": "LoudEase: 자동 볼륨 노멀라이저" },
   "autoSiteLabel": { "message": "이 사이트 볼륨을 자동으로 조절합니다(클릭 불필요)." },
-  "statusAutoReady": { "message": "자동 모드가 켜져 있습니다" }
+  "statusAutoReady": { "message": "자동 모드가 켜져 있습니다" },
+  "welcomeTitle": { "message": "LoudEase 준비 완료" },
+  "welcomeLead": { "message": "설정할 것이 없습니다. 동영상이나 음악을 재생하면 LoudEase가 갑작스러운 큰 광고 소리와 작은 대사를 자동으로 맞춥니다." },
+  "welcomeStep1": { "message": "동영상이나 음악 페이지를 열고 재생하세요." },
+  "welcomeStep2": { "message": "도구 모음 아이콘에 ON이 보이면 이 탭을 조절 중입니다." },
+  "welcomeStep3": { "message": "퍼즐 아이콘 메뉴에서 LoudEase를 고정하면 아이콘이 항상 표시됩니다." },
+  "welcomeNote": { "message": "오디오는 기기에서만 처리됩니다. 자동으로 연결되지 않는 사이트는 해당 탭에서 LoudEase를 한 번 열어 전체 탭 캡처를 사용하세요." }
 }

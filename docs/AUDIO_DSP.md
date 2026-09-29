@@ -1,6 +1,6 @@
 # Audio DSP
 
-This document describes the `programme-leveler-v4` controller used by LoudEase version `0.9.0`.
+This document describes the `programme-leveler-v4` controller used by LoudEase version `0.9.1`.
 
 Unreleased 2026-09-22: player attenuation is compensated before K-weighting;
 bounded measurement rollback handles delayed volume metadata without a source
@@ -63,11 +63,19 @@ The controller forms a stable baseline and a smaller within-programme term:
 
 ```text
 programme correction = T - P
-dynamic correction   = -0.86 * (M - P)
+dynamic correction   = -0.92 * (M - P)
 target gain          = programme correction + dynamic correction
 ```
 
-Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre and is retained as the baseline through silence. Positive dynamic correction is a detail aid, not a second normalizer: it is capped at `16 dB` at full lift strength and fades from full eligibility at `-40 dB` to zero at `-48 dB`. The larger audible-detail allowance closes more of the gap inside a loud programme without granting any positive detail correction to near-silence. The negative dynamic term and the independent fast path may still reduce loud material.
+The `0.92` dynamic coefficient is an unreleased experiment, not the product
+objective. In an idealized steady programme with no deadband or protection,
+it leaves only about 8% of a 400 ms loudness difference. Real output also
+depends on changing programme reference, smoothing and limiting. The
+[product-oriented real-site review](BALANCE_OBJECTIVE_REVIEW_20260923.md)
+therefore checks both cross-video centre and retained within-video contrast;
+forcing every short window to the target would erase intended dynamics.
+
+Each term has a 1 dB deadband. Negative corrections use `C`; positive corrections use `L`. The programme term moves different sources toward a common centre and is retained as the baseline through silence. Positive dynamic correction is a detail aid, not a second normalizer: it is capped at `16 dB` at full lift strength and fades from full eligibility at `-40 dB` to zero at `-48 dB`. The larger audible-detail allowance closes more of the gap inside a loud programme without granting any positive detail correction to near-silence. The negative dynamic term and the independent fast path may still reduce loud material. The unreleased 0.92 coefficient is a bounded follow-up candidate to the 0.86 setting; see [its evidence and limits](BOUNDED_DYNAMICS_CANDIDATE.md).
 
 The distinction matters on live streams. Before this bound, a programme measured near `-14 dB` followed by a `-60 dB` quiet bed could request the global `+25 dB` maximum, then reverse when speech or effects returned. The resulting 30-plus-decibel gain travel was heard as a long loud/quiet wave. With the current policy, that bed receives no positive detail term; only the stable programme baseline remains. An entire genuinely quiet programme can still receive the full bounded programme correction.
 
@@ -87,6 +95,13 @@ Upward gain is asymmetric by design:
 Perfect first-frame upward normalization is impossible without metadata or pre-analysis: a quiet opening can be either an under-mastered programme or intentional dynamics. LoudEase therefore protects immediately, but waits for evidence before lifting. The shorter ramp is intentionally calibrated for short-form feeds; the quiet-content floor, peak budget, and limiter remain unchanged safety boundaries.
 
 ## Fast protection and limiter
+
+Unreleased 2026-09-23: a lifted peak renews temporary transition protection only
+when the source peak also jumps more than 6 dB above the preceding 20 ms frame.
+Previously sustained amplified crests could renew the 40 ms ceiling indefinitely.
+The ordinary limiter ceiling, onset protection, gain policy and player-volume
+boundaries remain unchanged. See [candidate evidence](TRANSITION_CREST_CANDIDATE.md)
+for the reproduced failure, multirate checks and pending real-site acceptance.
 
 The 20 ms fast path cuts material above `T + 3 dB` even before programme confidence exists.
 

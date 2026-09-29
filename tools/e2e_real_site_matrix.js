@@ -99,6 +99,7 @@ for (const scenario of selected) {
     url: scenario.url,
     passed,
     exitCode: run.status,
+    runnerError: run.error ? String(run.error.message || run.error) : null,
     report
   });
   if (!passed && !verbose) {

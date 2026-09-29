@@ -67,7 +67,35 @@
     return (hash >>> 0).toString(16).padStart(8, '0');
   }
 
+  const programmeIds = new WeakMap();
+
+  // Douyin feed swipes reuse both the page URL and an opaque media source, so
+  // read the id from links inside this player's own container only.
+  function visibleProgrammeId(media) {
+    if (!/^(www\.)?douyin\.com$/i.test(location.hostname)) return '';
+    const container = media.closest?.('.basePlayerContainer');
+    if (!container) return programmeIds.get(media) || '';
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT);
+    const ids = new Set();
+    let node;
+    let visited = 0;
+    while ((node = walker.nextNode()) && visited < 800) {
+      visited += 1;
+      if (node.tagName !== 'A') continue;
+      try {
+        const link = new URL(node.getAttribute('href') || '', location.href);
+        const id = link.searchParams.get('aweme_id') || '';
+        if (link.protocol === 'https:' && /^(www\.)?douyin\.com$/i.test(link.hostname)
+          && link.pathname.startsWith('/search/') && /^\d{15,22}$/.test(id)) ids.add(id);
+      } catch (_) {}
+    }
+    if (!node && ids.size === 1) programmeIds.set(media, `douyin:${[...ids][0]}`);
+    return programmeIds.get(media) || '';
+  }
+
   function sourceIdentity(media) {
+    const visibleId = visibleProgrammeId(media);
+    if (visibleId) return visibleId;
     if (media.srcObject) return 'srcObject';
     const source = String(media.currentSrc || media.src || '');
     if (/^(blob|data|mediastream):/i.test(source)) return source.slice(0, source.indexOf(':') + 1);

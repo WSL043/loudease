@@ -401,5 +401,11 @@
   "githubOpened": { "message": "GitHub project opened." },
   "appStoreName": { "message": "LoudEase: Auto Volume Normalizer" },
   "autoSiteLabel": { "message": "Balance this site automatically, no click needed." },
-  "statusAutoReady": { "message": "Automatic mode is on" }
+  "statusAutoReady": { "message": "Automatic mode is on" },
+  "welcomeTitle": { "message": "LoudEase is ready" },
+  "welcomeLead": { "message": "Nothing to set up. Play a video or music and LoudEase evens out loud ads and quiet dialogue on its own." },
+  "welcomeStep1": { "message": "Open any video or music page and press play." },
+  "welcomeStep2": { "message": "Look for ON on the toolbar icon. That means LoudEase is balancing this tab." },
+  "welcomeStep3": { "message": "Pin LoudEase from the puzzle-piece menu to keep the icon in view." },
+  "welcomeNote": { "message": "Audio is processed on your device only. If a site's audio cannot be attached automatically, open LoudEase once on that tab to use full-tab capture." }
 }

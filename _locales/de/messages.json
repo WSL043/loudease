@@ -401,5 +401,11 @@
   "githubOpened": { "message": "GitHub-Projekt geöffnet." },
   "appStoreName": { "message": "LoudEase: Automatischer Lautstärke-Normalisierer" },
   "autoSiteLabel": { "message": "Diese Website automatisch ausgleichen, ohne Klick." },
-  "statusAutoReady": { "message": "Automatikmodus ist aktiv" }
+  "statusAutoReady": { "message": "Automatikmodus ist aktiv" },
+  "welcomeTitle": { "message": "LoudEase ist bereit" },
+  "welcomeLead": { "message": "Nichts einzurichten. Spielen Sie ein Video oder Musik ab, und LoudEase gleicht laute Werbung und leise Dialoge automatisch aus." },
+  "welcomeStep1": { "message": "Öffnen Sie eine beliebige Video- oder Musikseite und starten Sie die Wiedergabe." },
+  "welcomeStep2": { "message": "Steht ON auf dem Symbol in der Symbolleiste, gleicht LoudEase diesen Tab aus." },
+  "welcomeStep3": { "message": "Heften Sie LoudEase über das Puzzle-Menü an, damit das Symbol sichtbar bleibt." },
+  "welcomeNote": { "message": "Audio wird nur auf Ihrem Gerät verarbeitet. Lässt sich der Ton einer Website nicht automatisch anbinden, öffnen Sie LoudEase einmal auf diesem Tab für die Tab-Erfassung." }
 }
