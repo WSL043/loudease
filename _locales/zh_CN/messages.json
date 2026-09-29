@@ -407,5 +407,6 @@
   "welcomeStep1": { "message": "打开任意视频或音乐页面并点击播放。" },
   "welcomeStep2": { "message": "看工具栏图标上的 ON，表示 LoudEase 正在平衡当前标签页。" },
   "welcomeStep3": { "message": "在拼图图标菜单里固定 LoudEase，图标就会一直显示。" },
-  "welcomeNote": { "message": "音频只在你的设备上处理。如果某个网站的音频无法自动接入，在该标签页打开一次 LoudEase 即可改用整页接管。" }
+  "welcomeNote": { "message": "音频只在你的设备上处理。如果某个网站的音频无法自动接入，在该标签页打开一次 LoudEase 即可改用整页接管。" },
+  "noticeFullTabCapture": { "message": "此网站的音频无法自动接入，因此正在使用整页接管。" }
 }

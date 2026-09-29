@@ -15,6 +15,9 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Popup now says when full-tab capture is in use because a site's audio cannot be attached automatically (11 languages).
+- Automatic-mode e2e adds DRM (MediaKeys) and page-owned Web Audio graph cases: both are declined, never silenced (14/14). Dailymotion video verified with no click; Vimeo, Twitch and archive.org did not autoplay in the harness and are not claimed.
+
 - **Automatic mode.** LoudEase now balances audible video and audio on its own; a click on each tab is no longer needed. A content script attaches eligible `<audio>`/`<video>` elements to the existing programme-leveler AudioWorklet, loaded from a web-accessible resource so it works under strict page CSP. Cross-origin media without CORS, DRM media, and elements already routed through Web Audio are never attached (Chrome would silence them); those fall back to tab capture. A tab that is captured is bypassed by automatic mode, so audio is never processed twice. Adds a per-site switch in the popup, an `ON` action badge, and `tools/e2e_auto_mode.js`.
 - Repositioned the listing as an automatic volume normalizer: new store name, summary, description, keywords, category recommendation, and README.
 

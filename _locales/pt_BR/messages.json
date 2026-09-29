@@ -407,5 +407,6 @@
   "welcomeStep1": { "message": "Abra qualquer página de vídeo ou música e toque em reproduzir." },
   "welcomeStep2": { "message": "Se aparecer ON no ícone da barra, o LoudEase está equilibrando esta guia." },
   "welcomeStep3": { "message": "Fixe o LoudEase no menu de quebra-cabeça para manter o ícone visível." },
-  "welcomeNote": { "message": "O áudio é processado apenas no seu dispositivo. Se o áudio de um site não puder ser conectado automaticamente, abra o LoudEase uma vez nessa guia para usar a captura da guia." }
+  "welcomeNote": { "message": "O áudio é processado apenas no seu dispositivo. Se o áudio de um site não puder ser conectado automaticamente, abra o LoudEase uma vez nessa guia para usar a captura da guia." },
+  "noticeFullTabCapture": { "message": "O áudio deste site não pode ser conectado automaticamente, então a captura da guia está em uso." }
 }

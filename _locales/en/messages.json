@@ -407,5 +407,6 @@
   "welcomeStep1": { "message": "Open any video or music page and press play." },
   "welcomeStep2": { "message": "Look for ON on the toolbar icon. That means LoudEase is balancing this tab." },
   "welcomeStep3": { "message": "Pin LoudEase from the puzzle-piece menu to keep the icon in view." },
-  "welcomeNote": { "message": "Audio is processed on your device only. If a site's audio cannot be attached automatically, open LoudEase once on that tab to use full-tab capture." }
+  "welcomeNote": { "message": "Audio is processed on your device only. If a site's audio cannot be attached automatically, open LoudEase once on that tab to use full-tab capture." },
+  "noticeFullTabCapture": { "message": "This site's audio cannot be attached automatically, so full-tab capture is in use." }
 }

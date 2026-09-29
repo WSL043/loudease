@@ -931,7 +931,12 @@ function renderStatus(status) {
   }
   if (engineActive || (active > 0 && processed > 0 && audible > 0)) {
     const blockedNotice = liftBlockedNotice(status);
-    if (blockedNotice) setNotices([blockedNotice]);
+    const notices = [];
+    if (blockedNotice) notices.push(blockedNotice);
+    if (captureActive && finiteNumber(status.auto?.blockedAudibleCount) > 0) {
+      notices.push({ tone: 'info', text: t('noticeFullTabCapture', undefined, "This site's audio cannot be attached automatically, so full-tab capture is in use.") });
+    }
+    if (notices.length) setNotices(notices);
     const reduction = percentValue(settings?.cutStrength) > 0 ? Math.max(0, finiteNumber(status.averageReductionDb)) : 0;
     const lift = percentValue(settings?.liftStrength) > 0 ? Math.max(0, finiteNumber(status.averageLiftDb)) : 0;
     const effect = displayEffectForStatus(status, reduction, lift);

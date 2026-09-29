@@ -407,5 +407,6 @@
   "welcomeStep1": { "message": "Öffnen Sie eine beliebige Video- oder Musikseite und starten Sie die Wiedergabe." },
   "welcomeStep2": { "message": "Steht ON auf dem Symbol in der Symbolleiste, gleicht LoudEase diesen Tab aus." },
   "welcomeStep3": { "message": "Heften Sie LoudEase über das Puzzle-Menü an, damit das Symbol sichtbar bleibt." },
-  "welcomeNote": { "message": "Audio wird nur auf Ihrem Gerät verarbeitet. Lässt sich der Ton einer Website nicht automatisch anbinden, öffnen Sie LoudEase einmal auf diesem Tab für die Tab-Erfassung." }
+  "welcomeNote": { "message": "Audio wird nur auf Ihrem Gerät verarbeitet. Lässt sich der Ton einer Website nicht automatisch anbinden, öffnen Sie LoudEase einmal auf diesem Tab für die Tab-Erfassung." },
+  "noticeFullTabCapture": { "message": "Der Ton dieser Website lässt sich nicht automatisch anbinden; die Tab-Erfassung ist aktiv." }
 }

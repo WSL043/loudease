@@ -407,5 +407,6 @@
   "welcomeStep1": { "message": "Ouvrez une page vidéo ou musique et lancez la lecture." },
   "welcomeStep2": { "message": "Le badge ON sur l'icône de la barre d'outils indique que LoudEase équilibre cet onglet." },
   "welcomeStep3": { "message": "Épinglez LoudEase depuis le menu en forme de puzzle pour garder l'icône visible." },
-  "welcomeNote": { "message": "L'audio est traité uniquement sur votre appareil. Si l'audio d'un site ne peut pas être connecté automatiquement, ouvrez LoudEase une fois sur cet onglet pour utiliser la capture de l'onglet." }
+  "welcomeNote": { "message": "L'audio est traité uniquement sur votre appareil. Si l'audio d'un site ne peut pas être connecté automatiquement, ouvrez LoudEase une fois sur cet onglet pour utiliser la capture de l'onglet." },
+  "noticeFullTabCapture": { "message": "L'audio de ce site ne peut pas être connecté automatiquement ; la capture de l'onglet est utilisée." }
 }
