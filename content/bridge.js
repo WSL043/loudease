@@ -36,6 +36,7 @@
   let lastProgrammeKey = '';
   const observedRoots = new WeakSet();
   const mediaListeners = new Map();
+  const programmeIds = new WeakMap();
 
   function stillCurrent() {
     return window.__WEB_VOLUME_BALANCER_BRIDGE_TOKEN__ === bridgeToken;
@@ -126,7 +127,34 @@
     return (hash >>> 0).toString(16).padStart(8, '0');
   }
 
+  function visibleProgrammeId(media) {
+    // Feed navigation can reuse both the page URL and an opaque media source.
+    // Read only links in this player's own container, never neighbouring cards.
+    if (!/^(www\.)?douyin\.com$/i.test(location.hostname)) return '';
+    const container = media?.closest?.('.basePlayerContainer');
+    if (!container) return programmeIds.get(media) || '';
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT);
+    const ids = new Set();
+    let node, visited = 0;
+    while ((node = walker.nextNode()) && visited < 800) {
+      visited += 1;
+      if (node.tagName !== 'A') continue;
+      try {
+        const link = new URL(node.getAttribute('href') || '', location.href);
+        const id = link.searchParams.get('aweme_id') || '';
+        // Search links include the visible hashtag as a path suffix.
+        if (link.protocol === 'https:' && /^(www\.)?douyin\.com$/i.test(link.hostname)
+          && link.pathname.startsWith('/search/') && /^\d{15,22}$/.test(id)) ids.add(id);
+      } catch (_) {}
+    }
+    // Incomplete or conflicting DOM evidence must not invent a new programme.
+    if (!node && ids.size === 1) programmeIds.set(media, `douyin:${[...ids][0]}`);
+    return programmeIds.get(media) || '';
+  }
+
   function programmeSourceIdentity(media) {
+    const visibleId = visibleProgrammeId(media);
+    if (visibleId) return visibleId;
     return sanitizeMediaSource(media?.currentSrc || media?.src) || mediaSourceKind(media);
   }
 

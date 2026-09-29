@@ -2,6 +2,17 @@
 
 All notable public changes to LoudEase are recorded here.
 
+## 0.9.1 - 2026-09-29
+
+- Added a first-run welcome page (11 languages) and made a fresh install follow the browser language instead of always showing English.
+- Transition protection now renews only on a real source-level jump. Stable high-crest programmes no longer keep the short -13 dBFS transition ceiling alive, which had held a large share of some YouTube material at a low limiter threshold while it was being lifted.
+- Douyin feed swipes reset the programme estimate in automatic mode as well as in tab capture, using ids from the player's own container.
+- Same-programme dynamics amount 0.86 to 0.92 (about +0.6 dB on moderately quiet passages after loud ones; bounds, floor, peak headroom and mute boundaries unchanged; no hard clipping in the 30-case three-rate regression). Not yet confirmed by controlled listening.
+
+## 0.9.0 - 2026-09-29
+
+- Automatic mode: see the entry below in Unreleased history; first shipped in 0.9.0-beta.1.
+
 ## Unreleased
 
 - **Automatic mode.** LoudEase now balances audible video and audio on its own; a click on each tab is no longer needed. A content script attaches eligible `<audio>`/`<video>` elements to the existing programme-leveler AudioWorklet, loaded from a web-accessible resource so it works under strict page CSP. Cross-origin media without CORS, DRM media, and elements already routed through Web Audio are never attached (Chrome would silence them); those fall back to tab capture. A tab that is captured is bypassed by automatic mode, so audio is never processed twice. Adds a per-site switch in the popup, an `ON` action badge, and `tools/e2e_auto_mode.js`.

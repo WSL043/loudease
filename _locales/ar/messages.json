@@ -401,5 +401,11 @@
   "githubOpened": { "message": "تم فتح مشروع GitHub." },
   "appStoreName": { "message": "LoudEase: موازن الصوت التلقائي" },
   "autoSiteLabel": { "message": "موازنة هذا الموقع تلقائيًا دون نقر." },
-  "statusAutoReady": { "message": "الوضع التلقائي قيد التشغيل" }
+  "statusAutoReady": { "message": "الوضع التلقائي قيد التشغيل" },
+  "welcomeTitle": { "message": "LoudEase جاهز" },
+  "welcomeLead": { "message": "لا شيء لإعداده. شغّل فيديو أو موسيقى وسيوازن LoudEase تلقائيًا الإعلانات العالية والحوار الخافت." },
+  "welcomeStep1": { "message": "افتح أي صفحة فيديو أو موسيقى وابدأ التشغيل." },
+  "welcomeStep2": { "message": "إذا ظهرت كلمة ON على أيقونة شريط الأدوات فهذا يعني أن LoudEase يوازن هذه التبويبة." },
+  "welcomeStep3": { "message": "ثبّت LoudEase من قائمة قطعة الأحجية لتبقى الأيقونة ظاهرة." },
+  "welcomeNote": { "message": "تُعالَج الصوتيات على جهازك فقط. إذا تعذّر ربط صوت موقع ما تلقائيًا، فافتح LoudEase مرة واحدة في تلك التبويبة لاستخدام التقاط التبويبة كاملة." }
 }

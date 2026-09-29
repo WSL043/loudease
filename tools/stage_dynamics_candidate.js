@@ -1,0 +1,46 @@
+// Stage only the verified local development copy. Chrome reload and capture stay manual.
+const fs=require('fs');
+const path=require('path');
+const crypto=require('crypto');
+const {execFileSync}=require('child_process');
+const {instrument}=require('./real_quality_meter');
+const root=path.resolve(__dirname,'..');
+const dev=path.join(root,'dist/github-dev');
+const hash=x=>crypto.createHash('sha256').update(x).digest('hex');
+const policyName='shared/programme-leveler-policy.js';
+const workletName='offscreen/leveler-worklet.js';
+const policy=fs.readFileSync(path.join(root,policyName));
+const worklet=fs.readFileSync(path.join(root,workletName));
+if(!policy.toString().includes('dynamicsAmount: 0.92'))throw Error('Candidate policy missing');
+const priorStagePath=path.join(root,'tmp/personal-quality-stage.json');
+const priorStage=JSON.parse(fs.readFileSync(priorStagePath,'utf8'));
+if(path.resolve(priorStage.destination)!==dev)throw Error('Unexpected developer destination');
+const priorWorklet=priorStage.files.find(x=>x.name===workletName);
+if(!priorWorklet||priorWorklet.sourceSha256!==hash(worklet))throw Error('Worklet source changed since last stage');
+const oldDevWorklet=fs.readFileSync(path.join(dev,workletName));
+if(hash(oldDevWorklet)!==priorWorklet.observedSha256)throw Error('Developer worklet changed');
+const oldDevPolicy=fs.readFileSync(path.join(dev,policyName));
+const baseline=execFileSync('git',['show',`HEAD:${policyName}`],{cwd:root,encoding:'utf8'});
+if(oldDevPolicy.toString().replace(/\r\n/g,'\n')!==baseline.replace(/\r\n/g,'\n'))throw Error('Developer policy has unexpected edits');
+const bridgeStage=JSON.parse(fs.readFileSync(path.join(root,'tmp/transition-crest-candidate/feed-stage.json'),'utf8'));
+if(hash(fs.readFileSync(bridgeStage.target))!==bridgeStage.sourceSha256)throw Error('Developer feed bridge changed');
+const manifest=JSON.parse(fs.readFileSync(path.join(dev,'manifest.json'),'utf8').replace(/^\uFEFF/,''));
+const sourceManifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8').replace(/^\uFEFF/,''));
+for(const key of ['permissions','host_permissions'])if(JSON.stringify(manifest[key])!==JSON.stringify(sourceManifest[key]))throw Error('Developer permissions changed');
+const observed=Buffer.from(instrument(worklet.toString()));
+const backup=path.join(root,'tmp/transition-crest-candidate/pre-dynamics-stage-'+Date.now());
+fs.mkdirSync(backup,{recursive:true});
+fs.writeFileSync(path.join(backup,'programme-leveler-policy.js'),oldDevPolicy);
+fs.writeFileSync(path.join(backup,'leveler-worklet.js'),oldDevWorklet);
+fs.copyFileSync(priorStagePath,path.join(backup,'personal-quality-stage.json'));
+fs.writeFileSync(path.join(dev,policyName),policy);
+fs.writeFileSync(path.join(dev,workletName),observed);
+priorWorklet.observedSha256=hash(observed);
+priorStage.files.push({name:policyName,sourceSha256:hash(policy),observedSha256:hash(policy)});
+priorStage.stagedAt=new Date().toISOString();
+fs.writeFileSync(priorStagePath,JSON.stringify(priorStage,null,2));
+const record={at:new Date().toISOString(),backup,policySourceSha256:hash(policy),oldPolicySha256:hash(oldDevPolicy),
+  workletSourceSha256:hash(worklet),observedWorkletSha256:hash(observed),bridgeSha256:bridgeStage.sourceSha256,
+  effectivePolicyField:'dynamicsAmount=0.92',note:'Local development copy only; user reload and explicit capture required'};
+fs.writeFileSync(path.join(root,'tmp/transition-crest-candidate/dynamics-stage.json'),JSON.stringify(record,null,2));
+console.log(JSON.stringify(record,null,2));

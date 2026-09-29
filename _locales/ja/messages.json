@@ -401,5 +401,11 @@
   "githubOpened": { "message": "GitHub プロジェクトを開きました。" },
   "appStoreName": { "message": "LoudEase： 自動音量ノーマライザー" },
   "autoSiteLabel": { "message": "このサイトの音量を自動で調整（クリック不要）。" },
-  "statusAutoReady": { "message": "自動モードがオンです" }
+  "statusAutoReady": { "message": "自動モードがオンです" },
+  "welcomeTitle": { "message": "LoudEase の準備ができました" },
+  "welcomeLead": { "message": "設定は不要です。動画や音楽を再生すると、突然の大音量の広告や小さなセリフを LoudEase が自動で整えます。" },
+  "welcomeStep1": { "message": "動画や音楽のページを開いて再生します。" },
+  "welcomeStep2": { "message": "ツールバーのアイコンに ON と表示されれば、このタブを調整中です。" },
+  "welcomeStep3": { "message": "パズルのアイコンのメニューから LoudEase をピン留めすると常に表示されます。" },
+  "welcomeNote": { "message": "音声は端末内でのみ処理されます。自動で接続できないサイトでは、そのタブで LoudEase を一度開くとタブ全体のキャプチャに切り替わります。" }
 }
