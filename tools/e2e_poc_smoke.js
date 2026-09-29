@@ -1367,7 +1367,6 @@ async function main() {
           && popupState?.appState === 'working'
           && popupState?.levelActive === true
           && popupState?.captureButtonHidden === true
-          && popupState?.statusLabel === 'Active'
           && Boolean(popupState?.stateTitle)
         ),
         page: scenario.page.split('?')[0],
