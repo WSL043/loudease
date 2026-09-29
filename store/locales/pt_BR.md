@@ -4,28 +4,26 @@ Review status: Draft - fluent review required before publishing
 
 ## Nome do produto
 
-LoudEase
+LoudEase: normalizador de volume automático
 
 ## Resumo
 
-Equilibra localmente trechos altos e baixos do áudio da web, respeitando o modo mudo e o volume do player.
+Normaliza o volume automaticamente: reduz anúncios e picos altos, realça falas baixas. Sem cliques, processamento local.
 
 ## Descrição detalhada
 
-O LoudEase torna mais confortável ouvir áudio da web com volume irregular.
+O LoudEase é um normalizador de volume automático para o Chrome. Ele reduz anúncios e picos repentinos e realça falas baixas, para você não precisar mexer no volume o tempo todo.
 
-Abra a extensão em uma guia para autorizar o equilíbrio local do áudio dela. Em seguida, o LoudEase analisa o áudio dessa guia em tempo real, reduz trechos que ficam altos de repente e eleva com moderação os detalhes mais baixos. Ele preserva a hierarquia original do som, em vez de forçar todos os momentos ao mesmo nível.
+Instale e reproduza algo. Sem cliques nem configuração. O LoudEase equilibra sozinho vídeos e áudio em reprodução em páginas comuns, e o ícone da barra mostra ON enquanto funciona.
 
-Recursos:
+- Reduz anúncios, sustos e picos repentinos (proteção rápida e limitador com antecipação de 5 ms);
+- Realça falas e vídeos com pouco volume (limitado, intensidade ajustável);
+- Volume mais estável entre vídeos, transmissões e canais;
+- Respeita sempre o mudo e o volume do player;
+- Três alvos calibrados, regras por site e chave para desligar por site;
+- Processamento apenas no seu dispositivo com Web Audio e AudioWorklet: sem contas, anúncios ou análises;
+- 11 idiomas de interface.
 
-- reduz trechos que ficam altos de repente com uma proteção de resposta rápida;
-- eleva com moderação os detalhes mais baixos, preservando a margem de segurança;
-- respeita o modo mudo da página e o volume atual do player;
-- continua equilibrando as guias autorizadas quando você muda para outra guia;
-- funciona com vídeos comuns, músicas, transmissões ao vivo e outros áudios de guias;
-- processa áudio PCM localmente com Web Audio e AudioWorklet;
-- não inclui anúncios, ferramentas de análise nem código executável remoto.
+Verificado sem cliques no YouTube e no Bilibili. Áudio que o Chrome protege (mídia de origem cruzada sem CORS, DRM, páginas com grafo de áudio próprio) não pode ser conectado automaticamente: abra o LoudEase uma vez nessa guia para usar a captura da guia.
 
-O Chrome exige uma ação do usuário antes que uma nova guia possa ser capturada. Abra o LoudEase uma vez em cada nova guia cujo áudio você queira equilibrar. Durante a navegação normal, a autorização permanece vinculada àquela guia até a captura ser interrompida ou a guia ser fechada.
-
-O resultado varia conforme o material de origem e o equipamento de reprodução. O LoudEase é uma ferramenta de conforto auditivo, não um protetor auricular nem um dispositivo médico.
+O áudio é processado apenas no seu dispositivo e não é gravado nem enviado. Um observador local leve usa somente o estado de mídia da página (reprodução, mudo, volume) e não lê texto, formulários, cookies nem credenciais. O LoudEase é uma ferramenta de conforto auditivo, não proteção auditiva nem dispositivo médico. Atualmente em beta público.

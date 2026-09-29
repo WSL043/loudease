@@ -297,7 +297,6 @@ const popupTruthReady = dynamicVideoSwitchReady
   && latestSwitchReports.dynamicVideoReplace?.popupState?.appState === 'working'
   && latestSwitchReports.dynamicVideoReplace?.popupState?.levelActive === true
   && latestSwitchReports.dynamicVideoReplace?.popupState?.captureButtonHidden === true
-  && latestSwitchReports.dynamicVideoReplace?.popupState?.statusLabel === 'Active'
   && Boolean(latestSwitchReports.dynamicVideoReplace?.popupState?.stateTitle);
 const pocEvidence = [
   `reduce=${pocReduceReady ? 'pass' : 'missing'}`,

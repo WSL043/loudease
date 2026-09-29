@@ -4,28 +4,26 @@ Review status: Draft - fluent review required before publishing
 
 ## Produktname
 
-LoudEase
+LoudEase: Automatischer Lautstärke-Normalisierer
 
 ## Kurzbeschreibung
 
-Gleicht laute und leise Passagen von Web-Audio lokal aus und respektiert dabei Stummschaltung und Player-Lautstärke.
+Gleicht die Lautstärke automatisch an: dämpft laute Werbung und Spitzen, hebt leise Dialoge an. Ohne Klicks, lokal verarbeitet.
 
 ## Ausführliche Beschreibung
 
-LoudEase macht Web-Audio mit ungleichmäßiger Lautstärke angenehmer hörbar.
+LoudEase ist ein automatischer Lautstärke-Normalisierer für Chrome. Er dämpft plötzlich laute Werbung und Spitzen und hebt leise Dialoge an, damit Sie nicht ständig an der Lautstärke drehen müssen.
 
-Öffnen Sie die Erweiterung in einem Tab, um die lokale Audioanpassung für diesen Tab zu erlauben. LoudEase analysiert dessen Audio anschließend in Echtzeit, dämpft plötzlich laute Passagen und hebt leise Details behutsam an. Die ursprünglichen Lautstärkeverhältnisse bleiben erhalten, statt jeden Moment auf denselben Pegel zu zwingen.
+Installieren und etwas abspielen. Keine Klicks, keine Einrichtung. LoudEase gleicht hörbare Videos und Audio auf gewöhnlichen Webseiten selbstständig aus; während der Arbeit zeigt das Symbol in der Symbolleiste ON.
 
-Funktionen:
+- Dämpft Werbung, Schreckeffekte und plötzliche Spitzen (schneller Schutz plus 5-ms-Look-ahead-Limiter);
+- Hebt leise Dialoge und leise Videos an (begrenzt, Stärke einstellbar);
+- Gleichmäßigere Lautstärke zwischen Videos, Streams und Kanälen;
+- Respektiert Stummschaltung und Player-Lautstärke immer;
+- Drei kalibrierte Ziele, Regeln pro Website und Ausschalter pro Website;
+- Verarbeitung nur auf dem Gerät mit Web Audio und AudioWorklet: keine Konten, Werbung oder Analysen;
+- 11 Oberflächensprachen.
 
-- dämpft plötzlich laute Passagen über einen schnellen Schutzpfad;
-- hebt leise Details behutsam und mit Schutz der Pegelreserve an;
-- respektiert die Stummschaltung der Seite und die aktuelle Player-Lautstärke;
-- gleicht autorisierte Tabs weiter aus, wenn Sie zu einem anderen Tab wechseln;
-- eignet sich für gewöhnliche Videos, Musik, Livestreams und anderes Tab-Audio;
-- verarbeitet PCM-Audio lokal mit Web Audio und AudioWorklet;
-- enthält keine Werbung, Analysen oder remote ausgeführten Code.
+Ohne Klicks verifiziert auf YouTube und Bilibili. Audio, das Chrome schützt (Cross-Origin-Medien ohne CORS, DRM, Seiten mit eigenem Audiograph), lässt sich nicht automatisch anbinden: Öffnen Sie LoudEase einmal auf diesem Tab, um die Tab-Erfassung zu nutzen.
 
-Chrome erfordert eine Nutzeraktion, bevor ein neuer Tab erfasst werden kann. Öffnen Sie LoudEase einmal in jedem neuen Tab, dessen Audio Sie ausgleichen möchten. Die Autorisierung bleibt bei normaler Navigation mit diesem Tab verknüpft, bis die Erfassung endet oder der Tab geschlossen wird.
-
-Das Ergebnis hängt vom Ausgangsmaterial und den Wiedergabegeräten ab. LoudEase ist ein Werkzeug für angenehmeres Hören, kein Gehörschutz und kein Medizinprodukt.
+Audio wird nur auf Ihrem Gerät verarbeitet und weder aufgezeichnet noch übertragen. Ein schlanker lokaler Beobachter nutzt nur den Medienstatus der Seite (Wiedergabe, Stumm, Lautstärke) und liest keine Seitentexte, Formulare, Cookies oder Zugangsdaten. LoudEase ist ein Werkzeug für angenehmeres Hören, kein Gehörschutz und kein Medizinprodukt. Aktuell öffentliche Beta.
