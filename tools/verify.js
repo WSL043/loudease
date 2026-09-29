@@ -29,7 +29,7 @@ if (manifest.manifest_version === 3) {
   fail('manifest_version must be 3');
 }
 
-if (manifest.name === '__MSG_appName__'
+if (manifest.name === '__MSG_appStoreName__'
   && manifest.short_name === '__MSG_appShortName__'
   && manifest.description === '__MSG_appDescription__'
   && manifest.default_locale === 'en'
