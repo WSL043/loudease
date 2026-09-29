@@ -22,6 +22,7 @@ const checks = [
   ['processor errors and stalled state bypass to the destination', /onprocessorerror/.test(engine) && /STALE_STATE_MS/.test(engine) && /entry\.source\.connect\(context\.destination\)/.test(engine)],
   ['capture takes precedence over automatic processing', /config\.captured !== true/.test(engine) && /notifyAutoEngine\(tabId\)/.test(background)],
   ['engine does not poll the service worker', !/setInterval\([^)]*send\(/.test(engine) && /WVB_AUTO_COLLECT/.test(engine)],
+  ['live call sites are excluded from automatic mode', /CALL_HOSTS/.test(engine) && /meet\\.google\\.com/.test(engine)],
   ['global and per-site switches exist', /WVB_SET_AUTO_MODE/.test(background) && /disabledSites/.test(background) && /autoSite/.test(popup)],
   ['popup falls back to tab capture only when automatic mode cannot attach', /blockedAudibleCount/.test(popup) && /status\.autoActive/.test(popup)]
 ];
