@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the current `0.8.2` runtime. The runtime files and executable checks are the source of truth.
+This document describes the current `0.9.0` runtime. The runtime files and executable checks are the source of truth.
 
 Unreleased control fixes retain this same capture path. Windows/session volume
 remains downstream and user-owned; page-player attenuation is accounted for in
