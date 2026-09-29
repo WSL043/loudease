@@ -24,6 +24,10 @@
   const WATCHDOG_INTERVAL_MS = 2000;
   const STALE_STATE_MS = 4000;
 
+  // Live call audio is latency-sensitive and already tuned by the call service.
+  const CALL_HOSTS = /(^|\.)(meet\.google\.com|zoom\.us|zoom\.com|teams\.microsoft\.com|teams\.live\.com|webex\.com|whereby\.com|discord\.com|slack\.com)$/i;
+  if (CALL_HOSTS.test(location.hostname)) return;
+
   const entries = new Map();
   const watched = new WeakSet();
   const skipped = new WeakMap();
