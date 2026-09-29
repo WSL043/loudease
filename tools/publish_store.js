@@ -53,10 +53,9 @@ async function main() {
   } else if (command === 'upload') {
     const zip = path.resolve(rest.find((item) => !item.startsWith('--')) || path.join(root, 'dist', 'loudease-store.zip'));
     if (!fs.existsSync(zip)) throw new Error(`ZIP not found: ${zip}`);
-    const manifest = JSON.parse(require('child_process').execFileSync(
-      process.platform === 'win32' ? 'tar' : 'unzip',
-      process.platform === 'win32' ? ['-xOf', zip, 'manifest.json'] : ['-p', zip, 'manifest.json'], { encoding: 'utf8' }));
-    console.log(`Uploading ${zip} (manifest version ${manifest.version})`);
+    const built = path.join(path.dirname(zip), 'store', 'manifest.json');
+    const version = fs.existsSync(built) ? JSON.parse(fs.readFileSync(built, 'utf8')).version : 'unknown';
+    console.log(`Uploading ${zip} (store build version ${version})`);
     const result = await call(`${base('upload/')}:upload`, token, { method: 'POST', body: fs.readFileSync(zip) });
     console.log(JSON.stringify(result, null, 2));
     console.log('Uploaded. Wait until uploadState is SUCCESS (run "status"), then "publish".');
