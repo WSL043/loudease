@@ -2,6 +2,14 @@
 
 All notable public changes to LoudEase are recorded here.
 
+## 0.9.2 - 2026-10-02
+
+- Fixed: full-tab capture in 0.9.0 and 0.9.1 could not load the programme-leveler AudioWorklet in the offscreen page (the session-specific web-accessible URL was blocked by the page's own CSP) and silently ran the older meter/limiter fallback graph. Capture now loads the worklet from the extension's own URL, and the capture e2e tests fail unless the leveler worklet is the active graph. Automatic mode was not affected.
+- Popup now says when full-tab capture is in use because a site's audio cannot be attached automatically (11 languages).
+- Video-call sites are left out of automatic mode, so LoudEase never touches live-call audio.
+- Automatic-mode e2e adds DRM (MediaKeys) and page-owned Web Audio graph cases: both are declined, never silenced (14/14). Dailymotion video verified with no click; Vimeo, Twitch and archive.org did not autoplay in the harness and are not claimed.
+- Store listing: category Tools, English and 10 translated descriptions, new screenshots, updated permission rationale.
+
 ## 0.9.1 - 2026-09-29
 
 - Added a first-run welcome page (11 languages) and made a fresh install follow the browser language instead of always showing English.
@@ -14,9 +22,6 @@ All notable public changes to LoudEase are recorded here.
 - Automatic mode: see the entry below in Unreleased history; first shipped in 0.9.0-beta.1.
 
 ## Unreleased
-
-- Popup now says when full-tab capture is in use because a site's audio cannot be attached automatically (11 languages).
-- Automatic-mode e2e adds DRM (MediaKeys) and page-owned Web Audio graph cases: both are declined, never silenced (14/14). Dailymotion video verified with no click; Vimeo, Twitch and archive.org did not autoplay in the harness and are not claimed.
 
 - **Automatic mode.** LoudEase now balances audible video and audio on its own; a click on each tab is no longer needed. A content script attaches eligible `<audio>`/`<video>` elements to the existing programme-leveler AudioWorklet, loaded from a web-accessible resource so it works under strict page CSP. Cross-origin media without CORS, DRM media, and elements already routed through Web Audio are never attached (Chrome would silence them); those fall back to tab capture. A tab that is captured is bypassed by automatic mode, so audio is never processed twice. Adds a per-site switch in the popup, an `ON` action badge, and `tools/e2e_auto_mode.js`.
 - Repositioned the listing as an automatic volume normalizer: new store name, summary, description, keywords, category recommendation, and README.

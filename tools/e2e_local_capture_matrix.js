@@ -142,7 +142,7 @@ for (const scenario of scenarios) {
     && tab.capturePipelineMode === 'programme-leveler-v4'
     && tab.captureContextState === 'running'
     && tab.silentSink === true
-    && ['leveler-worklet', 'worklet', 'analyser-fallback'].includes(tab.meterMode)
+    && tab.meterMode === 'leveler-worklet'
     && Number(tab.meterFrameAgeMs ?? Infinity) < 1000
     && Number(tab.signalTickCount || 0) >= scenario.minSignalTicks
     && Number(tab.workletHardClippedSamples || 0) === 0

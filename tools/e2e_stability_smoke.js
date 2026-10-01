@@ -517,13 +517,22 @@ async function invokeActionForGrantAndStopAutoCapture({
     if (!tab?.id) {
       return { ok: false, error: 'missing target tab' };
     }
-    const before = await chrome.runtime.sendMessage({ type: 'WVB_GET_STATUS', tabId: tab.id, tabUrl: tab.url, ensure: false });
+    // The popup may start its own fallback capture shortly after opening; give it time to
+    // do so, then stop it, so the cleanup cannot run before the capture exists.
+    let before = null;
+    for (let waited = 0; waited <= 2500; waited += 250) {
+      before = await chrome.runtime.sendMessage({ type: 'WVB_GET_STATUS', tabId: tab.id, tabUrl: tab.url, ensure: false });
+      if (before?.captureActive) break;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
     if (before?.captureActive) {
       const stop = await chrome.runtime.sendMessage({ type: 'WVB_STOP_TAB_CAPTURE', tabId: tab.id });
       return { ok: Boolean(stop?.ok), stopped: true, before };
     }
     return { ok: true, stopped: false, before };
   }})(${JSON.stringify(targetPrefix)})`).catch((error) => ({ ok: false, error: String(error?.message || error) }));
+  // Close the popup so it cannot start its own fallback capture later and collide with the harness.
+  await browserCdp.command('Target.closeTarget', { targetId: popup.target.id }).catch(() => {});
   log(`action grant auto-capture cleanup ${JSON.stringify({
     ok: Boolean(stopped?.ok),
     stopped: Boolean(stopped?.stopped),
@@ -558,7 +567,7 @@ function assertActiveCapture(snapshot, label) {
   if (Number(status.captureAudioTrackCount || status.capture?.audioTrackCount || 0) < 1) {
     throw new Error(`${label}: no captured audio track ${JSON.stringify(status)}`);
   }
-  if (!['leveler-worklet', 'worklet', 'analyser-fallback'].includes(status.meterMode)) {
+  if (status.meterMode !== 'leveler-worklet') {
     throw new Error(`${label}: audio meter did not start ${JSON.stringify(status)}`);
   }
   if (Number(status.meterFrameAgeMs ?? Infinity) >= 1000) {

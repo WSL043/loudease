@@ -6,6 +6,10 @@ globalThis.addEventListener('unhandledrejection', (event) => {
   globalThis.__WVB_OFFSCREEN_ERROR__ = String(event?.reason?.message || event?.reason || event);
 });
 
+function ownExtensionUrl(path) {
+  return `chrome-extension://${chrome.runtime.id}/${path}`;
+}
+
 let ENGINE_VERSION = chrome.runtime?.getManifest?.().version || 'unknown';
 if (ENGINE_VERSION === 'unknown' && chrome.runtime?.getURL) {
   fetch(chrome.runtime.getURL('manifest.json'))
@@ -704,8 +708,10 @@ class CaptureSession {
 
   async createLevelerNode() {
     try {
-      await this.context.audioWorklet.addModule(chrome.runtime.getURL('shared/programme-leveler-policy.js'));
-      await this.context.audioWorklet.addModule(chrome.runtime.getURL('offscreen/leveler-worklet.js'));
+      // These two files are web-accessible with use_dynamic_url for the content-script engine;
+      // getURL would return the session-specific URL, which this page's own CSP blocks.
+      await this.context.audioWorklet.addModule(ownExtensionUrl('shared/programme-leveler-policy.js'));
+      await this.context.audioWorklet.addModule(ownExtensionUrl('offscreen/leveler-worklet.js'));
       this.leveler = new AudioWorkletNode(this.context, 'wvb-leveler-processor', {
         numberOfInputs: 1,
         numberOfOutputs: 1,

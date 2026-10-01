@@ -1,6 +1,6 @@
 # Audio DSP
 
-This document describes the `programme-leveler-v4` controller used by LoudEase version `0.9.1`.
+This document describes the `programme-leveler-v4` controller used by LoudEase version `0.9.2`.
 
 Unreleased 2026-09-22: player attenuation is compensated before K-weighting;
 bounded measurement rollback handles delayed volume metadata without a source
