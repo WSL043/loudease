@@ -17,3 +17,7 @@ All 10 localized drafts require review by a fluent speaker before that locale is
 ## Automatic-mode refresh
 
 All 10 locale drafts (and the English listing) now describe automatic mode, the localized `LoudEase: Auto Volume Normalizer` name, and no per-tab click. They remain drafts: a fluent speaker must review each one before that locale is published. In-extension strings are translated in all 11 UI locales.
+
+## Dashboard state (2026-10-02)
+
+The English listing and all 10 localized descriptions above were entered in the Chrome Web Store dashboard and submitted for review together with 0.9.1. Localized names and summaries come from the package (`_locales`). The 10 translations are AI-drafted and have **not** been reviewed by native speakers; fix any wording problem reported by users in the dashboard and in `store/locales/`.
