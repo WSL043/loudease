@@ -1,6 +1,6 @@
 # Chrome Web Store dashboard update checklist (0.9.1)
 
-The dashboard cannot be edited through the API or by browser automation. Do these steps by hand in Chrome, in about ten minutes. Open the item: https://chrome.google.com/webstore/devconsole (LoudEase). A submission of 0.9.1 is already pending review; edit the sections below, then use **Submit for review** again (Japanese UI: 審査に送信) so listing changes go out with it.
+The dashboard cannot be edited through the API or by a Chrome extension. It can be filled from a separate Chrome window driven over the DevTools protocol after signing in by hand (done once on 2026-10-02 for 0.9.1), or by hand in about ten minutes with `tmp/dashboard-helper.html` (`node tools/build_dashboard_helper.js`). Open the item: https://chrome.google.com/webstore/devconsole (LoudEase). A submission of 0.9.1 is already pending review; edit the sections below, then use **Submit for review** again (Japanese UI: 審査に送信) so listing changes go out with it.
 
 ## 1. Store listing tab (ストアの掲載情報)
 
@@ -156,38 +156,10 @@ No change (Public, all regions).
 
 ## 4. Test instructions tab (テスト手順)
 
-Replace with:
+The dashboard field holds at most **500 characters** (the longer review notes live in `store/TEST_INSTRUCTIONS.md` for the repository). Press 編集, replace with:
 
 ```
-## Basic review path
-
-1. Open a normal HTTP(S) page with audible HTML5 video or audio. A public YouTube video is sufficient; protected browser pages such as `chrome://` cannot be captured.
-2. Start playback. No click on LoudEase is needed: within a few seconds the toolbar icon shows **ON**. (Automatic mode; Chrome may keep the audio context suspended until you have clicked or pressed a key on the page once.)
-3. Open **LoudEase** from the toolbar and confirm the popup shows an active state and that the input/output waveform moves while sound is present.
-4. Move **Reduce loud sounds** and **Lift quiet sounds**. Close and reopen the popup to confirm that the values persist.
-5. Mute the website player or set its volume to zero. LoudEase must not produce audible output. Restore the player volume to continue.
-6. Open the extension settings page, change **Target loudness** between Gentle (`-22 dB`), Balanced (`-19 dB`), and Strong (`-16 dB`), then reopen Settings to confirm that the calibrated baseline persists. The page also exposes site rules, appearance, language, and the local-only support report.
-7. Untick **Balance this site automatically** in the popup. Processing must stop (the **ON** badge disappears) and the site's ordinary audio must continue unchanged. Tick it again to resume.
-8. Optional fallback path: for audio automatic mode declines to attach (cross-origin media without CORS, DRM streams), open the popup on that tab; it offers full-tab capture through the standard Chrome user gesture. Choose **Stop balancing** to end that session.
-
-## Permission behavior
-
-- Automatic mode attaches only to audible `<audio>`/`<video>` elements and needs no capture permission. It never attaches to cross-origin media without CORS or to DRM media, which Chrome would silence.
-- `tabCapture` (fallback path) starts only after the reviewer invokes LoudEase on a tab.
-- `activeTab` identifies that user-authorized capture target.
-- `web_accessible_resources` expose only the two AudioWorklet files the content script loads into the page's audio context.
-- `offscreen` owns the local Web Audio and AudioWorklet processing graph required by Manifest V3.
-- `storage` saves preferences and per-site strength settings.
-- `scripting` plus HTTP(S) host access runs the bundled content script that attaches to media, follows mute/player-volume intent, and restores after navigation. It does not read page text, forms, cookies, credentials, or general click/keyboard activity; the only page events it listens for are media events and a single first click/key press, used solely to let Chrome start its audio context.
-
-All audio processing is local. The store package contains no localhost diagnostics, remote executable code, advertising, analytics, or automatic telemetry.
-
-## Expected limitations
-
-- Automatic mode cannot attach to cross-origin media without CORS, DRM media, pages that build their own Web Audio graph, or `new Audio()` elements never inserted into the page. Chrome requires a user gesture for every tab-capture fallback.
-- Browser-internal, protected, and unsupported surfaces cannot be captured.
-- Site navigation or player replacement can occasionally require the user to reopen the popup and authorize capture again.
-- LoudEase is a listening-comfort tool, not hearing protection, a medical device, or broadcast-standard loudness normalization.
+No account needed. 1) Play audible HTML5 video (e.g. YouTube) in a tab. Automatic mode: the toolbar icon shows ON within seconds (click or press a key on the page once if Chrome keeps audio suspended). 2) Open the LoudEase popup: it shows active and the waveform moves. 3) Untick "Balance this site automatically": ON disappears, audio plays normally. 4) For DRM or cross-origin audio the popup offers full-tab capture (tabCapture) via a user click.
 ```
 
 ## 5. Submit
