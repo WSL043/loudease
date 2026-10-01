@@ -77,7 +77,7 @@ let mockSettings = {
   liftStrength: 50,
   siteKey: '',
   siteScoped: false,
-  version: '0.9.1'
+  version: '0.9.2'
 };
 
 function message(payload) {
