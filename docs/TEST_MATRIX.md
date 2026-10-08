@@ -181,3 +181,9 @@ Use legally redistributable or privately licensed material for:
 - low player volume, mute, silence, and near-silence.
 
 Record pumping, breathing, distortion, transient loss, stereo movement, noise lift, speech clarity, and fatigue. Do not commit copyrighted recordings without redistribution rights.
+
+## 2026-10-08 automatic signal recovery (unreleased)
+
+Automatic-mode signal age now tracks the last positive worklet signal, rather than the latest state message. A silent heartbeat or stale positive state must not keep the signal fresh. When the user opens the popup and Chrome reports an audible tab but the automatic graph has no fresh signal, the existing user-invoked tab-capture fallback is allowed. An unconfirmed automatic graph exposes manual capture recovery instead of claiming to be connected. Silence alone, player mute, fresh automatic signal, and an existing capture do not trigger that fallback.
+
+`node tools/auto_signal_recovery_tests.js` reproduces the former heartbeat-age error and covers fallback guards and popup recovery. The local slider/capture smoke test passed with explicit slider-persistence settings (the slider wrapper currently imports a main-guarded module and does not execute it). Personal Douyin live-page recovery remains unverified; the local test is not a replacement for that acceptance check. No DSP parameters, permissions, or version were changed.

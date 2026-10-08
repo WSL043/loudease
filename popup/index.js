@@ -663,7 +663,12 @@ function shouldAutoStartCapture(status) {
     return false;
   }
   if (status.autoActive) {
-    return false;
+    // A graph alone is not proof that it owns the tab's audible stream.
+    // Only the user-invoked popup may fall back to whole-tab capture.
+    const signalAge = status.lastSignalAgeMs;
+    const freshSignal = finiteNumber(status.signalTickCount) > 0
+      && signalAge != null && finiteNumber(signalAge) < 2500;
+    return status.tabAudibleHint === true && !freshSignal;
   }
   const auto = status.auto || {};
   if (auto.globalEnabled !== false && auto.siteEnabled !== false && auto.responding) {
@@ -912,6 +917,12 @@ function renderStatus(status) {
   if (engineActive && playerMuted) {
     setHeadline({ state: 'watching', label: t('statusMuted', undefined, 'Muted'), title: t('statusPlayerMuted', undefined, 'Player is muted'), sub: t('statusNoAudioOutput', undefined, 'No audio is being output') });
     setEffect({ value: '0', caption: 'dB', amount: 0 });
+    return;
+  }
+  if (status.autoActive && !captureActive && !hasFreshSignal) {
+    setHeadline({ state: 'watching', label: t('statusReady', undefined, 'Ready'), title: t('statusWaitingForAudio', undefined, 'Waiting for audio'), sub: t('captureRecoveryHelp', undefined, 'Reconnect to try again') });
+    setEffect({ value: '--', caption: 'dB', amount: 0 });
+    setCaptureVisible(captureAvailable, false);
     return;
   }
   if (engineActive && !hasFreshSignal) {
