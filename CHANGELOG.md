@@ -23,6 +23,7 @@ All notable public changes to LoudEase are recorded here.
 
 ## Unreleased
 
+- Automatic mode: signal age now tracks the last positive worklet signal, so an attached player that carries no sound (for example a hidden preloaded video on Douyin) no longer keeps the popup on "Connected" or blocks the whole-tab capture fallback. On pages with several players the one that carries signal is the one reported. Found while investigating a Douyin tab that was not being balanced.
 - **Automatic mode.** LoudEase now balances audible video and audio on its own; a click on each tab is no longer needed. A content script attaches eligible `<audio>`/`<video>` elements to the existing programme-leveler AudioWorklet, loaded from a web-accessible resource so it works under strict page CSP. Cross-origin media without CORS, DRM media, and elements already routed through Web Audio are never attached (Chrome would silence them); those fall back to tab capture. A tab that is captured is bypassed by automatic mode, so audio is never processed twice. Adds a per-site switch in the popup, an `ON` action badge, and `tools/e2e_auto_mode.js`.
 - Repositioned the listing as an automatic volume normalizer: new store name, summary, description, keywords, category recommendation, and README.
 
