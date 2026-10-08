@@ -289,6 +289,7 @@
         configuredSequence: 0,
         state: null,
         lastStateAt: 0,
+        lastSignalAt: null,
         attachedAt: Date.now()
       };
       const configured = new Promise((resolve) => {
@@ -302,6 +303,7 @@
           } else if (data.type === 'state') {
             entry.state = data;
             entry.lastStateAt = Date.now();
+            if (data.signalActive === true) entry.lastSignalAt = entry.lastStateAt;
           }
         };
       });
@@ -452,7 +454,9 @@
     const processing = live.filter((entry) => entry.mode === 'process' && !entry.failed);
     const primary = processing
       .filter((entry) => entry.state && isAudible(entry.media))
-      .sort((a, b) => b.lastStateAt - a.lastStateAt)[0] || processing[0] || null;
+      // Pages such as Douyin keep preloaded, silent, hidden players; the one that actually carries
+      // signal is the programme, so rank by last positive signal before the latest state message.
+      .sort((a, b) => (b.lastSignalAt || 0) - (a.lastSignalAt || 0) || b.lastStateAt - a.lastStateAt)[0] || processing[0] || null;
     const state = primary?.state || {};
     const now = Date.now();
     const reasons = {};
@@ -478,7 +482,7 @@
       contextState: context?.state || 'none',
       waitingForGesture: contextSuspendedForGesture,
       signalTickCount: finite(state.signalTickCount, 0),
-      lastSignalAgeMs: primary && primary.state ? (state.signalActive ? 0 : now - primary.lastStateAt) : null,
+      lastSignalAgeMs: primary?.lastSignalAt != null ? now - primary.lastSignalAt : null,
       signalActive: state.signalActive === true,
       averageInputDb: primary ? finite(state.lastInputDb, -91) : null,
       averageOutputDb: primary ? finite(state.lastOutputDb, -91) : null,
